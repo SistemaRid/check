@@ -1,0 +1,3254 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CheckMaint Pro - Sistema de Manutenção</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+  apiKey: "AIzaSyBgSqRBPtB2OYDfzcxKm-A4y0m8CDpr89w",
+  authDomain: "checklist-64b92.firebaseapp.com",
+  projectId: "checklist-64b92",
+  storageBucket: "checklist-64b92.firebasestorage.app",
+  messagingSenderId: "264367718946",
+  appId: "1:264367718946:web:28b62d3e5e2548b32f807b"
+};
+
+
+    // Initialize Firebase
+  let db = null;
+let auth = null;
+
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  db = firebase.firestore();
+  auth = firebase.auth();
+
+  console.log('Firebase inicializado com sucesso! ✅');
+} catch (error) {
+  console.error('Erro ao inicializar Firebase:', error);
+}
+
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            'primary-dark': '#4f46e5',
+            'primary-light': '#818cf8',
+            surface: '#f8fafc',
+            'surface-dark': '#f1f5f9',
+            'card': '#ffffff',
+            'text-primary': '#1e293b',
+            'text-secondary': '#64748b',
+            'border': '#e2e8f0',
+            'success': '#10b981',
+            'warning': '#f59e0b',
+            'danger': '#ef4444',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .sidebar-link { transition: all 0.2s ease; }
+    .sidebar-link:hover { background: rgba(99, 102, 241, 0.1); }
+    .sidebar-link.active { background: rgba(99, 102, 241, 0.15); border-left: 3px solid #6366f1; }
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .chart-container { position: relative; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full bg-surface"><!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="h-full flex items-center justify-center p-4">
+   <div class="w-full max-w-md"><!-- Logo -->
+    <div class="text-center mb-8">
+     <div class="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4 shadow-lg">
+      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+     </div>
+     <h1 id="loginTitle" class="text-2xl font-bold text-text-primary">CheckMaint Pro</h1>
+     <p class="text-text-secondary mt-1">Sistema de Manutenção e Checklists</p>
+    </div><!-- Login Card -->
+    <div class="bg-card rounded-2xl shadow-xl p-8 border border-border">
+     <h2 class="text-xl font-semibold text-text-primary mb-6">Acesso ao Sistema</h2>
+     <form id="loginForm" class="space-y-5"><!-- CPF Field -->
+      <div><label for="cpf" class="block text-sm font-medium text-text-primary mb-2">CPF</label>
+       <div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+         </svg></span> <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" class="w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+       </div>
+      </div><!-- Password Field -->
+      <div><label for="password" class="block text-sm font-medium text-text-primary mb-2">Senha</label>
+       <div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+         </svg></span> <input type="password" id="password" name="password" placeholder="••••••••" class="w-full pl-10 pr-12 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary"> <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+         </svg></button>
+       </div>
+      </div><!-- Error Message -->
+      <div id="loginError" class="hidden bg-danger/10 text-danger text-sm p-3 rounded-lg"><span id="loginErrorText">CPF ou senha inválidos</span>
+      </div><!-- Submit Button --> <button type="submit" id="loginBtn" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25"> <span>Entrar</span>
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+       </svg></button>
+       <button
+type="button"
+id="registerBtn"
+class="w-full mt-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all">
+
+Primeiro acesso / Cadastre-se
+
+</button>
+     </form><!-- Firebase Placeholder -->
+     <div class="mt-6 pt-6 border-t border-border">
+      <p class="text-xs text-text-secondary text-center">🔐 Autenticação Firebase será integrada aqui</p>
+     </div>
+    </div><!-- Company Info -->
+    <p id="loginCompany" class="text-center text-text-secondary text-sm mt-6">© 2024 Sua Empresa - Todos os direitos reservados</p>
+   </div>
+  </div><!-- MAIN APP SCREEN -->
+  <div id="appScreen" class="hidden h-full flex flex-col"><!-- TOP HEADER -->
+   <header class="bg-card border-b border-border px-4 lg:px-6 py-3 flex items-center justify-between z-30 shrink-0"><!-- Left Side -->
+    <div class="flex items-center gap-4"><button id="menuToggle" class="lg:hidden p-2 hover:bg-surface rounded-lg transition-colors">
+      <svg class="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg></button>
+     <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+       <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+       </svg>
+      </div>
+      <div class="hidden sm:block">
+       <h1 id="headerTitle" class="text-lg font-bold text-text-primary leading-tight">CheckMaint Pro</h1>
+       <p id="headerCompany" class="text-xs text-text-secondary">Sua Empresa</p>
+      </div>
+     </div>
+    </div><!-- Right Side -->
+    <div class="flex items-center gap-3"><!-- Notifications --> <button class="relative p-2 hover:bg-surface rounded-lg transition-colors">
+      <svg class="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg><span class="absolute top-1 right-1 w-2.5 h-2.5 bg-danger rounded-full pulse-dot"></span> </button> <!-- User Menu -->
+     <div class="flex items-center gap-3 pl-3 border-l border-border">
+      <div class="hidden sm:block text-right">
+       <p class="text-sm font-medium text-text-primary">Operador</p>
+       <p class="text-xs text-text-secondary">Turno A</p>
+      </div><button id="userMenuBtn" class="w-10 h-10 bg-primary-light/20 rounded-xl flex items-center justify-center text-primary font-semibold"> OP </button>
+     </div>
+    </div>
+   </header>
+   <div class="flex flex-1 overflow-hidden"><!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col overflow-hidden"><!-- Sidebar Header (Mobile) -->
+     <div class="lg:hidden flex items-center justify-between p-4 border-b border-border"><span class="font-semibold text-text-primary">Menu</span> <button id="closeSidebar" class="p-2 hover:bg-surface rounded-lg">
+       <svg class="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+       </svg></button>
+     </div>
+<!-- Navigation -->
+<nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+  <a href="#" data-page="dashboard" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-text-primary font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+    <span>Dashboard</span>
+  </a>
+
+  <a href="#" data-page="checklists" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+    <span>Checklists</span>
+  </a>
+
+  <a href="#" data-page="historico" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>Histórico</span>
+  </a>
+
+  <a href="#" data-page="manutencao" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+    <span>Manutenção</span>
+  </a>
+
+  <a href="#" data-page="relatorios" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+    <span>Relatórios</span>
+  </a>
+
+  <div class="pt-4 mt-4 border-t border-border">
+    <a href="#" data-page="configuracoes" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+      <span>Configurações</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Sidebar Footer -->
+<div class="p-4 border-t border-border">
+  <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-danger hover:bg-danger/10 transition-colors font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+    <span>Sair do Sistema</span>
+  </button>
+</div>
+    </aside><!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden"></div><!-- MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto bg-surface"><!-- DASHBOARD PAGE -->
+     <div id="page-dashboard" class="page-content p-4 lg:p-6 fade-in"><!-- Page Header with Period Selector -->
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+       <div>
+        <h2 class="text-2xl font-bold text-text-primary">Dashboard Operacional</h2>
+        <p class="text-text-secondary mt-1">Análise em tempo real de falhas e manutenção</p>
+       </div><select id="dashboardPeriod" class="px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="7">Últimos 7 dias</option> <option value="30">Últimos 30 dias</option> <option value="90">Últimos 90 dias</option> </select>
+      </div><!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+       <div class="bg-card rounded-2xl p-5 border border-border card-hover">
+        <div class="flex items-center justify-between mb-3">
+         <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+         </div><span class="text-xs text-text-secondary font-medium bg-surface px-2 py-1 rounded-full">–</span>
+        </div>
+        <p id="dashChecklistsRealizados" class="text-2xl font-bold text-text-primary">0</p>
+<p class="text-sm text-text-secondary">Checklists Realizados</p>
+       </div>
+       <div class="bg-card rounded-2xl p-5 border border-border card-hover">
+        <div class="flex items-center justify-between mb-3">
+         <div class="w-12 h-12 bg-success/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+         </div><span class="text-xs text-text-secondary font-medium bg-surface px-2 py-1 rounded-full">–</span>
+        </div>
+       <p id="dashEquipamentosConformes" class="text-2xl font-bold text-text-primary">0</p>
+<p class="text-sm text-text-secondary">Equipamentos Conformes</p>
+       </div>
+       <div class="bg-card rounded-2xl p-5 border border-border card-hover">
+        <div class="flex items-center justify-between mb-3">
+         <div class="w-12 h-12 bg-warning/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+         </div><span class="text-xs text-text-secondary font-medium bg-surface px-2 py-1 rounded-full">–</span>
+        </div>
+        <p id="dashFalhasDetectadas" class="text-2xl font-bold text-text-primary">0</p>
+<p class="text-sm text-text-secondary">Falhas Detectadas</p>
+       </div>
+       <div class="bg-card rounded-2xl p-5 border border-border card-hover">
+        <div class="flex items-center justify-between mb-3">
+         <div class="w-12 h-12 bg-danger/10 rounded-xl flex items-center justify-center">
+          <svg class="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+         </div><span class="text-xs text-text-secondary font-medium bg-surface px-2 py-1 rounded-full">–</span>
+        </div>
+        <p id="dashManutencoesPendentes" class="text-2xl font-bold text-text-primary">0</p>
+<p class="text-sm text-text-secondary">Manutenções Pendentes</p>
+       </div>
+      </div><!-- Analytics Grid - Part 1 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+       <!-- Chart 1: Evolution of Failures Over Time -->
+       <div class="bg-card rounded-2xl border border-border p-6">
+        <div class="mb-4">
+         <h3 class="font-semibold text-text-primary text-lg mb-1">Evolução de Falhas</h3>
+         <p class="text-sm text-text-secondary">Taxa de falhas detectadas por dia</p>
+        </div>
+        <div class="chart-container" style="height: 300px;">
+         <canvas id="failureTrendChart"></canvas>
+        </div>
+        <div class="mt-4 pt-4 border-t border-border">
+         <p class="text-xs text-text-secondary text-center">📊 Dados sincronizados com Firestore em tempo real</p>
+        </div>
+       </div><!-- Chart 2: Equipment with Most Failures -->
+       <div class="bg-card rounded-2xl border border-border p-6">
+        <div class="mb-4">
+         <h3 class="font-semibold text-text-primary text-lg mb-1">Falhas Marcadas por Equipamento</h3>
+<p class="text-sm text-text-secondary">Quantidade de itens marcados na emissão do checklist</p>
+        </div>
+        <div class="chart-container" style="height: 300px;">
+         <canvas id="equipmentFailuresChart"></canvas>
+        </div>
+        <div class="mt-4 pt-4 border-t border-border">
+         <p class="text-xs text-text-secondary text-center">🔧 Atualizações automáticas do banco de dados</p>
+        </div>
+       </div>
+      </div><!-- Analytics Grid - Part 2 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+       <!-- Chart 3: Failure Rate per Checklist -->
+       <div class="bg-card rounded-2xl border border-border p-6">
+        <div class="mb-4">
+         <h3 class="font-semibold text-text-primary text-lg mb-1">Taxa de Falha por Checklist</h3>
+         <p class="text-sm text-text-secondary">Falhas encontradas em cada execução</p>
+        </div>
+        <div class="chart-container" style="height: 280px;">
+         <canvas id="failureRateChart"></canvas>
+        </div>
+        <div class="mt-4 pt-4 border-t border-border">
+         <p class="text-xs text-text-secondary text-center">📈 Monitoramento contínuo de qualidade operacional</p>
+        </div>
+       </div><!-- Chart 4: Advanced Failure Analysis by System -->
+       <div class="bg-card rounded-2xl border border-border p-6">
+        <div class="mb-6">
+         <h3 class="font-semibold text-text-primary text-lg mb-4">Análise de Falhas por Sistema</h3><!-- Interactive Filters -->
+         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6"><!-- Equipment Filter -->
+          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Maquinário</label> <select id="equipmentSystemFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="veiculo_leve">Veículos Leves</option> <option value="caminhao_basculante">Caminhão Basculante</option> <option value="caminhao_carroceria">Caminhão Carroceria</option> <option value="caminhao_comboio">Caminhão Comboio</option> <option value="caminhao_munck">Caminhão Munck</option> <option value="caminhao_pipa">Caminhão Pipa</option> <option value="carregadeira">Carregadeira</option> <option value="cavalo_mecanico">Cavalo Mecânico</option> <option value="compressor">Compressor</option> <option value="escavadeira">Escavadeira</option> <option value="gerador_energia">Gerador de Energia</option> <option value="mini_carregadeira">Mini Carregadeira</option> <option value="motoniveladora">Motoniveladora</option> <option value="onibus">Ônibus</option> <option value="perfuratriz">Perfuratriz</option> <option value="prancha">Prancha</option> <option value="retroescavadeira">Retroescavadeira</option> <option value="rompedor">Rompedor</option> <option value="trator_esteira">Trator de Esteira</option> </select>
+          </div><!-- System/Sector Filter -->
+          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Sistema</label> <select id="systemTypeFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="motor">Motor</option> <option value="hidraulico">Sistema Hidráulico</option> <option value="eletrico">Sistema Elétrico</option> <option value="arrefecimento">Sistema de Arrefecimento</option> <option value="combustivel">Sistema de Combustível</option> <option value="transmissao">Sistema de Transmissão</option> <option value="freios">Sistema de Freios</option> <option value="pneus">Pneus e Rodas</option> <option value="iluminacao">Iluminação e Sinalização</option> <option value="cabine">Cabine e Segurança</option> <option value="estrutura">Estrutura e Chassi</option> <option value="pneumatico">Sistema Pneumático</option> <option value="operacional">Componentes Operacionais</option> </select>
+          </div><!-- Period Filter -->
+          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label> <select id="failureAnalysisPeriod" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="7">Últimos 7 dias</option> <option value="30">Últimos 30 dias</option> <option value="90">Últimos 90 dias</option> <option value="custom">Personalizado</option> </select>
+          </div>
+         </div><!-- Custom Period Filter Section (Hidden by default) -->
+         <div id="customPeriodSection" class="hidden mb-6 p-4 bg-surface-dark rounded-lg border border-border">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Tipo de Filtro</label> <select id="customFilterType" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="day">Dia Específico</option> <option value="range">Período (Data Inicial - Final)</option> </select>
+           </div><!-- Day-specific filter -->
+           <div id="dayFilterWrapper"><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Selecionar Dia</label> <input type="date" id="customDay" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div><!-- Range filter (hidden by default) -->
+           <div id="rangeFilterWrapper" class="hidden"><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data Inicial</label> <input type="date" id="customStartDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div>
+           <div id="rangeEndWrapper" class="hidden"><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data Final</label> <input type="date" id="customEndDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div>
+          </div>
+          <div class="flex gap-2">
+           <button id="applyCustomFilter" class="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors">Aplicar Filtro</button> <button id="clearCustomFilter" class="flex-1 px-4 py-2 bg-surface border border-border hover:bg-surface-dark text-text-primary rounded-lg text-sm font-medium transition-colors">Limpar</button>
+          </div>
+         </div>
+        </div><!-- Analysis Chart -->
+        <div class="chart-container mb-6" style="height: 280px;">
+         <canvas id="failureAnalysisChart"></canvas>
+        </div><!-- Firebase Integration Note -->
+        <div class="mt-4 pt-4 border-t border-border">
+         <p class="text-xs text-text-secondary text-center">🔧 Dados sincronizados com Firestore • Análise em tempo real de checklists realizados</p>
+        </div>
+       </div>
+      </div><!-- Recent Activity and Pending Maintenance -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+       <!-- Recent Activity -->
+       <div class="lg:col-span-2 bg-card rounded-2xl border border-border overflow-hidden">
+        <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-surface-dark">
+         <h3 class="font-semibold text-text-primary">Atividade Recente</h3><button class="text-sm text-primary hover:text-primary-dark font-medium">Ver Todas</button>
+        </div>
+        <div id="recentActivityContainer" class="divide-y divide-border max-h-96 overflow-y-auto">
+         <div class="px-5 py-8 text-center text-text-secondary">
+          <p class="text-sm">📊 Nenhuma atividade registrada ainda</p>
+          <p class="text-xs mt-1">Inicie um novo checklist para começar</p>
+         </div>
+        </div>
+       </div><!-- Pending Maintenance -->
+       <div class="bg-card rounded-2xl border border-border overflow-hidden flex flex-col">
+        <div class="px-5 py-4 border-b border-border bg-surface-dark">
+         <h3 class="font-semibold text-text-primary">Manutenções Críticas</h3>
+        </div>
+        <div class="p-4 space-y-3 flex-1 overflow-y-auto">
+         <div class="text-center py-8 text-text-secondary">
+          <p class="text-sm">✅ Nenhuma manutenção pendente</p>
+          <p class="text-xs mt-1">Bom trabalho! Tudo em dia</p>
+         </div>
+        </div>
+        <div class="px-4 py-3 border-t border-border">
+         <p class="text-xs text-text-secondary text-center">🔧 0 manutenções na fila</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- CHECKLISTS PAGE -->
+     <div id="page-checklists" class="page-content hidden p-4 lg:p-6 fade-in">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+       <div>
+        <h2 class="text-2xl font-bold text-text-primary">Checklists</h2>
+        <p class="text-text-secondary mt-1">Gerencie os checklists de equipamentos</p>
+       </div>
+       <div class="flex items-center gap-3">
+        <button id="toggleFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+         </svg><span>Filtros</span> </button> <button id="newChecklistBtn" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-primary/25">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+         </svg><span>Novo Checklist</span> </button>
+       </div>
+      </div><!-- Filters Section (Hidden by default) -->
+      <div id="checklistFiltersContainer" class="hidden bg-card rounded-2xl border border-border p-4 mb-6 fade-in">
+       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Data</label> <input type="date" id="checklistDateFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+        </div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="checklistEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="compressor">Compressor de Ar</option> <option value="motor">Motor Elétrico</option> <option value="bomba">Bomba Hidráulica</option> <option value="esteira">Esteira #01</option> <option value="vácuo">Bomba Vácuo</option> </select>
+        </div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="checklistStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="não-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+        </div>
+       </div>
+      </div>
+<!-- ESTADO VAZIO -->
+<div id="checklistsEmptyState" class="bg-card rounded-2xl border border-border p-10 text-center mt-4">
+  <svg class="w-10 h-10 mx-auto text-text-secondary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+  </svg>
+
+  <p class="text-text-secondary text-lg font-medium">
+    Nenhum checklist disponível
+  </p>
+
+  <p class="text-text-secondary text-sm mt-2">
+    Quando os equipamentos forem cadastrados, os checklists aparecerão aqui.
+  </p>
+</div>
+
+<!-- LISTA REAL -->
+<div id="checklistsContainer" class="space-y-4 hidden">
+  <!-- Checklists will be populated here -->
+</div>
+     </div><!-- HISTORICO PAGE -->
+     <div id="page-historico" class="page-content hidden p-4 lg:p-6 fade-in">
+      <div class="mb-6">
+       <h2 class="text-2xl font-bold text-text-primary">Histórico de Checklists</h2>
+       <p class="text-text-secondary mt-1">Visualize todos os checklists realizados</p>
+      </div><!-- Filters -->
+      <div class="bg-card rounded-2xl border border-border p-4 mb-6">
+       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Período</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option>Últimos 7 dias</option> <option>Últimos 30 dias</option> <option>Este mês</option> <option>Personalizado</option> </select>
+        </div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option>Todos</option> <option>Compressor de Ar</option> <option>Motor Elétrico</option> <option>Bomba Hidráulica</option> </select>
+        </div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option>Todos</option> <option>Conforme</option> <option>Não Conforme</option> </select>
+        </div>
+       </div>
+      </div><!-- History Table -->
+      <div class="bg-card rounded-2xl border border-border overflow-hidden">
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-surface-dark">
+          <tr>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Data/Hora</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Equipamento</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Operador</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Ações</th>
+          </tr>
+         </thead>
+         <tbody class="divide-y divide-border">
+          <tr>
+           <td colspan="5" class="px-5 py-8 text-center text-text-secondary"><p class="text-sm">📋 Nenhum checklist no histórico ainda</p><p class="text-xs mt-1">Os checklists realizados aparecerão aqui</p></td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div><!-- Firebase Placeholder -->
+      <div class="mt-6 bg-surface-dark rounded-xl p-4 text-center">
+       <p class="text-sm text-text-secondary">📜 Histórico será carregado dinamicamente do Firestore</p>
+      </div>
+     </div><!-- MANUTENCAO PAGE -->
+<div id="page-manutencao" class="page-content hidden p-4 lg:p-6 fade-in">
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-text-primary">Manutenção</h2>
+      <p class="text-text-secondary mt-1">Gerencie ordens de serviço e manutenções</p>
+    </div>
+    <button class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-primary/25">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+      <span>Nova OS</span>
+    </button>
+  </div>
+
+  <!-- Status Tabs -->
+  <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+    <button class="px-4 py-2 bg-primary text-white rounded-xl font-medium text-sm whitespace-nowrap">Todas (0)</button>
+    <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Abertas (0)</button>
+    <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Em Andamento (0)</button>
+    <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Concluídas (0)</button>
+  </div>
+
+  <!-- Maintenance Empty State -->
+  <div class="bg-card rounded-2xl border border-border p-10 text-center">
+    <svg class="w-10 h-10 mx-auto text-text-secondary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 7v10m0 0l3-3m-3 3l-3-3" />
+    </svg>
+
+    <p class="text-lg text-text-secondary font-medium">
+      Nenhuma ordem de serviço registrada
+    </p>
+
+    <p class="text-sm text-text-secondary mt-2">
+      As manutenções aparecerão aqui quando forem criadas.
+    </p>
+  </div>
+
+  <div class="mt-6 bg-surface-dark rounded-xl p-4 text-center">
+    <p class="text-sm text-text-secondary">Nenhuma manutenção registrada no momento.</p>
+  </div>
+</div><!-- RELATORIOS PAGE -->
+
+<div id="page-relatorios" class="page-content hidden p-4 lg:p-6 fade-in">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-text-primary">Relatórios</h2>
+    <p class="text-text-secondary mt-1">Análises e exportação de dados</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+      <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+      </div>
+      <h3 class="font-semibold text-text-primary mb-2">Relatório de Checklists</h3>
+      <p class="text-sm text-text-secondary mb-4">Resumo de conformidades e não conformidades por período</p>
+      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
+    </div>
+
+    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+      <div class="w-14 h-14 bg-success/10 rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-success" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+      </div>
+      <h3 class="font-semibold text-text-primary mb-2">Performance de Equipamentos</h3>
+      <p class="text-sm text-text-secondary mb-4">Análise de disponibilidade e falhas por equipamento</p>
+      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
+    </div>
+
+    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+      <div class="w-14 h-14 bg-warning/10 rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-warning" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      </div>
+      <h3 class="font-semibold text-text-primary mb-2">Manutenções Realizadas</h3>
+      <p class="text-sm text-text-secondary mb-4">Histórico completo de manutenções preventivas e corretivas</p>
+      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
+    </div>
+
+    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+      <div class="w-14 h-14 bg-danger/10 rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-danger" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+      </div>
+      <h3 class="font-semibold text-text-primary mb-2">Análise de Falhas</h3>
+      <p class="text-sm text-text-secondary mb-4">Identificação de padrões e causas raiz de problemas</p>
+      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
+    </div>
+
+    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+      <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+      </div>
+      <h3 class="font-semibold text-text-primary mb-2">Produtividade da Equipe</h3>
+      <p class="text-sm text-text-secondary mb-4">Métricas de desempenho por operador e turno</p>
+      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
+    </div>
+
+    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+      <div class="w-14 h-14 bg-surface-dark rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-text-secondary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+      </div>
+      <h3 class="font-semibold text-text-primary mb-2">Exportar Dados</h3>
+      <p class="text-sm text-text-secondary mb-4">Exportar dados em formato Excel ou PDF</p>
+      <span class="text-primary text-sm font-medium">Exportar →</span>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-surface-dark rounded-xl p-4 text-center">
+    <p class="text-sm text-text-secondary">Os relatórios ficarão disponíveis quando houver dados cadastrados.</p>
+  </div>
+</div><!-- CONFIGURACOES PAGE -->
+
+<div id="page-configuracoes" class="page-content hidden p-4 lg:p-6 fade-in">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-text-primary">Configurações</h2>
+    <p class="text-text-secondary mt-1">Gerencie as configurações do sistema</p>
+  </div>
+
+  <div class="max-w-3xl space-y-6">
+    <!-- Profile Section -->
+    <div class="bg-card rounded-2xl border border-border p-6">
+      <h3 class="font-semibold text-text-primary mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+        Perfil do Usuário
+      </h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Nome Completo</label> <input type="text" value="" placeholder="Nenhum usuário carregado" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary outline-none"></div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">CPF</label> <input type="text" value="" placeholder="Sem CPF" disabled class="w-full px-4 py-2.5 border border-border rounded-xl bg-surface text-text-secondary"></div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">E-mail</label> <input type="email" value="" placeholder="Sem e-mail" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary outline-none"></div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Turno</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary outline-none"><option selected>Não definido</option></select></div>
+      </div>
+
+      <button class="mt-4 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-medium transition-colors">Salvar Alterações</button>
+    </div>
+
+    <!-- Notifications Section -->
+    <div class="bg-card rounded-2xl border border-border p-6">
+      <h3 class="font-semibold text-text-primary mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+        Notificações
+      </h3>
+
+      <div class="space-y-4">
+        <label class="flex items-center justify-between p-3 bg-surface rounded-xl cursor-pointer hover:bg-surface-dark transition-colors">
+          <div>
+            <p class="font-medium text-text-primary">Alertas de Manutenção</p>
+            <p class="text-sm text-text-secondary">Receber notificações de manutenções urgentes</p>
+          </div>
+          <input type="checkbox" checked class="w-5 h-5 text-primary rounded focus:ring-primary">
+        </label>
+
+        <label class="flex items-center justify-between p-3 bg-surface rounded-xl cursor-pointer hover:bg-surface-dark transition-colors">
+          <div>
+            <p class="font-medium text-text-primary">Lembrete de Checklists</p>
+            <p class="text-sm text-text-secondary">Lembrar checklists pendentes do turno</p>
+          </div>
+          <input type="checkbox" checked class="w-5 h-5 text-primary rounded focus:ring-primary">
+        </label>
+
+        <label class="flex items-center justify-between p-3 bg-surface rounded-xl cursor-pointer hover:bg-surface-dark transition-colors">
+          <div>
+            <p class="font-medium text-text-primary">Relatórios Diários</p>
+            <p class="text-sm text-text-secondary">Enviar resumo por e-mail ao final do dia</p>
+          </div>
+          <input type="checkbox" class="w-5 h-5 text-primary rounded focus:ring-primary">
+        </label>
+      </div>
+    </div>
+
+    <!-- Firebase Config Placeholder -->
+    <div class="bg-card rounded-2xl border border-border p-6">
+      <h3 class="font-semibold text-text-primary mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+        Conexão Firebase
+      </h3>
+
+      <div class="bg-surface-dark rounded-xl p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-3 h-3 bg-warning rounded-full pulse-dot"></div>
+          <span class="text-sm font-medium text-text-primary">Aguardando Configuração</span>
+        </div>
+
+        <p class="text-sm text-text-secondary">
+          O sistema aguardará a conexão real com Firebase para carregar dados, autenticação e arquivos.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+     </div>
+    </main>
+   </div>
+   <!-- MACHINE SELECTION MODAL -->
+<div id="equipmentSelectionModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-card rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    
+    <div class="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-text-primary">Selecionar Máquina</h2>
+      <button id="closeEquipmentModal" class="p-2 hover:bg-surface rounded-lg transition-colors">
+        <svg class="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <div id="equipmentGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+  </div>
+</div>
+  </div><!-- NEW CHECKLIST MODAL -->
+  <div id="newChecklistModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+   <div class="bg-card rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Modal Header -->
+    <div class="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
+     <h2 class="text-2xl font-bold text-text-primary">Novo Checklist</h2><button id="closeChecklistModal" class="p-2 hover:bg-surface rounded-lg transition-colors">
+      <svg class="w-6 h-6 text-text-secondary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg></button>
+    </div><!-- Modal Body -->
+<div class="p-6">
+  <div id="selectedEquipmentDisplay" class="mb-4 px-4 py-3 bg-surface rounded-xl text-sm font-medium text-text-primary hidden"></div>
+
+  <form id="newChecklistForm" class="space-y-6">
+
+    <!-- CABEÇALHO DO CHECKLIST -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="modalTurno" class="block text-sm font-semibold text-text-primary mb-2">Turno *</label>
+        <select id="modalTurno" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" required>
+          <option value="">Selecione</option>
+          <option value="1º TURNO">1º TURNO</option>
+          <option value="2º TURNO">2º TURNO</option>
+          <option value="3º TURNO">3º TURNO</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="modalData" class="block text-sm font-semibold text-text-primary mb-2">Data *</label>
+        <input type="date" id="modalData" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" required>
+      </div>
+
+      <div>
+        <label for="modalModelo" class="block text-sm font-semibold text-text-primary mb-2">Modelo *</label>
+        <input type="text" id="modalModelo" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: Mercedes Actros" required>
+      </div>
+
+      <div>
+        <label for="modalTagPlaca" class="block text-sm font-semibold text-text-primary mb-2">Tag/Placa *</label>
+        <input type="text" id="modalTagPlaca" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: ABC-1234" required>
+      </div>
+
+      <div>
+        <label for="modalUnidade" class="block text-sm font-semibold text-text-primary mb-2">Unidade *</label>
+        <input type="text" id="modalUnidade" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: Unidade Serra Sul" required>
+      </div>
+
+      <div>
+        <label for="modalOperator" class="block text-sm font-semibold text-text-primary mb-2">Operador *</label>
+        <input type="text" id="modalOperator" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: João Silva" required>
+      </div>
+
+      <div>
+        <label for="modalHoraInicial" class="block text-sm font-semibold text-text-primary mb-2">Hora Inicial *</label>
+        <input type="time" id="modalHoraInicial" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" required>
+      </div>
+
+      <div>
+        <label for="modalHoraFinal" class="block text-sm font-semibold text-text-primary mb-2">Hora Final</label>
+        <input type="time" id="modalHoraFinal" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none">
+      </div>
+
+      <div>
+        <label for="modalHrKmInicial" class="block text-sm font-semibold text-text-primary mb-2">HR/KM Inicial *</label>
+        <input type="text" id="modalHrKmInicial" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: 15420" required>
+      </div>
+
+      <div>
+        <label for="modalHrKmFinal" class="block text-sm font-semibold text-text-primary mb-2">HR/KM Final</label>
+        <input type="text" id="modalHrKmFinal" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: 15485">
+      </div>
+    </div>
+
+    <!-- EQUIPAMENTO -->
+    <div>
+      <label class="block text-sm font-semibold text-text-primary mb-3">Equipamento Selecionado</label>
+      <input
+        type="text"
+        id="modalEquipment"
+        readonly
+        class="w-full px-4 py-3 border border-border rounded-xl bg-surface text-text-primary outline-none"
+        placeholder="Selecione uma máquina primeiro"
+      >
+    </div>
+
+    <!-- SEÇÕES -->
+    <div>
+      <label class="block text-sm font-semibold text-text-primary mb-3">Sistemas / Seções do Checklist</label>
+      <div id="modalSystemsList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+    </div>
+
+    <!-- OBSERVAÇÕES -->
+    <div>
+      <label for="modalObservation" class="block text-sm font-semibold text-text-primary mb-3">Observações</label>
+      <textarea id="modalObservation" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Descreva observações gerais do checklist" rows="4"></textarea>
+    </div>
+
+    <!-- AÇÕES -->
+    <div class="flex gap-3 pt-4 border-t border-border">
+      <button type="button" id="cancelChecklistBtn" class="flex-1 px-4 py-3 bg-surface border border-border hover:bg-surface-dark text-text-primary rounded-xl font-medium transition-colors">
+        Cancelar
+      </button>
+
+      <button type="submit" class="flex-1 px-4 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Iniciar Checklist</span>
+      </button>
+    </div>
+  </form>
+</div>
+     </form>
+    </div>
+   </div>
+  </div>
+
+   <div id="registerModal" style="
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.5);
+display:none;
+align-items:center;
+justify-content:center;
+">
+
+<div style="
+background:white;
+padding:25px;
+border-radius:12px;
+width:350px;
+">
+
+<h2 style="font-weight:bold;font-size:20px;margin-bottom:15px;">
+Primeiro acesso
+</h2>
+
+<input id="regName" placeholder="Nome completo" style="width:100%;margin-bottom:10px;padding:8px">
+
+<input id="regCpf" placeholder="CPF" style="width:100%;margin-bottom:10px;padding:8px">
+
+<input id="regPassword" type="password" placeholder="Senha" style="width:100%;margin-bottom:10px;padding:8px">
+
+<input id="regPassword2" type="password" placeholder="Confirmar senha" style="width:100%;margin-bottom:10px;padding:8px">
+
+<button id="createAccountBtn" style="
+width:100%;
+background:#2563eb;
+color:white;
+padding:10px;
+border-radius:8px;
+font-weight:bold;
+">
+Criar conta
+</button>
+
+<button id="closeRegisterModal" style="
+margin-top:10px;
+width:100%;
+background:#e5e7eb;
+padding:10px;
+border-radius:8px;
+">
+Cancelar
+</button>
+
+<p id="registerError" style="color:red;margin-top:10px;"></p>
+
+</div>
+</div>
+<!-- MODAL DETALHES DO CHECKLIST -->
+<!-- Modal de Detalhes do Checklist -->
+<div id="checklistDetailsModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    
+    <!-- Cabeçalho -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-bold text-gray-800">Detalhes do Checklist</h2>
+      <button
+        id="closeChecklistDetailsModal"
+        class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Conteúdo -->
+    <div id="checklistDetailsContent" class="p-6 overflow-y-auto max-h-[65vh]">
+      <!-- Conteúdo preenchido via JS -->
+    </div>
+
+    <!-- Rodapé -->
+    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+
+  <span class="text-sm font-medium text-gray-500">
+    Alterar status do checklist
+  </span>
+
+  <div class="flex items-center gap-3">
+
+    <select
+      id="checklistStatusSelect"
+      class="min-w-[200px] px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300"
+    >
+      <option value="">Selecionar status</option>
+      <option value="conforme">Conforme</option>
+      <option value="nao-conforme">Não conforme</option>
+      <option value="pendente">Pendente</option>
+    </select>
+
+    <button
+      id="saveChecklistStatusBtn"
+      class="px-4 py-2 rounded-lg font-semibold text-white bg-indigo-500 hover:bg-indigo-600 transition-colors"
+    >
+      Salvar alterações
+    </button>
+
+  </div>
+
+</div>
+  </div>
+</div>
+  <script type="module">
+    import { CHECKLIST_DEFS, getChecklistDef } from "./assets/js/defs/index.js";
+    // Default Configuration
+    const defaultConfig = {
+      system_title: 'CheckMaint Pro',
+      company_name: 'Sua Empresa'
+    };
+
+    // Current state
+    let currentPage = 'dashboard';
+    let isLoggedIn = false;
+    let chartInstances = {};
+
+    let currentUser = null;
+let currentUserData = null;
+
+function onlyNumbers(value = '') {
+  return String(value).replace(/\D/g, '');
+}
+
+function showLoginError(message) {
+  loginError.classList.remove('hidden');
+  document.getElementById('loginErrorText').textContent = message;
+}
+
+function hideLoginError() {
+  loginError.classList.add('hidden');
+}
+
+function setLoginLoading(isLoading) {
+  const loginBtn = document.getElementById('loginBtn');
+  if (!loginBtn) return;
+
+  loginBtn.disabled = isLoading;
+  loginBtn.style.opacity = isLoading ? '0.7' : '1';
+  loginBtn.style.cursor = isLoading ? 'not-allowed' : 'pointer';
+
+  const span = loginBtn.querySelector('span');
+  if (span) {
+    span.textContent = isLoading ? 'Entrando...' : 'Entrar';
+  }
+}
+
+async function findUserByCpf(cpfLimpo) {
+  const snapshot = await db
+    .collection('users')
+    .where('cpf', '==', cpfLimpo)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) return null;
+
+  const doc = snapshot.docs[0];
+  return {
+    id: doc.id,
+    ...doc.data()
+  };
+}
+
+async function loginWithCpfAndPassword(cpf, password) {
+  if (!db || !auth) {
+    throw new Error('Firebase não foi inicializado corretamente.');
+  }
+
+  const cpfLimpo = onlyNumbers(cpf);
+
+  if (cpfLimpo.length !== 11) {
+    throw new Error('Digite um CPF válido com 11 números.');
+  }
+
+  if (!password || password.length < 4) {
+    throw new Error('Digite sua senha.');
+  }
+
+  const userData = await findUserByCpf(cpfLimpo);
+
+  if (!userData) {
+    throw new Error('CPF não encontrado.');
+  }
+
+  if (!userData.email) {
+    throw new Error('Este usuário não possui e-mail cadastrado no Firebase Auth.');
+  }
+
+  const cred = await auth.signInWithEmailAndPassword(userData.email, password);
+
+  currentUser = cred.user;
+  currentUserData = userData;
+
+  return { cred, userData };
+}
+
+function applyLoggedUserToHeader() {
+  const userNameEl = document.querySelector('.hidden.sm\\:block.text-right p.text-sm.font-medium.text-text-primary');
+  const userRoleEl = document.querySelector('.hidden.sm\\:block.text-right p.text-xs.text-text-secondary');
+  const userAvatarBtn = document.getElementById('userMenuBtn');
+
+  const nome = currentUserData?.name || currentUserData?.nome || 'Usuário';
+  const funcao = currentUserData?.role || currentUserData?.funcao || 'Operador';
+
+  if (userNameEl) userNameEl.textContent = nome;
+  if (userRoleEl) userRoleEl.textContent = funcao;
+
+  if (userAvatarBtn) {
+    const partes = nome.trim().split(/\s+/);
+    const iniciais = partes.length >= 2
+      ? (partes[0][0] + partes[1][0]).toUpperCase()
+      : nome.slice(0, 2).toUpperCase();
+
+    userAvatarBtn.textContent = iniciais;
+  }
+}
+
+(function applyDefaultBranding() {
+  const title = defaultConfig.system_title;
+  const company = defaultConfig.company_name;
+
+  const loginTitle = document.getElementById('loginTitle');
+  if (loginTitle) loginTitle.textContent = title;
+
+  const loginCompany = document.getElementById('loginCompany');
+  if (loginCompany) loginCompany.textContent = `© 2024 ${company} - Todos os direitos reservados`;
+
+  const headerTitle = document.getElementById('headerTitle');
+  if (headerTitle) headerTitle.textContent = title;
+
+  const headerCompany = document.getElementById('headerCompany');
+  if (headerCompany) headerCompany.textContent = company;
+})();
+
+    // Chart.js Configuration
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b';
+
+    // Sistema de componentes detalhado por equipamento
+    const systemComponentsDatabase = {
+      veiculo_leve: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      caminhao_basculante: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Alarme de ré', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Carroceria', 'Basculante', 'Tomada de força', 'Sistema de elevação']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      caminhao_carroceria: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      caminhao_comboio: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Pedal de freio']
+        },
+        acoplamento: {
+          nome: 'Sistema de Acoplamento',
+          componentes: ['Engate quinta roda', 'Mangueiras de ar', 'Cabos elétricos', 'Pinos de travamento']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      caminhao_munck: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        operacional: {
+          nome: 'Sistema Munck',
+          componentes: ['Braço hidráulico', 'Ganchos', 'Correntes', 'Cilindros de estabilização', 'Sapatas']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      caminhao_pipa: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        tanque: {
+          nome: 'Sistema de Tanque',
+          componentes: ['Tanque principal', 'Tubulações internas', 'Bomba de água', 'Filtro de água', 'Válvulas de esvaziamento']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      carregadeira: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Alarme de ré', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Caçamba', 'Articulação central', 'Pinos', 'Travas']
+        },
+        estrutura: {
+          nome: 'Estrutura e Chassi',
+          componentes: ['Chassis', 'Assoalho', 'Degraus', 'Suportes', 'Fixações']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      escavadeira: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Alarme de ré', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Lança', 'Braço', 'Caçamba', 'Pinos', 'Travas']
+        },
+        estrutura: {
+          nome: 'Estrutura e Chassi',
+          componentes: ['Chassis', 'Assoalho', 'Degraus', 'Suportes', 'Fixações']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      caminhao: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Alarme de ré', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Carroceria', 'Basculante', 'Tomada de força']
+        },
+        estrutura: {
+          nome: 'Estrutura e Chassi',
+          componentes: ['Chassis', 'Assoalho', 'Degraus', 'Suportes', 'Fixações']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      empilhadeira: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Alarme de ré', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Garfo', 'Correntes', 'Cilindros de elevação', 'Pinos', 'Travas']
+        },
+        estrutura: {
+          nome: 'Estrutura e Chassi',
+          componentes: ['Chassis', 'Assoalho', 'Degraus', 'Suportes', 'Fixações']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      motoniveladora: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Alarme de ré', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine', 'Cinto de segurança', 'Retrovisores', 'Vidros', 'Proteções', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Lâmina de corte', 'Cilindros de elevação', 'Pneus pneumáticos', 'Pinos', 'Travas']
+        },
+        estrutura: {
+          nome: 'Estrutura e Chassi',
+          componentes: ['Chassis', 'Assoalho', 'Degraus', 'Suportes', 'Fixações']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        },
+        arrefecimento: {
+          nome: 'Sistema de Arrefecimento',
+          componentes: ['Radiador', 'Termostato', 'Ventoinha', 'Bomba d\'água', 'Mangueiras']
+        }
+      },
+      cavalo_mecanico: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas ou lonas', 'Pedal de freio']
+        },
+        acoplamento: {
+          nome: 'Sistema de Acoplamento',
+          componentes: ['Engate quinta roda', 'Mangueiras de ar', 'Cabos elétricos', 'Pinos de travamento']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      compressor: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Radiador']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Válvula de alívio', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras pneumáticas']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Motor elétrico', 'Painel de controle', 'Fiação', 'Interruptor', 'Chave geral']
+        },
+        tanque: {
+          nome: 'Tanque de Ar',
+          componentes: ['Tanque principal', 'Válvulas de esvaziamento', 'Medidor de pressão', 'Tubulações']
+        }
+      },
+      mini_carregadeira: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Caçamba', 'Articulação central', 'Pinos', 'Travas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      gerador_energia: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Alternador', 'Regulador de voltagem', 'Disjuntor', 'Fiação', 'Bornes']
+        },
+        tanque: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque de combustível', 'Filtro', 'Válvula de esvaziamento', 'Tubulações']
+        },
+        controle: {
+          nome: 'Sistema de Controle',
+          componentes: ['Painel de controle', 'Medidor de voltagem', 'Proteção térmica', 'Chave liga/desliga']
+        }
+      },
+      onibus: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes internas', 'Setas', 'Buzina', 'Sinalizador']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        cabine: {
+          nome: 'Cabine e Segurança',
+          componentes: ['Cabine do motorista', 'Bancos', 'Cinto de segurança', 'Retrovisores', 'Portas', 'Extintor']
+        },
+        transmissao: {
+          nome: 'Sistema de Transmissão',
+          componentes: ['Embreagem', 'Câmbio automático', 'Cardã', 'Diferencial', 'Eixos']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      perfuratriz: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de controle', 'Sensores']
+        },
+        operacional: {
+          nome: 'Sistema de Perfuração',
+          componentes: ['Broca', 'Correntes de transmissão', 'Cilindros de avanço', 'Proteções', 'Hastes de perfuração']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Secador', 'Cilindros pneumáticos', 'Válvulas', 'Mangueiras']
+        }
+      },
+      prancha: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Radiador']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório', 'Válvulas']
+        },
+        pneumatico: {
+          nome: 'Sistema Pneumático',
+          componentes: ['Compressor', 'Cilindros', 'Válvulas', 'Mangueiras']
+        },
+        estrutura: {
+          nome: 'Estrutura',
+          componentes: ['Plataforma principal', 'Grades laterais', 'Correntes de fixação', 'Piso antiderrapante', 'Proteções']
+        }
+      },
+      retroescavadeira: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulico', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas', 'Sistema pneumático', 'Pedal de freio']
+        },
+        pneus: {
+          nome: 'Pneus e Rodas',
+          componentes: ['Pneus', 'Pressão dos pneus', 'Desgaste de pneus', 'Parafusos das rodas', 'Rodas']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Lança', 'Braço', 'Caçamba', 'Pinos', 'Travas']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      },
+      rompedor: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Radiador']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório', 'Válvulas']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Motor elétrico', 'Painel de controle', 'Fiação', 'Proteções', 'Chave de acionamento']
+        },
+        operacional: {
+          nome: 'Sistema de Impacto',
+          componentes: ['Martelo de impacto', 'Pino de trabalho', 'Câmara de óleo', 'Válvula de impacto', 'Proteções']
+        }
+      },
+      trator_esteira: {
+        motor: {
+          nome: 'Motor',
+          componentes: ['Motor', 'Óleo do motor', 'Filtro de óleo', 'Filtro de ar', 'Filtro de combustível', 'Radiador', 'Sistema de arrefecimento', 'Correias do motor']
+        },
+        hidraulico: {
+          nome: 'Sistema Hidráulico',
+          componentes: ['Mangueiras hidráulicas', 'Cilindros hidráulicos', 'Bombas hidráulicas', 'Reservatório hidráulico', 'Vazamentos hidráulicos', 'Pressão hidráulica']
+        },
+        eletrico: {
+          nome: 'Sistema Elétrico',
+          componentes: ['Bateria', 'Alternador', 'Fiação elétrica', 'Painel de instrumentos', 'Sensores', 'Chave geral']
+        },
+        iluminacao: {
+          nome: 'Iluminação e Sinalização',
+          componentes: ['Faróis', 'Luzes traseiras', 'Luzes de trabalho', 'Setas', 'Buzina']
+        },
+        freios: {
+          nome: 'Sistema de Freio',
+          componentes: ['Freio de serviço', 'Freio de estacionamento', 'Pastilhas', 'Sistema hidráulico', 'Pedal de freio']
+        },
+        esteira: {
+          nome: 'Sistema de Esteira',
+          componentes: ['Esteiras de borracha', 'Rodas motrizes', 'Rodas tensoras', 'Pinos de corrente', 'Patins']
+        },
+        operacional: {
+          nome: 'Componentes Operacionais',
+          componentes: ['Lâmina dianteira', 'Cilindros de elevação', 'Braço hidráulico', 'Engate', 'Proteções']
+        },
+        combustivel: {
+          nome: 'Sistema de Combustível',
+          componentes: ['Tanque', 'Filtro', 'Injetor', 'Bomba de combustível', 'Tubulações']
+        }
+      }
+    };
+
+    // Gerar dados de falhas simulados baseado em componentes
+    const generateFailureData = (equipment, system) => {
+      const equipData = systemComponentsDatabase[equipment];
+      if (!equipData || !equipData[system]) {
+        return { componentes: [], falhas: [] };
+      }
+      
+      const componentes = equipData[system].componentes;
+      // Gerar dados de falhas aleatórios (será substituído por dados do Firestore)
+      const falhas = componentes.map((_, idx) => Math.floor(Math.random() * 15) + (idx === 0 ? 3 : 0));
+      
+      return { componentes, falhas };
+    };
+
+    // Store checklists data - starts empty
+    let allChecklists = [];
+
+    window.getAllChecklists = () => allChecklists;
+window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
+  
+
+    const initializeCharts = () => {
+      // Destroy existing charts
+      Object.values(chartInstances).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+          chart.destroy();
+        }
+      });
+      chartInstances = {};
+
+      const data = (() => {
+  const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  const failures = [0, 0, 0, 0, 0, 0, 0];
+
+  (allChecklists || []).forEach(item => {
+    const totalFalhas = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
+    if (!totalFalhas) return;
+
+    let dateObj = null;
+
+    if (item.data) {
+      const parts = String(item.data).split('-');
+      if (parts.length === 3) {
+        dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      } else {
+        dateObj = new Date(item.data);
+      }
+    } else if (item.createdAt) {
+      dateObj = new Date(item.createdAt);
+    }
+
+    if (!dateObj || isNaN(dateObj.getTime())) return;
+
+    const jsDay = dateObj.getDay(); // 0=Dom, 1=Seg...
+    const mappedIndex = jsDay === 0 ? 6 : jsDay - 1; // Seg=0 ... Dom=6
+
+    failures[mappedIndex] += totalFalhas;
+  });
+
+  return { days, failures };
+})();
+
+      // Chart 1: Failure Trend (Line Chart)
+      const failureTrendCtx = document.getElementById('failureTrendChart');
+      if (failureTrendCtx) {
+        chartInstances.failureTrend = new Chart(failureTrendCtx, {
+          type: 'line',
+          data: {
+            labels: data.days,
+            datasets: [{
+              label: 'Falhas Detectadas',
+              data: data.failures,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.08)',
+              borderWidth: 2.5,
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: '#ef4444',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              filler: { propagate: true }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 10,
+                ticks: { color: '#64748b' },
+                grid: { color: '#e2e8f0' }
+              },
+              x: {
+                ticks: { color: '#64748b' },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // Chart 2: Equipment Failures (Horizontal Bar Chart)
+      const falhasPorEquipamento = {};
+
+(allChecklists || []).forEach(item => {
+  const equipamento = item.equipment || 'Não informado';
+  const totalFalhas = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
+
+  if (totalFalhas > 0) {
+    falhasPorEquipamento[equipamento] = (falhasPorEquipamento[equipamento] || 0) + totalFalhas;
+  }
+});
+
+const rankingEquipamentos = Object.entries(falhasPorEquipamento)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 5);
+
+const equipmentLabels = rankingEquipamentos.length
+  ? rankingEquipamentos.map(([nome]) => nome)
+  : ['Sem falhas registradas'];
+
+const equipmentData = rankingEquipamentos.length
+  ? rankingEquipamentos.map(([, total]) => total)
+  : [0];
+      const equipmentCtx = document.getElementById('equipmentFailuresChart');
+      if (equipmentCtx) {
+        chartInstances.equipment = new Chart(equipmentCtx, {
+          type: 'bar',
+          data: {
+  labels: equipmentLabels,
+  datasets: [{
+    label: 'Número de Falhas',
+    data: equipmentData,
+    backgroundColor: ['#ef4444', '#f59e0b', '#f59e0b', '#fbbf24', '#fcd34d'],
+    borderRadius: 4,
+    borderSkipped: false
+  }]
+},
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                max: 14,
+                ticks: { color: '#64748b' },
+                grid: { color: '#e2e8f0' }
+              },
+              y: {
+                ticks: { color: '#64748b' },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // Chart 3: Failure Rate (Line Chart)
+      const failureRateCtx = document.getElementById('failureRateChart');
+      if (failureRateCtx) {
+        chartInstances.failureRate = new Chart(failureRateCtx, {
+          type: 'line',
+          data: {
+            labels: ['Check #1', 'Check #2', 'Check #3', 'Check #4', 'Check #5', 'Check #6', 'Check #7', 'Check #8'],
+            datasets: [{
+              label: 'Taxa de Falha (%)',
+              data: [8.3, 12.5, 5.2, 15.8, 3.4, 9.2, 6.7, 11.4],
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.08)',
+              borderWidth: 2.5,
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: '#f59e0b',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 20,
+                ticks: { 
+                  color: '#64748b',
+                  callback: function(value) { return value + '%'; }
+                },
+                grid: { color: '#e2e8f0' }
+              },
+              x: {
+                ticks: { color: '#64748b' },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // Chart 4: Advanced Failure Analysis by System
+      const failureAnalysisCtx = document.getElementById('failureAnalysisChart');
+      if (failureAnalysisCtx) {
+        // Sample data for selected equipment and system
+        chartInstances.failureAnalysis = new Chart(failureAnalysisCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Faróis', 'Bateria', 'Fiação Elétrica', 'Buzina', 'Painel de Instrumentos'],
+            datasets: [{
+              label: 'Ocorrências',
+              data: [6, 4, 3, 2, 1],
+              backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'],
+              borderRadius: 4,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                max: 8,
+                ticks: { color: '#64748b' },
+                grid: { color: '#e2e8f0' }
+              },
+              y: {
+                ticks: { color: '#64748b' },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      updateFailureComponentsList();
+    };
+
+    // Update failure components summary list
+    const updateFailureComponentsList = () => {
+      const listContainer = document.getElementById('failureComponentsList');
+      if (!listContainer) return;
+      
+      const components = [
+        { name: 'Faróis', failures: 6, lastDate: '17/01/2024 08:30', isHighest: true },
+        { name: 'Bateria', failures: 4, lastDate: '15/01/2024 14:20' },
+        { name: 'Fiação Elétrica', failures: 3, lastDate: '14/01/2024 10:15' },
+        { name: 'Buzina', failures: 2, lastDate: '12/01/2024 16:45' },
+        { name: 'Painel de Instrumentos', failures: 1, lastDate: '10/01/2024 09:00' }
+      ];
+
+      listContainer.innerHTML = components.map(comp => `
+        <div class="flex items-center justify-between p-3 rounded-lg ${comp.isHighest ? 'bg-danger/5 border border-danger/20' : 'bg-surface'}">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-medium text-text-primary">${comp.name}</p>
+              ${comp.isHighest ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-danger bg-danger/10 px-2 py-0.5 rounded">🔴 CRÍTICO</span>' : ''}
+            </div>
+            <p class="text-xs text-text-secondary mt-1">Última ocorrência: ${comp.lastDate}</p>
+          </div>
+          <div class="ml-3 text-right shrink-0">
+            <span class="block text-lg font-bold text-text-primary">${comp.failures}</span>
+            <span class="text-xs text-text-secondary">falhas</span>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    // Update failure analysis components function
+    const updateFailureAnalysisComponents = (components, failures) => {
+      // This function updates the UI based on selected equipment/system
+      // Components and failures are displayed in the chart
+    };
+
+    // DOM Elements
+    const loginScreen = document.getElementById('loginScreen');
+    const appScreen = document.getElementById('appScreen');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const cpfInput = document.getElementById('cpf');
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const menuToggle = document.getElementById('menuToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const pageContents = document.querySelectorAll('.page-content');
+    const dashboardPeriod = document.getElementById('dashboardPeriod');
+
+    // CPF Mask
+    cpfInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      
+      if (value.length > 9) {
+        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      } else if (value.length > 6) {
+        value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      } else if (value.length > 3) {
+        value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+      }
+      
+      e.target.value = value;
+    });
+
+    // Toggle Password Visibility
+    togglePasswordBtn.addEventListener('click', () => {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+    });
+
+    // Login Form Submit
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const cpf = cpfInput.value.trim();
+  const password = passwordInput.value;
+
+  hideLoginError();
+  setLoginLoading(true);
+
+  try {
+    await loginWithCpfAndPassword(cpf, password);
+
+    isLoggedIn = true;
+    loginScreen.classList.add('hidden');
+    appScreen.classList.remove('hidden');
+
+           applyLoggedUserToHeader();
+
+    await loadChecklistsFromFirestore();
+    await loadDashboardData();
+
+    setTimeout(() => {
+      initializeCharts();
+    }, 100);
+
+
+  } catch (error) {
+    console.error('Erro no login:', error);
+
+    let message = 'Não foi possível entrar. Verifique CPF e senha.';
+
+    if (error.code === 'auth/invalid-credential') {
+      message = 'CPF ou senha inválidos.';
+    } else if (error.code === 'auth/user-not-found') {
+      message = 'Usuário não encontrado.';
+    } else if (error.code === 'auth/wrong-password') {
+      message = 'Senha incorreta.';
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    showLoginError(message);
+  } finally {
+    setLoginLoading(false);
+  }
+});
+
+    // Logout
+logoutBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+
+  try {
+    if (auth) {
+      await auth.signOut();
+    }
+  } catch (error) {
+    console.error('Erro ao sair:', error);
+  }
+
+  isLoggedIn = false;
+  currentUser = null;
+  currentUserData = null;
+
+  appScreen.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  loginForm.reset();
+  hideLoginError();
+  closeSidebarMenu();
+
+  Object.values(chartInstances).forEach(chart => {
+    if (chart && typeof chart.destroy === 'function') {
+      chart.destroy();
+    }
+  });
+
+  chartInstances = {};
+});
+    // Dashboard period selector
+    dashboardPeriod.addEventListener('change', () => {
+      // Reinitialize charts with different data (Firebase integration point)
+      initializeCharts();
+    });
+
+    // Failure Analysis Filters
+    const equipmentSystemFilter = document.getElementById('equipmentSystemFilter');
+    const systemTypeFilter = document.getElementById('systemTypeFilter');
+    const failureAnalysisPeriod = document.getElementById('failureAnalysisPeriod');
+    const customPeriodSection = document.getElementById('customPeriodSection');
+    const customFilterType = document.getElementById('customFilterType');
+    const dayFilterWrapper = document.getElementById('dayFilterWrapper');
+    const rangeFilterWrapper = document.getElementById('rangeFilterWrapper');
+    const rangeEndWrapper = document.getElementById('rangeEndWrapper');
+    const customDay = document.getElementById('customDay');
+    const customStartDate = document.getElementById('customStartDate');
+    const customEndDate = document.getElementById('customEndDate');
+    const applyCustomFilter = document.getElementById('applyCustomFilter');
+    const clearCustomFilter = document.getElementById('clearCustomFilter');
+
+    let activeCustomPeriod = null;
+
+    // Handle custom period section visibility
+    failureAnalysisPeriod.addEventListener('change', () => {
+      if (failureAnalysisPeriod.value === 'custom') {
+        customPeriodSection.classList.remove('hidden');
+      } else {
+        customPeriodSection.classList.add('hidden');
+        activeCustomPeriod = null;
+      }
+      updateFailureAnalysis();
+    });
+
+    // Handle filter type change
+    customFilterType.addEventListener('change', () => {
+      if (customFilterType.value === 'day') {
+        dayFilterWrapper.classList.remove('hidden');
+        rangeFilterWrapper.classList.add('hidden');
+        rangeEndWrapper.classList.add('hidden');
+      } else {
+        dayFilterWrapper.classList.add('hidden');
+        rangeFilterWrapper.classList.remove('hidden');
+        rangeEndWrapper.classList.remove('hidden');
+      }
+    });
+
+    // Apply custom filter
+    applyCustomFilter.addEventListener('click', () => {
+      if (customFilterType.value === 'day') {
+        if (customDay.value) {
+          activeCustomPeriod = { type: 'day', value: customDay.value };
+          updateFailureAnalysis();
+        } else {
+          alert('Por favor, selecione um dia');
+        }
+      } else {
+        if (customStartDate.value && customEndDate.value) {
+          const start = new Date(customStartDate.value);
+          const end = new Date(customEndDate.value);
+          if (start > end) {
+            alert('A data inicial deve ser anterior à data final');
+            return;
+          }
+          activeCustomPeriod = { type: 'range', start: customStartDate.value, end: customEndDate.value };
+          updateFailureAnalysis();
+        } else {
+          alert('Por favor, preencha ambas as datas');
+        }
+      }
+    });
+
+    // Clear custom filter
+    clearCustomFilter.addEventListener('click', () => {
+      customDay.value = '';
+      customStartDate.value = '';
+      customEndDate.value = '';
+      activeCustomPeriod = null;
+      failureAnalysisPeriod.value = '7';
+      customPeriodSection.classList.add('hidden');
+      updateFailureAnalysis();
+    });
+
+    const updateFailureAnalysis = () => {
+      const equipment = equipmentSystemFilter.value;
+      const system = systemTypeFilter.value;
+      const period = failureAnalysisPeriod.value;
+
+      // Get components from database based on equipment and system
+      const data = generateFailureData(equipment, system);
+      const components = data.componentes;
+      const failures = data.falhas;
+
+      // Update chart
+      if (chartInstances.failureAnalysis) {
+        chartInstances.failureAnalysis.data.labels = components;
+        chartInstances.failureAnalysis.data.datasets[0].data = failures;
+        
+        // Generate gradient colors from red (highest) to yellow (lowest)
+        const colors = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'];
+        chartInstances.failureAnalysis.data.datasets[0].backgroundColor = colors.slice(0, Math.min(components.length, 5)).concat(Array(Math.max(0, components.length - 5)).fill('#fcd34d'));
+        
+        chartInstances.failureAnalysis.update();
+      }
+
+      // Update components list
+      updateFailureAnalysisComponents(components, failures);
+    };
+
+    // Add event listeners to filters
+    equipmentSystemFilter.addEventListener('change', updateFailureAnalysis);
+    systemTypeFilter.addEventListener('change', updateFailureAnalysis);
+
+    // Update failure analysis on dashboard load
+    updateFailureAnalysis();
+
+    // Render checklists based on current filters
+    function renderChecklists() {
+  const container = document.getElementById('checklistsContainer');
+  const emptyState = document.getElementById('checklistsEmptyState');
+
+  if (!container || !emptyState) return;
+
+  const dateFilter = document.getElementById('checklistDateFilter')?.value || '';
+  const equipmentFilter = document.getElementById('checklistEquipmentFilter')?.value || '';
+  const statusFilter = document.getElementById('checklistStatusFilter')?.value || '';
+
+  let filtered = [...allChecklists];
+
+  if (dateFilter) {
+    filtered = filtered.filter(c => c.data === dateFilter || c.date === dateFilter);
+  }
+
+  if (equipmentFilter) {
+    filtered = filtered.filter(c => c.checklistKey === equipmentFilter || c.equipmentId === equipmentFilter);
+  }
+
+  if (statusFilter) {
+    filtered = filtered.filter(c => c.status === statusFilter);
+  }
+
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    emptyState.classList.remove('hidden');
+    container.classList.add('hidden');
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+  container.classList.remove('hidden');
+
+  filtered.forEach((checklist) => {
+    const card = document.createElement('div');
+    card.className = 'bg-card rounded-2xl border border-border p-5 card-hover';
+
+    const status = checklist.status || 'pendente';
+    const statusText =
+      status === 'conforme' ? 'Conforme' :
+      status === 'nao-conforme' ? 'Não Conforme' :
+      status === 'concluido' ? 'Concluído' :
+      'Pendente';
+
+    const statusColor =
+      status === 'conforme' ? 'success' :
+      status === 'nao-conforme' ? 'warning' :
+      status === 'concluido' ? 'primary' :
+      'warning';
+
+    const dataExibicao = checklist.data || checklist.date || '-';
+    const operadorExibicao = checklist.operador || checklist.operator || '-';
+    const unidadeExibicao = checklist.unidade || checklist.area || '-';
+
+    card.innerHTML = `
+      <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+        <div class="flex items-start gap-4 flex-1">
+          <div class="w-12 h-12 bg-${statusColor}/10 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6 text-${statusColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <h3 class="font-semibold text-text-primary">${checklist.equipment || '-'}</h3>
+              <span class="text-xs font-medium text-${statusColor} bg-${statusColor}/10 px-2 py-1 rounded-full">${statusText}</span>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-sm text-text-secondary">
+              <span>📅 ${dataExibicao}</span>
+              <span>📍 ${unidadeExibicao}</span>
+              <span>👤 ${operadorExibicao}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+<button
+  onclick="openChecklistDetailsModal('${checklist.id}')"
+  class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-medium transition-colors"
+>
+  Ver Detalhes
+</button>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+async function loadChecklistsFromFirestore() {
+  if (!db) {
+    console.warn('Firestore não inicializado.');
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection('checklists').get();
+
+    allChecklists = snapshot.docs.map(doc => {
+      const data = doc.data();
+
+      let createdAt = '';
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        createdAt = data.createdAt.toDate().toISOString();
+      } else if (typeof data.createdAt === 'string') {
+        createdAt = data.createdAt;
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt
+      };
+    });
+
+    allChecklists.sort((a, b) => {
+      const dataA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dataB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dataB - dataA;
+    });
+
+    if (currentPage === 'checklists') {
+      renderChecklists();
+    }
+
+  } catch (error) {
+    console.error('Erro ao carregar checklists do Firestore:', error);
+  }
+}
+
+async function loadDashboardData() {
+  if (!db) return;
+
+  try {
+    const snapshot = await db.collection('checklists').get();
+
+    const checklists = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data
+      };
+    });
+
+    const totalChecklists = checklists.length;
+    const conformes = checklists.filter(item => String(item.status || '').toLowerCase() === 'conforme').length;
+    const naoConformes = checklists.filter(item => {
+      const s = String(item.status || '').toLowerCase();
+      return s === 'nao-conforme' || s === 'não-conforme';
+    }).length;
+    const pendentes = checklists.filter(item => String(item.status || '').toLowerCase() === 'pendente').length;
+
+    const elTotal = document.getElementById('dashChecklistsRealizados');
+    const elConformes = document.getElementById('dashEquipamentosConformes');
+    const elFalhas = document.getElementById('dashFalhasDetectadas');
+    const elPendentes = document.getElementById('dashManutencoesPendentes');
+
+    if (elTotal) elTotal.textContent = totalChecklists;
+    if (elConformes) elConformes.textContent = conformes;
+    if (elFalhas) elFalhas.textContent = naoConformes;
+    if (elPendentes) elPendentes.textContent = pendentes;
+
+    const recentActivityContainer = document.getElementById('recentActivityContainer');
+    if (recentActivityContainer) {
+      if (checklists.length === 0) {
+        recentActivityContainer.innerHTML = `
+          <div class="px-5 py-8 text-center text-text-secondary">
+            <p class="text-sm">📊 Nenhuma atividade registrada ainda</p>
+            <p class="text-xs mt-1">Inicie um novo checklist para começar</p>
+          </div>
+        `;
+      } else {
+        const ordered = [...checklists]
+          .sort((a, b) => {
+            const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return bTime - aTime;
+          })
+          .slice(0, 5);
+
+        recentActivityContainer.innerHTML = ordered.map(item => `
+          <div class="px-5 py-4">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <p class="text-sm font-semibold text-text-primary">${item.equipment || '-'}</p>
+                <p class="text-xs text-text-secondary mt-1">
+                  ${item.operador || '-'} • ${item.unidade || '-'} • ${item.data || '-'}
+                </p>
+              </div>
+              <span class="text-xs px-2 py-1 rounded-full bg-surface text-text-secondary">
+                ${item.status || 'pendente'}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    const maintenanceBox = document.querySelector('#page-dashboard .bg-card.rounded-2xl.border.border-border.overflow-hidden.flex.flex-col .p-4.space-y-3');
+    const maintenanceFooter = document.querySelector('#page-dashboard .bg-card.rounded-2xl.border.border-border.overflow-hidden.flex.flex-col .px-4.py-3.border-t.border-border p');
+
+    if (maintenanceBox) {
+      if (naoConformes === 0) {
+        maintenanceBox.innerHTML = `
+          <div class="text-center py-8 text-text-secondary">
+            <p class="text-sm">✅ Nenhuma manutenção pendente</p>
+            <p class="text-xs mt-1">Bom trabalho! Tudo em dia</p>
+          </div>
+        `;
+      } else {
+        const lista = checklists
+          .filter(item => {
+            const s = String(item.status || '').toLowerCase();
+            return s === 'nao-conforme' || s === 'não-conforme';
+          })
+          .slice(0, 5);
+
+        maintenanceBox.innerHTML = lista.map(item => `
+          <div class="p-3 rounded-xl border border-warning/30 bg-warning/5">
+            <p class="text-sm font-semibold text-text-primary">${item.equipment || '-'}</p>
+            <p class="text-xs text-text-secondary mt-1">${item.unidade || '-'} • ${item.operador || '-'}</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    if (maintenanceFooter) {
+      maintenanceFooter.textContent = `🔧 ${naoConformes} manutenções na fila`;
+    }
+
+  } catch (error) {
+    console.error('Erro ao carregar dados do dashboard:', error);
+  }
+}
+
+    // Mobile Sidebar Toggle
+    function openSidebarMenu() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebarMenu() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarOverlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    menuToggle.addEventListener('click', openSidebarMenu);
+    closeSidebar.addEventListener('click', closeSidebarMenu);
+    sidebarOverlay.addEventListener('click', closeSidebarMenu);
+
+    // Page Navigation
+    function navigateToPage(page) {
+      if (!page) return;
+      
+      // Hide all pages
+      const allPages = document.querySelectorAll('.page-content');
+      allPages.forEach(p => p.classList.add('hidden'));
+      
+      // Show selected page
+      const selectedPage = document.getElementById(`page-${page}`);
+      if (selectedPage) {
+        selectedPage.classList.remove('hidden');
+      }
+      
+      // Update active link styling - query fresh links each time
+      const allLinks = document.querySelectorAll('.sidebar-link');
+      allLinks.forEach(link => {
+        if (link.dataset.page === page) {
+          link.classList.add('active');
+          link.classList.remove('text-text-secondary');
+          link.classList.add('text-text-primary');
+        } else {
+          link.classList.remove('active');
+          link.classList.add('text-text-secondary');
+          link.classList.remove('text-text-primary');
+        }
+      });
+      
+      currentPage = page;
+      
+      // Execute page-specific initialization
+            if (page === 'dashboard') {
+        setTimeout(async () => {
+          initializeCharts();
+          await loadDashboardData();
+        }, 100);
+      } else if (page === 'checklists') {
+        setTimeout(() => {
+          renderChecklists();
+        }, 50);
+      }
+      
+      // Close mobile sidebar
+      if (window.innerWidth < 1024) {
+        closeSidebarMenu();
+      }
+    }
+
+    // Attach click listeners to sidebar links using event delegation
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('.sidebar-link');
+      if (link) {
+        e.preventDefault();
+        const page = link.dataset.page;
+        if (page) {
+          navigateToPage(page);
+        }
+      }
+    });
+
+    // Attach filter event listeners for checklists
+    function attachChecklistFilters() {
+      const dateFilter = document.getElementById('checklistDateFilter');
+      const equipmentFilter = document.getElementById('checklistEquipmentFilter');
+      const statusFilter = document.getElementById('checklistStatusFilter');
+      
+      if (dateFilter) dateFilter.addEventListener('change', renderChecklists);
+      if (equipmentFilter) equipmentFilter.addEventListener('change', renderChecklists);
+      if (statusFilter) statusFilter.addEventListener('change', renderChecklists);
+    }
+
+    // Toggle filters visibility
+    const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+    const checklistFiltersContainer = document.getElementById('checklistFiltersContainer');
+
+    toggleFiltersBtn.addEventListener('click', () => {
+      checklistFiltersContainer.classList.toggle('hidden');
+    });
+
+  const registerBtn = document.getElementById('registerBtn');
+const registerModal = document.getElementById('registerModal');
+const closeRegisterModal = document.getElementById('closeRegisterModal');
+const createAccountBtn = document.getElementById('createAccountBtn');
+
+if (registerBtn && registerModal) {
+  registerBtn.addEventListener('click', () => {
+    registerModal.style.display = 'flex';
+  });
+}
+
+if (closeRegisterModal && registerModal) {
+  closeRegisterModal.addEventListener('click', () => {
+    registerModal.style.display = 'none';
+  });
+}
+
+function cpfToEmail(cpf){
+  const clean = cpf.replace(/\D/g,'');
+  return clean + "@checkmaint.local";
+}
+
+if (createAccountBtn) {
+  createAccountBtn.addEventListener('click', async () => {
+
+const name = document.getElementById('regName').value.trim();
+const cpf = document.getElementById('regCpf').value.replace(/\D/g,'');
+const password = document.getElementById('regPassword').value;
+const password2 = document.getElementById('regPassword2').value;
+const errorEl = document.getElementById('registerError');
+
+errorEl.textContent = '';
+
+try{
+
+if(!name) throw new Error("Digite seu nome");
+if(cpf.length !== 11) throw new Error("CPF inválido");
+if(password.length < 4) throw new Error("Senha muito curta");
+if(password !== password2) throw new Error("Senhas não coincidem");
+
+const email = cpfToEmail(cpf);
+
+const cred = await auth.createUserWithEmailAndPassword(email,password);
+
+await db.collection("users").doc(cred.user.uid).set({
+name: name.toUpperCase(),
+cpf: cpf,
+email: email,
+role: "OPERADOR",
+createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
+
+registerModal.style.display = 'none';
+
+alert("Conta criada com sucesso! Agora faça login.");
+
+  } catch(err) {
+    console.error(err);
+    errorEl.textContent = err.message;
+  }
+  });
+}
+
+    // Modal Functions
+const equipmentSelectionModal = document.getElementById('equipmentSelectionModal');
+const newChecklistModal = document.getElementById('newChecklistModal');
+const newChecklistBtn = document.getElementById('newChecklistBtn');
+const closeEquipmentModal = document.getElementById('closeEquipmentModal');
+const closeChecklistModal = document.getElementById('closeChecklistModal');
+const cancelChecklistBtn = document.getElementById('cancelChecklistBtn');
+const newChecklistForm = document.getElementById('newChecklistForm');
+const modalSystemsList = document.getElementById('modalSystemsList');
+const equipmentGrid = document.getElementById('equipmentGrid');
+const selectedEquipmentDisplay = document.getElementById('selectedEquipmentDisplay');
+
+let checklistDetailsModal = null;
+let closeChecklistDetailsModalBtn = null;
+let checklistDetailsContent = null;
+let selectedChecklistDetailsId = null;
+let checklistStatusSelect = null;
+let saveChecklistStatusBtn = null;
+    let selectedEquipmentType = null;
+    let selectedEquipmentLabel = null;
+    let selectedChecklistDetails = null;
+
+function initChecklistDetailsElements() {
+  checklistDetailsModal = document.getElementById('checklistDetailsModal');
+  closeChecklistDetailsModalBtn = document.getElementById('closeChecklistDetailsModal');
+  checklistDetailsContent = document.getElementById('checklistDetailsContent');
+  checklistStatusSelect = document.getElementById('checklistStatusSelect');
+  saveChecklistStatusBtn = document.getElementById('saveChecklistStatusBtn');
+}
+
+
+   const equipmentTypes = [
+  { id: "caminhao-basculante", label: "Caminhão Basculante", icon: "🚚" },
+  { id: "caminhao-carroceria", label: "Caminhão Carroceria", icon: "🚚" },
+  { id: "caminhao-comboio", label: "Caminhão Comboio", icon: "🚚" },
+  { id: "caminhao-munck", label: "Caminhão Munck", icon: "🏗️" },
+  { id: "caminhao-pipa", label: "Caminhão Pipa", icon: "💧" },
+  { id: "carregadeira", label: "Carregadeira", icon: "🏗️" },
+  { id: "cavalo-mecanico", label: "Cavalo Mecânico", icon: "🚛" },
+  { id: "compressor", label: "Compressor", icon: "🛠️" },
+  { id: "empilhadeira", label: "Empilhadeira", icon: "📦" },
+  { id: "escavadeira", label: "Escavadeira", icon: "⛏️" },
+  { id: "gerador-energia", label: "Gerador de Energia", icon: "⚡" },
+  { id: "mini-carregadeira", label: "Mini Carregadeira", icon: "🏗️" },
+  { id: "motoniveladora", label: "Motoniveladora", icon: "🛣️" },
+  { id: "onibus", label: "Ônibus", icon: "🚌" },
+  { id: "perfuratriz", label: "Perfuratriz", icon: "🪨" },
+  { id: "prancha", label: "Prancha", icon: "🚛" },
+  { id: "retroescavadeira", label: "Retroescavadeira", icon: "🏗️" },
+  { id: "rompedor", label: "Rompedor", icon: "🔨" },
+  { id: "trator-esteira", label: "Trator de Esteira", icon: "🚜" },
+  { id: "veiculos-leves", label: "Veículos Leves", icon: "🚗" }
+];
+
+    function openEquipmentSelectionModal() {
+  if (!equipmentSelectionModal) {
+    alert('A seleção de equipamento ainda não foi criada no HTML.');
+    return;
+  }
+
+  equipmentSelectionModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  populateEquipmentGrid();
+}
+
+    function closeEquipmentSelectionModal() {
+  if (!equipmentSelectionModal) return;
+
+  equipmentSelectionModal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+  function openChecklistFormModal(equipmentId, equipmentLabel) {
+  if (!newChecklistModal || !selectedEquipmentDisplay) {
+    alert('O formulário de checklist ainda está incompleto no HTML.');
+    return;
+  }
+
+  const def = getChecklistDef(equipmentId);
+
+  if (!def) {
+    alert('Checklist não encontrado para esta máquina.');
+    return;
+  }
+
+  selectedEquipmentType = equipmentId;
+  selectedEquipmentLabel = equipmentLabel;
+
+  selectedEquipmentDisplay.textContent = `Máquina selecionada: ${equipmentLabel}`;
+  selectedEquipmentDisplay.classList.remove('hidden');
+
+  const modalEquipmentInput = document.getElementById('modalEquipment');
+  if (modalEquipmentInput) {
+    modalEquipmentInput.value = equipmentLabel;
+  }
+
+  newChecklistModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  populateSystemsListFromDef(def);
+}
+    function closeChecklistFormModal() {
+  newChecklistModal.classList.add('hidden');
+  document.body.style.overflow = '';
+  newChecklistForm.reset();
+  modalSystemsList.innerHTML = '';
+  selectedEquipmentType = null;
+  selectedEquipmentLabel = null;
+
+  if (selectedEquipmentDisplay) {
+    selectedEquipmentDisplay.textContent = '';
+    selectedEquipmentDisplay.classList.add('hidden');
+  }
+
+  const modalEquipmentInput = document.getElementById('modalEquipment');
+  if (modalEquipmentInput) {
+    modalEquipmentInput.value = '';
+  }
+}
+
+function formatDateBR(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('pt-BR');
+}
+function openChecklistDetailsModal(checklistId) {
+  initChecklistDetailsElements();
+
+  if (!checklistDetailsModal || !checklistDetailsContent) {
+    alert('Modal de detalhes não encontrado no HTML.');
+    return;
+  }
+
+  const checklist = allChecklists.find(item => item.id === checklistId);
+
+  if (!checklist) {
+    alert('Checklist não encontrado.');
+    return;
+  }
+
+  selectedChecklistDetailsId = checklistId;
+
+  const status = checklist.status || 'pendente';
+  const statusText =
+    status === 'conforme' ? 'Conforme' :
+    status === 'nao-conforme' ? 'Não Conforme' :
+    'Pendente';
+
+  const itemsHtml = (checklist.ocorrencias || []).length
+    ? checklist.ocorrencias.map(item => `
+        <div class="p-3 rounded-xl bg-surface border border-border">
+          <p class="text-xs font-semibold text-text-secondary mb-1">${item.section || '-'}</p>
+          <p class="text-sm text-text-primary"><strong>${item.id}.</strong> ${item.text}</p>
+        </div>
+      `).join('')
+    : '<p class="text-sm text-text-secondary">Nenhum item selecionado.</p>';
+
+  checklistDetailsContent.innerHTML = `
+    <div class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Equipamento</p>
+          <p class="font-semibold text-text-primary">${checklist.equipment || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Status atual</p>
+          <p class="font-semibold text-text-primary">${statusText}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Data</p>
+          <p class="font-semibold text-text-primary">${formatDateBR(checklist.data)}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Turno</p>
+          <p class="font-semibold text-text-primary">${checklist.turno || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Modelo</p>
+          <p class="font-semibold text-text-primary">${checklist.modelo || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Tag / Placa</p>
+          <p class="font-semibold text-text-primary">${checklist.tagPlaca || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Unidade</p>
+          <p class="font-semibold text-text-primary">${checklist.unidade || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Operador</p>
+          <p class="font-semibold text-text-primary">${checklist.operador || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Hora Inicial</p>
+          <p class="font-semibold text-text-primary">${checklist.horaInicial || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Hora Final</p>
+          <p class="font-semibold text-text-primary">${checklist.horaFinal || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">HR/KM Inicial</p>
+          <p class="font-semibold text-text-primary">${checklist.hrKmInicial || '-'}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">HR/KM Final</p>
+          <p class="font-semibold text-text-primary">${checklist.hrKmFinal || '-'}</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-lg font-bold text-text-primary mb-3">Ocorrências encontradas</h3>
+        <div class="space-y-2">
+          ${itemsHtml}
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-lg font-bold text-text-primary mb-3">Observações</h3>
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-sm text-text-primary whitespace-pre-wrap">${checklist.observacoes || 'Sem observações.'}</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  checklistDetailsModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  initChecklistDetailsElements();
+
+  if (checklistStatusSelect) {
+    checklistStatusSelect.value = status;
+  }
+}
+
+function closeChecklistDetailsModalFn() {
+  initChecklistDetailsElements();
+  if (!checklistDetailsModal) return;
+  checklistDetailsModal.classList.add('hidden');
+  document.body.style.overflow = '';
+  selectedChecklistDetailsId = null;
+}
+window.openChecklistDetailsModal = openChecklistDetailsModal;
+async function updateChecklistStatus(status) {
+  if (!selectedChecklistDetailsId) {
+    alert('Nenhum checklist selecionado.');
+    return;
+  }
+
+  try {
+    const saveBtn = document.getElementById('saveChecklistStatusBtn');
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Salvando...';
+    }
+
+    await db.collection('checklists').doc(selectedChecklistDetailsId).update({
+      status: status,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    const checklistIndex = allChecklists.findIndex(item => item.id === selectedChecklistDetailsId);
+
+    if (checklistIndex !== -1) {
+      allChecklists[checklistIndex] = {
+        ...allChecklists[checklistIndex],
+        status: status,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    renderChecklists();
+    await loadDashboardData();
+
+    const checklistAtualizado = allChecklists.find(item => item.id === selectedChecklistDetailsId);
+
+    if (checklistAtualizado) {
+      openChecklistDetailsModal(checklistAtualizado.id);
+    }
+
+  } catch (error) {
+    console.error('Erro ao atualizar status do checklist:', error);
+    alert('Erro ao salvar alterações.');
+  } finally {
+    const saveBtn = document.getElementById('saveChecklistStatusBtn');
+
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Salvar alterações';
+    }
+  }
+}
+    function populateEquipmentGrid() {
+      equipmentGrid.innerHTML = '';
+
+      equipmentTypes.forEach(equipment => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'bg-card border border-border rounded-xl p-6 hover:shadow-lg hover:border-primary transition-all text-center cursor-pointer';
+        card.innerHTML = `
+          <div class="text-5xl mb-3">${equipment.icon}</div>
+          <h3 class="font-semibold text-text-primary text-sm">${equipment.label}</h3>
+          <p class="text-xs text-text-secondary mt-2">Clique para selecionar</p>
+        `;
+
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          closeEquipmentSelectionModal();
+          openChecklistFormModal(equipment.id, equipment.label);
+        });
+
+        equipmentGrid.appendChild(card);
+      });
+    }
+
+   function populateSystemsListFromDef(def) {
+  const container = modalSystemsList;
+  container.innerHTML = '';
+
+  if (!def || !def.sections || !def.sections.length) {
+    container.innerHTML = '<p class="text-sm text-text-secondary">Nenhum item disponível para este checklist.</p>';
+    return;
+  }
+
+  def.sections.forEach((section) => {
+    const sectionBlock = document.createElement('div');
+    sectionBlock.className = 'border border-border rounded-xl p-4 bg-white';
+
+    const sectionTitle = document.createElement('h4');
+    sectionTitle.className = 'text-sm font-bold text-text-primary mb-3';
+    sectionTitle.textContent = section.title;
+    sectionBlock.appendChild(sectionTitle);
+
+    const itemsWrap = document.createElement('div');
+    itemsWrap.className = 'space-y-3';
+
+    section.items.forEach((item) => {
+      const itemRow = document.createElement('div');
+      itemRow.className = 'p-3 rounded-xl border border-border bg-surface';
+
+      itemRow.innerHTML = `
+        <div class="flex flex-col gap-3">
+          <p class="text-sm text-text-primary">
+            <span class="font-semibold">${item.id}.</span> ${item.text}
+          </p>
+
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors">
+              <input
+                type="radio"
+                name="item_status_${section.title}_${item.id}"
+                value="ok"
+                data-item-id="${item.id}"
+                data-section="${section.title}"
+                data-text="${item.text}"
+                class="w-4 h-4 accent-blue-600"
+                checked
+              >
+              <span class="text-sm font-medium text-blue-700">OK</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 transition-colors">
+              <input
+                type="radio"
+                name="item_status_${section.title}_${item.id}"
+                value="falha"
+                data-item-id="${item.id}"
+                data-section="${section.title}"
+                data-text="${item.text}"
+                class="w-4 h-4 accent-red-600"
+              >
+              <span class="text-sm font-medium text-red-700">FALHA</span>
+            </label>
+          </div>
+        </div>
+      `;
+
+      itemsWrap.appendChild(itemRow);
+    });
+
+    sectionBlock.appendChild(itemsWrap);
+    container.appendChild(sectionBlock);
+  });
+}
+initChecklistDetailsElements();
+
+if (newChecklistBtn) {
+  newChecklistBtn.addEventListener('click', openEquipmentSelectionModal);
+}
+
+if (closeEquipmentModal) {
+  closeEquipmentModal.addEventListener('click', closeEquipmentSelectionModal);
+}
+
+if (closeChecklistModal) {
+  closeChecklistModal.addEventListener('click', closeChecklistFormModal);
+}
+
+if (closeChecklistDetailsModalBtn) {
+  closeChecklistDetailsModalBtn.addEventListener('click', closeChecklistDetailsModalFn);
+}
+
+if (cancelChecklistBtn) {
+  cancelChecklistBtn.addEventListener('click', closeChecklistFormModal);
+}
+
+// Close modals on overlay click
+if (equipmentSelectionModal) {
+  equipmentSelectionModal.addEventListener('click', (e) => {
+    if (e.target === equipmentSelectionModal) {
+      closeEquipmentSelectionModal();
+    }
+  });
+}
+
+if (newChecklistModal) {
+  newChecklistModal.addEventListener('click', (e) => {
+    if (e.target === newChecklistModal) {
+      closeChecklistFormModal();
+    }
+  });
+}
+
+
+if (checklistDetailsModal) {
+  checklistDetailsModal.addEventListener('click', (e) => {
+    if (e.target === checklistDetailsModal) {
+      closeChecklistDetailsModalFn();
+    }
+  });
+}
+
+if (saveChecklistStatusBtn) {
+  saveChecklistStatusBtn.addEventListener('click', async () => {
+    const status = checklistStatusSelect?.value;
+
+    if (!status) {
+      alert('Selecione um status antes de salvar.');
+      return;
+    }
+
+    await updateChecklistStatus(status);
+  });
+}
+
+  // Form submission
+newChecklistForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const turno = document.getElementById('modalTurno').value;
+  const data = document.getElementById('modalData').value;
+  const modelo = document.getElementById('modalModelo').value.trim();
+  const tagPlaca = document.getElementById('modalTagPlaca').value.trim();
+  const unidade = document.getElementById('modalUnidade').value.trim();
+  const operador = document.getElementById('modalOperator').value.trim();
+  const horaInicial = document.getElementById('modalHoraInicial').value;
+  const horaFinal = document.getElementById('modalHoraFinal').value;
+  const hrKmInicial = document.getElementById('modalHrKmInicial').value.trim();
+  const hrKmFinal = document.getElementById('modalHrKmFinal').value.trim();
+  const observacoes = document.getElementById('modalObservation').value.trim();
+
+  const allItemRadiosFalha = document.querySelectorAll('#modalSystemsList input[type="radio"][value="falha"]:checked');
+
+const ocorrencias = Array.from(allItemRadiosFalha).map(radio => ({
+  id: radio.dataset.itemId,
+  section: radio.dataset.section,
+  text: radio.dataset.text
+}));
+
+  if (!selectedEquipmentType) {
+    alert('Selecione uma máquina antes de continuar.');
+    return;
+  }
+
+  if (!turno || !data || !modelo || !tagPlaca || !unidade || !operador || !horaInicial || !hrKmInicial) {
+    alert('Preencha todos os campos obrigatórios do cabeçalho.');
+    return;
+  }
+
+if (!selectedEquipmentType) {
+  alert('Selecione uma máquina antes de continuar.');
+  return;
+}
+
+if (!turno || !data || !modelo || !tagPlaca || !unidade || !operador || !horaInicial || !hrKmInicial) {
+  alert('Preencha todos os campos obrigatórios do cabeçalho.');
+  return;
+}
+
+  try {
+    const newChecklistData = {
+  checklistKey: selectedEquipmentType,
+  equipment: selectedEquipmentLabel,
+  turno,
+  data,
+  modelo,
+  tagPlaca,
+  unidade,
+  operador,
+  horaInicial,
+  horaFinal,
+  hrKmInicial,
+  hrKmFinal,
+  observacoes,
+  ocorrencias,
+  createdBy: currentUser ? currentUser.uid : null,
+  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  status: ocorrencias.length > 0 ? 'nao-conforme' : 'conforme'
+};
+
+    const docRef = await db.collection('checklists').add(newChecklistData);
+
+    allChecklists.unshift({
+      id: docRef.id,
+      ...newChecklistData,
+      createdAt: new Date().toISOString()
+    });
+
+    const successMsg = document.createElement('div');
+    successMsg.className = 'fixed top-4 right-4 bg-success text-white px-6 py-3 rounded-xl shadow-lg z-50 fade-in';
+    successMsg.innerHTML = `✓ Checklist de "${selectedEquipmentLabel}" iniciado com sucesso!`;
+    document.body.appendChild(successMsg);
+
+    setTimeout(() => {
+      successMsg.remove();
+    }, 3000);
+
+    closeChecklistFormModal();
+
+        await loadChecklistsFromFirestore();
+
+    if (currentPage === 'checklists') {
+      renderChecklists();
+    }
+
+if (typeof loadDashboardData === 'function') {
+  await loadDashboardData();
+}
+
+initializeCharts();
+
+  } catch (error) {
+    console.error('Erro ao salvar checklist:', error);
+    alert('Erro ao salvar checklist no Firebase.');
+  }
+});
+
+    // Initial setup
+    attachChecklistFilters();
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        closeSidebarMenu();
+        sidebar.classList.remove('-translate-x-full');
+      } else if (!sidebarOverlay.classList.contains('hidden')) {
+        // Keep sidebar open on mobile if it was open
+      } else {
+        sidebar.classList.add('-translate-x-full');
+      }
+
+      // Reinitialize charts on resize for responsive
+      if (currentPage === 'dashboard' && isLoggedIn) {
+        setTimeout(() => {
+          initializeCharts();
+        }, 100);
+      }
+    });
+  </script>
+</body>
+</html>
