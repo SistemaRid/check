@@ -6,6 +6,7 @@
   <title>CheckMaint Pro - Sistema de Manutenção</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
@@ -2793,6 +2794,151 @@ function formatDateBR(value) {
   if (isNaN(date.getTime())) return value;
   return date.toLocaleDateString('pt-BR');
 }
+
+const PDF_TEMPLATE_PATHS = {
+  'veiculos-leves': '/pdfs/checklist-veiculos-leves-template.pdf'
+};
+
+function getPdfTemplatePath(checklistKey) {
+  return PDF_TEMPLATE_PATHS[checklistKey] || null;
+}
+
+function normalizeChecklistDate(value) {
+  if (!value) return '';
+
+  if (typeof value === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+      return value;
+    }
+  }
+
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleDateString('pt-BR');
+}
+
+function downloadBytesAsPdf(bytes, fileName) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+
+function preencherCamposTurno(form, checklist) {
+  const turno = String(checklist.turno || '').trim();
+
+  if (turno === '1º TURNO') {
+    form.getTextField('operador_1').setText(checklist.operador || '');
+    form.getTextField('hora_inicial_1').setText(checklist.horaInicial || '');
+    form.getTextField('hora_final_1').setText(checklist.horaFinal || '');
+    form.getTextField('hr_km_inicial_1').setText(checklist.hrKmInicial || '');
+    form.getTextField('hr_km_final_1').setText(checklist.hrKmFinal || '');
+    return;
+  }
+
+  if (turno === '2º TURNO') {
+    form.getTextField('operador_2').setText(checklist.operador || '');
+    form.getTextField('hora_inicial_2').setText(checklist.horaInicial || '');
+    form.getTextField('hora_final_2').setText(checklist.horaFinal || '');
+    form.getTextField('hr_km_inicial_2').setText(checklist.hrKmInicial || '');
+    form.getTextField('hr_km_final_2').setText(checklist.hrKmFinal || '');
+    return;
+  }
+
+  if (turno === '3º TURNO') {
+    form.getTextField('operador_3').setText(checklist.operador || '');
+    form.getTextField('hora_inicial_3').setText(checklist.horaInicial || '');
+    form.getTextField('hora_final_3').setText(checklist.horaFinal || '');
+    form.getTextField('hr_km_inicial_3').setText(checklist.hrKmInicial || '');
+    form.getTextField('hr_km_final_3').setText(checklist.hrKmFinal || '');
+  }
+}
+
+async function generateChecklistPdf(checklistId) {
+  try {
+    const checklist = allChecklists.find(item => item.id === checklistId);
+
+    if (!checklist) {
+      alert('Checklist não encontrado para gerar o PDF.');
+      return;
+    }
+
+    const templatePath = getPdfTemplatePath(checklist.checklistKey);
+
+    if (!templatePath) {
+      alert(`Ainda não existe template preenchível configurado para: ${checklist.checklistKey}`);
+      return;
+    }
+
+    const existingPdfBytes = await fetch(templatePath).then(async (res) => {
+      if (!res.ok) {
+        throw new Error(`Não foi possível carregar o template PDF: ${templatePath}`);
+      }
+      return await res.arrayBuffer();
+    });
+
+    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+    const form = pdfDoc.getForm();
+
+    const fields = form.getFields();
+    console.log(
+      'Campos encontrados no PDF:',
+      fields.map(field => ({
+        name: field.getName(),
+        type: field.constructor.name
+      }))
+    );
+
+    function setTextFieldSafe(fieldName, value) {
+      const fieldExists = fields.find(field => field.getName() === fieldName);
+
+      if (!fieldExists) {
+        console.error(`Campo não encontrado no template: ${fieldName}`);
+        return;
+      }
+
+      form.getTextField(fieldName).setText(String(value || ''));
+    }
+
+    setTextFieldSafe('modelo', checklist.modelo);
+    setTextFieldSafe('tag_placa', checklist.tagPlaca);
+    setTextFieldSafe('data', normalizeChecklistDate(checklist.data));
+    setTextFieldSafe('unidade', checklist.unidade);
+
+    preencherCamposTurno({
+      getTextField: (name) => ({
+        setText: (value) => setTextFieldSafe(name, value)
+      })
+    }, checklist);
+
+    const pdfBytes = await pdfDoc.save();
+
+    const safeDate = normalizeChecklistDate(checklist.data).replaceAll('/', '-');
+    const safeEquipment = String(checklist.checklistKey || 'checklist').replaceAll('/', '-');
+    const fileName = `${safeEquipment}-${safeDate || 'sem-data'}.pdf`;
+
+    downloadBytesAsPdf(pdfBytes, fileName);
+
+  } catch (error) {
+    console.error('Erro ao gerar PDF preenchível:', error);
+    alert('Erro ao gerar PDF. Veja o console para identificar qual campo não foi encontrado.');
+  }
+}
+
 function openChecklistDetailsModal(checklistId) {
   initChecklistDetailsElements();
 
@@ -2902,6 +3048,15 @@ function openChecklistDetailsModal(checklistId) {
           <p class="text-sm text-text-primary whitespace-pre-wrap">${checklist.observacoes || 'Sem observações.'}</p>
         </div>
       </div>
+            <div class="flex justify-end">
+        <button
+          type="button"
+          onclick="generateChecklistPdf('${checklist.id}')"
+          class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition"
+        >
+          Gerar PDF
+        </button>
+      </div>
     </div>
   `;
 
@@ -2915,6 +3070,7 @@ function openChecklistDetailsModal(checklistId) {
   }
 }
 
+
 function closeChecklistDetailsModalFn() {
   initChecklistDetailsElements();
   if (!checklistDetailsModal) return;
@@ -2922,7 +3078,10 @@ function closeChecklistDetailsModalFn() {
   document.body.style.overflow = '';
   selectedChecklistDetailsId = null;
 }
+
 window.openChecklistDetailsModal = openChecklistDetailsModal;
+window.generateChecklistPdf = generateChecklistPdf;
+
 async function updateChecklistStatus(status) {
   if (!selectedChecklistDetailsId) {
     alert('Nenhum checklist selecionado.');
