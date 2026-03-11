@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR" class="h-full">
  <head>
   <meta charset="UTF-8">
@@ -10,6 +10,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e293b'/%3E%3Cpath d='M18 33l8 8 20-20' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -127,7 +131,7 @@ Primeiro acesso / Cadastre-se
       <p class="text-xs text-text-secondary text-center">🔐 Autenticação Firebase será integrada aqui</p>
      </div>
     </div><!-- Company Info -->
-    <p id="loginCompany" class="text-center text-text-secondary text-sm mt-6">© 2024 Sua Empresa - Todos os direitos reservados</p>
+    <p id="loginCompany" class="text-center text-text-secondary text-sm mt-6">© 2026 Todos os direitos reservados | Dev. por Juan Carlos</p>
    </div>
   </div><!-- MAIN APP SCREEN -->
   <div id="appScreen" class="hidden h-full flex flex-col"><!-- TOP HEADER -->
@@ -380,10 +384,14 @@ Primeiro acesso / Cadastre-se
        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div><label class="block text-sm font-medium text-text-primary mb-2">Data</label> <input type="date" id="checklistDateFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="checklistEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="compressor">Compressor de Ar</option> <option value="motor">Motor Elétrico</option> <option value="bomba">Bomba Hidráulica</option> <option value="esteira">Esteira #01</option> <option value="vácuo">Bomba Vácuo</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="checklistEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="checklistStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="não-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="checklistStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
         </div>
+       </div>
+       <div class="mt-4 flex flex-col sm:flex-row gap-3">
+        <button id="applyChecklistFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">Aplicar filtros</button>
+        <button id="clearChecklistFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">Limpar filtros</button>
        </div>
       </div>
 <!-- ESTADO VAZIO -->
@@ -408,18 +416,28 @@ Primeiro acesso / Cadastre-se
 </div>
      </div><!-- HISTORICO PAGE -->
      <div id="page-historico" class="page-content hidden p-4 lg:p-6 fade-in">
-      <div class="mb-6">
+     <div class="mb-6">
        <h2 class="text-2xl font-bold text-text-primary">Histórico de Checklists</h2>
        <p class="text-text-secondary mt-1">Visualize todos os checklists realizados</p>
+      </div>
+      <div class="mb-6">
+       <button id="toggleHistoryFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+        <span>Filtros</span>
+       </button>
       </div><!-- Filters -->
-      <div class="bg-card rounded-2xl border border-border p-4 mb-6">
+      <div id="historyFiltersContainer" class="hidden bg-card rounded-2xl border border-border p-4 mb-6">
        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Período</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option>Últimos 7 dias</option> <option>Últimos 30 dias</option> <option>Este mês</option> <option>Personalizado</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Operador</label> <input type="text" id="historyOperatorFilter" placeholder="Buscar por nome" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option>Todos</option> <option>Compressor de Ar</option> <option>Motor Elétrico</option> <option>Bomba Hidráulica</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Período</label> <select id="historyMonthFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Mês atual</option> <option value="all">Todos os meses</option> <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option> <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option> <option value="07">Julho</option> <option value="08">Agosto</option> <option value="09">Setembro</option> <option value="10">Outubro</option> <option value="11">Novembro</option> <option value="12">Dezembro</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option>Todos</option> <option>Conforme</option> <option>Não Conforme</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="historyStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
         </div>
+       </div>
+       <div class="mt-4 flex flex-col sm:flex-row gap-3">
+        <button id="applyHistoryFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">Aplicar filtros</button>
+        <button id="clearHistoryFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">Limpar filtros</button>
        </div>
       </div><!-- History Table -->
       <div class="bg-card rounded-2xl border border-border overflow-hidden">
@@ -434,11 +452,14 @@ Primeiro acesso / Cadastre-se
            <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Ações</th>
           </tr>
          </thead>
-         <tbody class="divide-y divide-border">
-          <tr>
-           <td colspan="5" class="px-5 py-8 text-center text-text-secondary"><p class="text-sm">📋 Nenhum checklist no histórico ainda</p><p class="text-xs mt-1">Os checklists realizados aparecerão aqui</p></td>
-          </tr>
-         </tbody>
+         <tbody id="historyTableBody" class="divide-y divide-border">
+  <tr>
+    <td colspan="5" class="px-5 py-8 text-center text-text-secondary">
+      <p class="text-sm">📋 Nenhum checklist no histórico ainda</p>
+      <p class="text-xs mt-1">Os checklists realizados aparecerão aqui</p>
+    </td>
+  </tr>
+</tbody>
         </table>
        </div>
       </div><!-- Firebase Placeholder -->
@@ -447,42 +468,60 @@ Primeiro acesso / Cadastre-se
       </div>
      </div><!-- MANUTENCAO PAGE -->
 <div id="page-manutencao" class="page-content hidden p-4 lg:p-6 fade-in">
-  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h2 class="text-2xl font-bold text-text-primary">Manutenção</h2>
-      <p class="text-text-secondary mt-1">Gerencie ordens de serviço e manutenções</p>
+  <div class="relative overflow-hidden rounded-[2rem]">
+    <div class="pointer-events-none select-none blur-sm opacity-40">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-text-primary">Manutenção</h2>
+          <p class="text-text-secondary mt-1">Gerencie ordens de serviço e manutenções</p>
+        </div>
+        <button class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-primary/25">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+          <span>Nova OS</span>
+        </button>
+      </div>
+
+      <!-- Status Tabs -->
+      <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <button class="px-4 py-2 bg-primary text-white rounded-xl font-medium text-sm whitespace-nowrap">Todas (0)</button>
+        <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Abertas (0)</button>
+        <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Em Andamento (0)</button>
+        <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Concluídas (0)</button>
+      </div>
+
+      <!-- Maintenance Empty State -->
+      <div class="bg-card rounded-2xl border border-border p-10 text-center">
+        <svg class="w-10 h-10 mx-auto text-text-secondary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 7v10m0 0l3-3m-3 3l-3-3" />
+        </svg>
+
+        <p class="text-lg text-text-secondary font-medium">
+          Nenhuma ordem de serviço registrada
+        </p>
+
+        <p class="text-sm text-text-secondary mt-2">
+          As manutenções aparecerão aqui quando forem criadas.
+        </p>
+      </div>
+
+      <div class="mt-6 bg-surface-dark rounded-xl p-4 text-center">
+        <p class="text-sm text-text-secondary">Nenhuma manutenção registrada no momento.</p>
+      </div>
     </div>
-    <button class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-primary/25">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-      <span>Nova OS</span>
-    </button>
-  </div>
 
-  <!-- Status Tabs -->
-  <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-    <button class="px-4 py-2 bg-primary text-white rounded-xl font-medium text-sm whitespace-nowrap">Todas (0)</button>
-    <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Abertas (0)</button>
-    <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Em Andamento (0)</button>
-    <button class="px-4 py-2 bg-card border border-border text-text-secondary rounded-xl font-medium text-sm whitespace-nowrap">Concluídas (0)</button>
-  </div>
-
-  <!-- Maintenance Empty State -->
-  <div class="bg-card rounded-2xl border border-border p-10 text-center">
-    <svg class="w-10 h-10 mx-auto text-text-secondary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2M12 7v10m0 0l3-3m-3 3l-3-3" />
-    </svg>
-
-    <p class="text-lg text-text-secondary font-medium">
-      Nenhuma ordem de serviço registrada
-    </p>
-
-    <p class="text-sm text-text-secondary mt-2">
-      As manutenções aparecerão aqui quando forem criadas.
-    </p>
-  </div>
-
-  <div class="mt-6 bg-surface-dark rounded-xl p-4 text-center">
-    <p class="text-sm text-text-secondary">Nenhuma manutenção registrada no momento.</p>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="max-w-lg rounded-3xl border border-border bg-white/85 backdrop-blur-md shadow-2xl px-8 py-10 text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-warning/15 text-warning">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M10.29 3.86l-7.5 13A2 2 0 004.5 20h15a2 2 0 001.71-3.14l-7.5-13a2 2 0 00-3.42 0z" />
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-text-primary">Módulo em implantação</h3>
+        <p class="mt-3 text-sm sm:text-base text-text-secondary">
+          A área de manutenção ainda não está em uso neste momento. Ela ficará disponível em uma futura implantação do sistema.
+        </p>
+      </div>
+    </div>
   </div>
 </div><!-- RELATORIOS PAGE -->
 
@@ -493,65 +532,64 @@ Primeiro acesso / Cadastre-se
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+    <button id="generateChecklistReportBtn" type="button" class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer text-left w-full">
       <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
         <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
       </div>
       <h3 class="font-semibold text-text-primary mb-2">Relatório de Checklists</h3>
-      <p class="text-sm text-text-secondary mb-4">Resumo de conformidades e não conformidades por período</p>
+      <p class="text-sm text-text-secondary mb-4">Lista com os checklists realizados e seus respectivos operadores</p>
       <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
-    </div>
+    </button>
 
-    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+    <button id="generateEquipmentPerformanceReportBtn" type="button" class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer text-left w-full">
       <div class="w-14 h-14 bg-success/10 rounded-2xl flex items-center justify-center mb-4">
         <svg class="w-7 h-7 text-success" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
       </div>
       <h3 class="font-semibold text-text-primary mb-2">Performance de Equipamentos</h3>
-      <p class="text-sm text-text-secondary mb-4">Análise de disponibilidade e falhas por equipamento</p>
+      <p class="text-sm text-text-secondary mb-4">Quantidade de falhas registradas por equipamento</p>
       <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
-    </div>
+    </button>
 
-    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
-      <div class="w-14 h-14 bg-warning/10 rounded-2xl flex items-center justify-center mb-4">
-        <svg class="w-7 h-7 text-warning" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      </div>
-      <h3 class="font-semibold text-text-primary mb-2">Manutenções Realizadas</h3>
-      <p class="text-sm text-text-secondary mb-4">Histórico completo de manutenções preventivas e corretivas</p>
-      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
-    </div>
-
-    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
-      <div class="w-14 h-14 bg-danger/10 rounded-2xl flex items-center justify-center mb-4">
-        <svg class="w-7 h-7 text-danger" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-      </div>
-      <h3 class="font-semibold text-text-primary mb-2">Análise de Falhas</h3>
-      <p class="text-sm text-text-secondary mb-4">Identificação de padrões e causas raiz de problemas</p>
-      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
-    </div>
-
-    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
-      <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-        <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-      </div>
-      <h3 class="font-semibold text-text-primary mb-2">Produtividade da Equipe</h3>
-      <p class="text-sm text-text-secondary mb-4">Métricas de desempenho por operador e turno</p>
-      <span class="text-primary text-sm font-medium">Gerar Relatório →</span>
-    </div>
-
-    <div class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer">
+    <button id="openExportDataModalBtn" type="button" class="bg-card rounded-2xl border border-border p-6 card-hover cursor-pointer text-left w-full">
       <div class="w-14 h-14 bg-surface-dark rounded-2xl flex items-center justify-center mb-4">
         <svg class="w-7 h-7 text-text-secondary" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
       </div>
       <h3 class="font-semibold text-text-primary mb-2">Exportar Dados</h3>
-      <p class="text-sm text-text-secondary mb-4">Exportar dados em formato Excel ou PDF</p>
+      <p class="text-sm text-text-secondary mb-4">Exportar em Excel os checklists de um mês específico ou de um intervalo de datas</p>
       <span class="text-primary text-sm font-medium">Exportar →</span>
-    </div>
-  </div>
+    </button>
 
   <div class="mt-6 bg-surface-dark rounded-xl p-4 text-center">
     <p class="text-sm text-text-secondary">Os relatórios ficarão disponíveis quando houver dados cadastrados.</p>
   </div>
 </div><!-- CONFIGURACOES PAGE -->
+
+<div id="exportDataModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-card rounded-3xl border border-border shadow-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+      <div>
+        <h3 class="text-xl font-bold text-text-primary">Exportar Dados</h3>
+        <p class="text-sm text-text-secondary mt-1">Selecione o periodo dos checklists que deseja exportar</p>
+      </div>
+      <button id="closeExportDataModal" class="p-2 hover:bg-surface rounded-xl transition-colors">
+        <svg class="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label for="exportStartDate" class="block text-sm font-medium text-text-primary mb-2">Data inicial</label>
+        <input type="date" id="exportStartDate" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+      </div>
+      <div>
+        <label for="exportEndDate" class="block text-sm font-medium text-text-primary mb-2">Data final</label>
+        <input type="date" id="exportEndDate" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+      </div>
+      <button id="confirmExportDataBtn" type="button" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold transition-colors">
+        Exportar
+      </button>
+    </div>
+  </div>
+</div>
 
 <div id="page-configuracoes" class="page-content hidden p-4 lg:p-6 fade-in">
   <div class="mb-6">
@@ -887,12 +925,84 @@ Cancelar
     let currentPage = 'dashboard';
     let isLoggedIn = false;
     let chartInstances = {};
+    let appliedChecklistFilters = {
+      date: '',
+      equipment: '',
+      status: ''
+    };
+    let appliedHistoryFilters = {
+      month: '',
+      operator: '',
+      status: ''
+    };
 
     let currentUser = null;
 let currentUserData = null;
 
 function onlyNumbers(value = '') {
   return String(value).replace(/\D/g, '');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeString(value = '') {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function normalizeStatus(value) {
+  const normalized = normalizeString(value).replace(/_/g, '-').replace(/\s+/g, '-');
+
+  if (normalized === 'conforme') return 'conforme';
+  if (normalized === 'nao-conforme') return 'nao-conforme';
+  if (normalized === 'concluido') return 'concluido';
+
+  return 'pendente';
+}
+
+function getStatusPresentation(status) {
+  const value = normalizeStatus(status);
+
+  if (value === 'conforme') {
+    return { value, label: 'Conforme', color: 'success' };
+  }
+
+  if (value === 'nao-conforme') {
+    return { value, label: 'Não Conforme', color: 'warning' };
+  }
+
+  if (value === 'concluido') {
+    return { value, label: 'Concluído', color: 'primary' };
+  }
+
+  return { value: 'pendente', label: 'Pendente', color: 'warning' };
+}
+
+function normalizeTurno(value) {
+  const match = String(value ?? '').match(/[123]/);
+  return match ? `${match[0]}º TURNO` : String(value ?? '').trim();
+}
+
+function getTurnoIndex(value) {
+  const normalized = normalizeTurno(value);
+  if (normalized === '1º TURNO') return '1';
+  if (normalized === '2º TURNO') return '2';
+  if (normalized === '3º TURNO') return '3';
+  return '';
+}
+
+function getSectionTitle(section) {
+  return section?.title || section?.code || '';
 }
 
 function showLoginError(message) {
@@ -2268,6 +2378,69 @@ logoutBtn.addEventListener('click', async (e) => {
     // Update failure analysis on dashboard load
     updateFailureAnalysis();
 
+function updateChecklistEquipmentFilterOptions() {
+  const select = document.getElementById('checklistEquipmentFilter');
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value;
+  const equipmentMap = new Map();
+
+  allChecklists.forEach((item) => {
+    const value = item.checklistKey || item.equipmentId || '';
+    const label = item.equipment || item.checklistLabel || item.modelo || item.checklistKey || '';
+
+    if (value && label && !equipmentMap.has(value)) {
+      equipmentMap.set(value, label);
+    }
+  });
+
+  const equipmentOptions = Array.from(equipmentMap.entries())
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
+
+  select.innerHTML = '<option value="">Todos</option>' + equipmentOptions
+    .map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`)
+    .join('');
+
+  if (equipmentOptions.some(item => item.value === currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+function readChecklistFilterForm() {
+  return {
+    date: document.getElementById('checklistDateFilter')?.value || '',
+    equipment: document.getElementById('checklistEquipmentFilter')?.value || '',
+    status: normalizeStatus(document.getElementById('checklistStatusFilter')?.value || '')
+  };
+}
+
+function applyChecklistFilters() {
+  appliedChecklistFilters = readChecklistFilterForm();
+  renderChecklists();
+}
+
+function clearChecklistFilters() {
+  const dateFilter = document.getElementById('checklistDateFilter');
+  const equipmentFilter = document.getElementById('checklistEquipmentFilter');
+  const statusFilter = document.getElementById('checklistStatusFilter');
+
+  if (dateFilter) dateFilter.value = '';
+  if (equipmentFilter) equipmentFilter.value = '';
+  if (statusFilter) statusFilter.value = '';
+
+  appliedChecklistFilters = {
+    date: '',
+    equipment: '',
+    status: ''
+  };
+
+  renderChecklists();
+}
+
     // Render checklists based on current filters
     function renderChecklists() {
   const container = document.getElementById('checklistsContainer');
@@ -2275,9 +2448,11 @@ logoutBtn.addEventListener('click', async (e) => {
 
   if (!container || !emptyState) return;
 
-  const dateFilter = document.getElementById('checklistDateFilter')?.value || '';
-  const equipmentFilter = document.getElementById('checklistEquipmentFilter')?.value || '';
-  const statusFilter = document.getElementById('checklistStatusFilter')?.value || '';
+  updateChecklistEquipmentFilterOptions();
+
+  const dateFilter = appliedChecklistFilters.date || '';
+  const equipmentFilter = appliedChecklistFilters.equipment || '';
+  const statusFilter = appliedChecklistFilters.status || '';
 
   let filtered = [...allChecklists];
 
@@ -2290,7 +2465,8 @@ logoutBtn.addEventListener('click', async (e) => {
   }
 
   if (statusFilter) {
-    filtered = filtered.filter(c => c.status === statusFilter);
+    const normalizedFilter = normalizeStatus(statusFilter);
+    filtered = filtered.filter(c => normalizeStatus(c.status) === normalizedFilter);
   }
 
   container.innerHTML = '';
@@ -2307,19 +2483,7 @@ logoutBtn.addEventListener('click', async (e) => {
   filtered.forEach((checklist) => {
     const card = document.createElement('div');
     card.className = 'bg-card rounded-2xl border border-border p-5 card-hover';
-
-    const status = checklist.status || 'pendente';
-    const statusText =
-      status === 'conforme' ? 'Conforme' :
-      status === 'nao-conforme' ? 'Não Conforme' :
-      status === 'concluido' ? 'Concluído' :
-      'Pendente';
-
-    const statusColor =
-      status === 'conforme' ? 'success' :
-      status === 'nao-conforme' ? 'warning' :
-      status === 'concluido' ? 'primary' :
-      'warning';
+    const statusMeta = getStatusPresentation(checklist.status);
 
     const dataExibicao = checklist.data || checklist.date || '-';
     const operadorExibicao = checklist.operador || checklist.operator || '-';
@@ -2328,22 +2492,22 @@ logoutBtn.addEventListener('click', async (e) => {
     card.innerHTML = `
       <div class="flex flex-col lg:flex-row lg:items-center gap-4">
         <div class="flex items-start gap-4 flex-1">
-          <div class="w-12 h-12 bg-${statusColor}/10 rounded-xl flex items-center justify-center shrink-0">
-            <svg class="w-6 h-6 text-${statusColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 bg-${statusMeta.color}/10 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6 text-${statusMeta.color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
           </div>
 
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap mb-1">
-              <h3 class="font-semibold text-text-primary">${checklist.equipment || '-'}</h3>
-              <span class="text-xs font-medium text-${statusColor} bg-${statusColor}/10 px-2 py-1 rounded-full">${statusText}</span>
+              <h3 class="font-semibold text-text-primary">${escapeHtml(checklist.equipment || '-')}</h3>
+              <span class="text-xs font-medium text-${statusMeta.color} bg-${statusMeta.color}/10 px-2 py-1 rounded-full">${statusMeta.label}</span>
             </div>
 
             <div class="flex flex-wrap gap-4 text-sm text-text-secondary">
-              <span>📅 ${dataExibicao}</span>
-              <span>📍 ${unidadeExibicao}</span>
-              <span>👤 ${operadorExibicao}</span>
+              <span>📅 ${escapeHtml(dataExibicao)}</span>
+              <span>📍 ${escapeHtml(unidadeExibicao)}</span>
+              <span>👤 ${escapeHtml(operadorExibicao)}</span>
             </div>
           </div>
         </div>
@@ -2399,6 +2563,10 @@ async function loadChecklistsFromFirestore() {
       renderChecklists();
     }
 
+    if (currentPage === 'historico') {
+      renderHistorico();
+    }
+
   } catch (error) {
     console.error('Erro ao carregar checklists do Firestore:', error);
   }
@@ -2408,23 +2576,12 @@ async function loadDashboardData() {
   if (!db) return;
 
   try {
-    const snapshot = await db.collection('checklists').get();
-
-    const checklists = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data
-      };
-    });
+    const checklists = Array.isArray(allChecklists) ? [...allChecklists] : [];
 
     const totalChecklists = checklists.length;
-    const conformes = checklists.filter(item => String(item.status || '').toLowerCase() === 'conforme').length;
-    const naoConformes = checklists.filter(item => {
-      const s = String(item.status || '').toLowerCase();
-      return s === 'nao-conforme' || s === 'não-conforme';
-    }).length;
-    const pendentes = checklists.filter(item => String(item.status || '').toLowerCase() === 'pendente').length;
+    const conformes = checklists.filter(item => normalizeStatus(item.status) === 'conforme').length;
+    const naoConformes = checklists.filter(item => normalizeStatus(item.status) === 'nao-conforme').length;
+    const pendentes = checklists.filter(item => normalizeStatus(item.status) === 'pendente').length;
 
     const elTotal = document.getElementById('dashChecklistsRealizados');
     const elConformes = document.getElementById('dashEquipamentosConformes');
@@ -2448,8 +2605,12 @@ async function loadDashboardData() {
       } else {
         const ordered = [...checklists]
           .sort((a, b) => {
-            const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
-            const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            const aTime = a.createdAt?.toDate
+              ? a.createdAt.toDate().getTime()
+              : new Date(a.createdAt || a.data || 0).getTime() || 0;
+            const bTime = b.createdAt?.toDate
+              ? b.createdAt.toDate().getTime()
+              : new Date(b.createdAt || b.data || 0).getTime() || 0;
             return bTime - aTime;
           })
           .slice(0, 5);
@@ -2458,13 +2619,13 @@ async function loadDashboardData() {
           <div class="px-5 py-4">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-sm font-semibold text-text-primary">${item.equipment || '-'}</p>
+                <p class="text-sm font-semibold text-text-primary">${escapeHtml(item.equipment || '-')}</p>
                 <p class="text-xs text-text-secondary mt-1">
-                  ${item.operador || '-'} • ${item.unidade || '-'} • ${item.data || '-'}
+                  ${escapeHtml(item.operador || '-')} • ${escapeHtml(item.unidade || '-')} • ${escapeHtml(item.data || '-')}
                 </p>
               </div>
               <span class="text-xs px-2 py-1 rounded-full bg-surface text-text-secondary">
-                ${item.status || 'pendente'}
+                ${getStatusPresentation(item.status).label}
               </span>
             </div>
           </div>
@@ -2485,16 +2646,13 @@ async function loadDashboardData() {
         `;
       } else {
         const lista = checklists
-          .filter(item => {
-            const s = String(item.status || '').toLowerCase();
-            return s === 'nao-conforme' || s === 'não-conforme';
-          })
+          .filter(item => normalizeStatus(item.status) === 'nao-conforme')
           .slice(0, 5);
 
         maintenanceBox.innerHTML = lista.map(item => `
           <div class="p-3 rounded-xl border border-warning/30 bg-warning/5">
-            <p class="text-sm font-semibold text-text-primary">${item.equipment || '-'}</p>
-            <p class="text-xs text-text-secondary mt-1">${item.unidade || '-'} • ${item.operador || '-'}</p>
+            <p class="text-sm font-semibold text-text-primary">${escapeHtml(item.equipment || '-')}</p>
+            <p class="text-xs text-text-secondary mt-1">${escapeHtml(item.unidade || '-')} • ${escapeHtml(item.operador || '-')}</p>
           </div>
         `).join('');
       }
@@ -2557,16 +2715,20 @@ async function loadDashboardData() {
       currentPage = page;
       
       // Execute page-specific initialization
-            if (page === 'dashboard') {
-        setTimeout(async () => {
-          initializeCharts();
-          await loadDashboardData();
-        }, 100);
-      } else if (page === 'checklists') {
-        setTimeout(() => {
-          renderChecklists();
-        }, 50);
-      }
+          if (page === 'dashboard') {
+  setTimeout(async () => {
+    initializeCharts();
+    await loadDashboardData();
+  }, 100);
+} else if (page === 'checklists') {
+  setTimeout(() => {
+    renderChecklists();
+  }, 50);
+} else if (page === 'historico') {
+  setTimeout(() => {
+    renderHistorico();
+  }, 50);
+}
       
       // Close mobile sidebar
       if (window.innerWidth < 1024) {
@@ -2588,22 +2750,335 @@ async function loadDashboardData() {
 
     // Attach filter event listeners for checklists
     function attachChecklistFilters() {
+      const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+      const checklistFiltersContainer = document.getElementById('checklistFiltersContainer');
+      const applyFiltersBtn = document.getElementById('applyChecklistFiltersBtn');
+      const clearFiltersBtn = document.getElementById('clearChecklistFiltersBtn');
       const dateFilter = document.getElementById('checklistDateFilter');
       const equipmentFilter = document.getElementById('checklistEquipmentFilter');
       const statusFilter = document.getElementById('checklistStatusFilter');
       
-      if (dateFilter) dateFilter.addEventListener('change', renderChecklists);
-      if (equipmentFilter) equipmentFilter.addEventListener('change', renderChecklists);
-      if (statusFilter) statusFilter.addEventListener('change', renderChecklists);
+      if (toggleFiltersBtn && checklistFiltersContainer && !toggleFiltersBtn.dataset.bound) {
+        toggleFiltersBtn.addEventListener('click', () => {
+          checklistFiltersContainer.classList.toggle('hidden');
+        });
+        toggleFiltersBtn.dataset.bound = 'true';
+      }
+
+      if (applyFiltersBtn && !applyFiltersBtn.dataset.bound) {
+        applyFiltersBtn.addEventListener('click', applyChecklistFilters);
+        applyFiltersBtn.dataset.bound = 'true';
+      }
+
+      if (clearFiltersBtn && !clearFiltersBtn.dataset.bound) {
+        clearFiltersBtn.addEventListener('click', clearChecklistFilters);
+        clearFiltersBtn.dataset.bound = 'true';
+      }
+
+      [dateFilter, equipmentFilter, statusFilter].forEach((element) => {
+        if (element && !element.dataset.bound) {
+          element.dataset.bound = 'true';
+        }
+      });
     }
 
-    // Toggle filters visibility
-    const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
-    const checklistFiltersContainer = document.getElementById('checklistFiltersContainer');
+    // Historico de checklists
+    function formatFirestoreDateTime(value, fallbackDate = '', fallbackHour = '') {
+  try {
+    if (value && typeof value.toDate === 'function') {
+      const dateObj = value.toDate();
 
-    toggleFiltersBtn.addEventListener('click', () => {
-      checklistFiltersContainer.classList.toggle('hidden');
-    });
+      const data = dateObj.toLocaleDateString('pt-BR');
+      const hora = dateObj.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      return { data, hora };
+    }
+
+    if (typeof value === 'string') {
+      const dateObj = new Date(value);
+
+      if (!isNaN(dateObj.getTime())) {
+        const data = dateObj.toLocaleDateString('pt-BR');
+        const hora = dateObj.toLocaleTimeString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return { data, hora };
+      }
+    }
+  } catch (error) {
+    console.warn('Erro ao formatar data/hora do histórico:', error);
+  }
+
+  return {
+    data: fallbackDate || '-',
+    hora: fallbackHour || '-'
+  };
+}
+
+function getChecklistHistoryEquipmentName(checklist) {
+  return (
+    checklist.equipment ||
+    checklist.checklistLabel ||
+    checklist.modelo ||
+    checklist.checklistKey ||
+    'Não informado'
+  );
+}
+
+function getChecklistHistoryStatusBadge(status) {
+  const statusMeta = getStatusPresentation(status);
+
+  if (statusMeta.value === 'conforme') {
+    return '<span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Conforme</span>';
+  }
+
+  if (statusMeta.value === 'nao-conforme') {
+    return '<span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Não conforme</span>';
+  }
+
+  return '<span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pendente</span>';
+}
+
+function getChecklistHistoryTimestamp(checklist) {
+  const createdAtValue = checklist?.createdAt?.toDate?.() || checklist?.createdAt || null;
+  const createdAtTime = createdAtValue ? new Date(createdAtValue).getTime() : NaN;
+
+  if (!Number.isNaN(createdAtTime) && createdAtTime > 0) {
+    return createdAtTime;
+  }
+
+  const datePart = checklist?.data || checklist?.date || "";
+  const timePart = checklist?.horaInicial || "00:00";
+  const fallbackTime = new Date(`${datePart}T${timePart}`).getTime();
+
+  return Number.isNaN(fallbackTime) ? 0 : fallbackTime;
+}
+
+function getChecklistHistoryDateValue(checklist) {
+  const dateValue = checklist?.data || checklist?.date || "";
+  return String(dateValue).slice(0, 10);
+}
+
+function updateHistoricoEquipmentFilterOptions() {
+  const select = document.getElementById('historyEquipmentFilter');
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value;
+  const equipments = [...new Set(
+    allChecklists
+      .map(item => getChecklistHistoryEquipmentName(item))
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  select.innerHTML = '<option value="">Todos</option>' + equipments
+    .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+    .join('');
+
+  if (equipments.includes(currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+function toggleHistoricoFiltersPanel() {
+  const filtersContainer = document.getElementById('historyFiltersContainer');
+
+  if (!filtersContainer) {
+    return;
+  }
+
+  filtersContainer.classList.toggle('hidden');
+}
+
+function readHistoricoFilterForm() {
+  return {
+    month: document.getElementById('historyMonthFilter')?.value || '',
+    operator: normalizeString(document.getElementById('historyOperatorFilter')?.value || ''),
+    status: normalizeStatus(document.getElementById('historyStatusFilter')?.value || '')
+  };
+}
+
+function applyHistoricoFilters() {
+  appliedHistoryFilters = readHistoricoFilterForm();
+  renderHistorico();
+}
+
+function clearHistoricoFilters() {
+  const monthFilter = document.getElementById('historyMonthFilter');
+  const operatorFilter = document.getElementById('historyOperatorFilter');
+  const statusFilter = document.getElementById('historyStatusFilter');
+
+  if (monthFilter) monthFilter.value = '';
+  if (operatorFilter) operatorFilter.value = '';
+  if (statusFilter) statusFilter.value = '';
+
+  appliedHistoryFilters = {
+    month: '',
+    operator: '',
+    status: ''
+  };
+
+  renderHistorico();
+}
+
+function getChecklistHistoryMonthValue(checklist) {
+  const dateValue = getChecklistHistoryDateValue(checklist);
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateValue) ? dateValue.slice(0, 7) : '';
+}
+
+function matchesHistoricoMonthFilter(checklist, monthFilter, useDefaultCurrentMonth = false) {
+  const timestamp = getChecklistHistoryTimestamp(checklist);
+
+  if (!timestamp) {
+    return false;
+  }
+
+  const now = new Date();
+  const itemDate = new Date(timestamp);
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const itemMonth = getChecklistHistoryMonthValue(checklist);
+
+  if (!monthFilter) {
+    return useDefaultCurrentMonth ? itemMonth === currentMonth : true;
+  }
+
+  if (monthFilter === 'all') {
+    return true;
+  }
+
+  return itemMonth.endsWith(`-${monthFilter}`);
+}
+
+function getHistoricoFilteredItems() {
+  const monthFilter = appliedHistoryFilters.month || '';
+  const operatorFilter = appliedHistoryFilters.operator || '';
+  const statusFilter = appliedHistoryFilters.status || '';
+  let filteredItems = [...allChecklists];
+  const hasActiveFilters = Boolean(monthFilter || operatorFilter || statusFilter);
+
+  if (operatorFilter) {
+    filteredItems = filteredItems.filter(item => normalizeString(item.operador || item.operator || '').includes(operatorFilter));
+  }
+
+  if (statusFilter) {
+    filteredItems = filteredItems.filter(item => normalizeStatus(item.status) === statusFilter);
+  }
+
+  filteredItems = filteredItems.filter(item => matchesHistoricoMonthFilter(item, monthFilter, !hasActiveFilters));
+
+  return filteredItems.sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a));
+}
+
+function renderHistorico() {
+  const tbody = document.getElementById('historyTableBody');
+  if (!tbody) return;
+
+  const historyItems = getHistoricoFilteredItems();
+
+  if (!historyItems.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="px-5 py-8 text-center text-text-secondary">
+          <p class="text-sm">📋 Nenhum checklist encontrado</p>
+          <p class="text-xs mt-1">Ajuste os filtros ou aguarde novos registros</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = historyItems.map(checklist => {
+    const createdInfo = formatFirestoreDateTime(
+      checklist.createdAt,
+      checklist.data || '-',
+      checklist.horaInicial || '-'
+    );
+
+    const equipmentName = getChecklistHistoryEquipmentName(checklist);
+    const operador = checklist.operador || 'Não informado';
+    const statusBadge = getChecklistHistoryStatusBadge(checklist.status);
+
+    return `
+      <tr class="hover:bg-surface transition">
+        <td class="px-5 py-4">
+          <div class="flex flex-col">
+            <span class="text-sm font-semibold text-text-primary">${escapeHtml(createdInfo.data)}</span>
+            <span class="text-xs text-text-secondary">${escapeHtml(createdInfo.hora)}</span>
+          </div>
+        </td>
+
+        <td class="px-5 py-4">
+          <div class="flex flex-col">
+            <span class="text-sm font-medium text-text-primary">${escapeHtml(equipmentName)}</span>
+            <span class="text-xs text-text-secondary">${escapeHtml(checklist.turno || '-')}</span>
+          </div>
+        </td>
+
+        <td class="px-5 py-4">
+          <div class="flex flex-col">
+            <span class="text-sm font-medium text-text-primary">${escapeHtml(operador)}</span>
+            <span class="text-xs text-text-secondary">${escapeHtml(checklist.unidade || '-')}</span>
+          </div>
+        </td>
+
+        <td class="px-5 py-4">
+          ${statusBadge}
+        </td>
+
+        <td class="px-5 py-4">
+          <button
+            type="button"
+            onclick="openChecklistDetailsModal('${checklist.id}')"
+            class="inline-flex items-center px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:opacity-90 transition"
+          >
+            Ver detalhes
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function attachHistoricoFilters() {
+  const toggleFiltersBtn = document.getElementById('toggleHistoryFiltersBtn');
+  const applyFiltersBtn = document.getElementById('applyHistoryFiltersBtn');
+  const clearFiltersBtn = document.getElementById('clearHistoryFiltersBtn');
+  const monthFilter = document.getElementById('historyMonthFilter');
+  const operatorFilter = document.getElementById('historyOperatorFilter');
+  const statusFilter = document.getElementById('historyStatusFilter');
+
+  if (toggleFiltersBtn && !toggleFiltersBtn.dataset.bound) {
+    toggleFiltersBtn.addEventListener('click', toggleHistoricoFiltersPanel);
+    toggleFiltersBtn.dataset.bound = 'true';
+  }
+
+  if (applyFiltersBtn && !applyFiltersBtn.dataset.bound) {
+    applyFiltersBtn.addEventListener('click', applyHistoricoFilters);
+    applyFiltersBtn.dataset.bound = 'true';
+  }
+
+  if (clearFiltersBtn && !clearFiltersBtn.dataset.bound) {
+    clearFiltersBtn.addEventListener('click', clearHistoricoFilters);
+    clearFiltersBtn.dataset.bound = 'true';
+  }
+
+  if (monthFilter && !monthFilter.dataset.bound) {
+    monthFilter.dataset.bound = 'true';
+  }
+
+  [operatorFilter, statusFilter].forEach((element) => {
+    if (element && !element.dataset.bound) {
+      element.dataset.bound = 'true';
+    }
+  });
+}
 
   const registerBtn = document.getElementById('registerBtn');
 const registerModal = document.getElementById('registerModal');
@@ -2640,6 +3115,8 @@ errorEl.textContent = '';
 
 try{
 
+if(!db || !auth) throw new Error("Firebase não foi inicializado corretamente.");
+
 if(!name) throw new Error("Digite seu nome");
 if(cpf.length !== 11) throw new Error("CPF inválido");
 if(password.length < 4) throw new Error("Senha muito curta");
@@ -2656,6 +3133,8 @@ email: email,
 role: "OPERADOR",
 createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
+
+await auth.signOut();
 
 registerModal.style.display = 'none';
 
@@ -2682,6 +3161,10 @@ const selectedEquipmentDisplay = document.getElementById('selectedEquipmentDispl
 
 let checklistDetailsModal = null;
 let closeChecklistDetailsModalBtn = null;
+let exportDataModal = null;
+let closeExportDataModalBtn = null;
+let openExportDataModalBtn = null;
+let confirmExportDataBtn = null;
 let checklistDetailsContent = null;
 let selectedChecklistDetailsId = null;
 let checklistStatusSelect = null;
@@ -2693,6 +3176,10 @@ let saveChecklistStatusBtn = null;
 function initChecklistDetailsElements() {
   checklistDetailsModal = document.getElementById('checklistDetailsModal');
   closeChecklistDetailsModalBtn = document.getElementById('closeChecklistDetailsModal');
+  exportDataModal = document.getElementById('exportDataModal');
+  closeExportDataModalBtn = document.getElementById('closeExportDataModal');
+  openExportDataModalBtn = document.getElementById('openExportDataModalBtn');
+  confirmExportDataBtn = document.getElementById('confirmExportDataBtn');
   checklistDetailsContent = document.getElementById('checklistDetailsContent');
   checklistStatusSelect = document.getElementById('checklistStatusSelect');
   saveChecklistStatusBtn = document.getElementById('saveChecklistStatusBtn');
@@ -2703,20 +3190,20 @@ function initChecklistDetailsElements() {
   { id: "caminhao-basculante", label: "Caminhão Basculante", icon: "🚚" },
   { id: "caminhao-carroceria", label: "Caminhão Carroceria", icon: "🚚" },
   { id: "caminhao-comboio", label: "Caminhão Comboio", icon: "🚚" },
-  { id: "caminhao-munck", label: "Caminhão Munck", icon: "🏗️" },
+  { id: "caminhao-munck", label: "Caminhão Munck", icon: "ðŸ—️" },
   { id: "caminhao-pipa", label: "Caminhão Pipa", icon: "💧" },
-  { id: "carregadeira", label: "Carregadeira", icon: "🏗️" },
+  { id: "carregadeira", label: "Carregadeira", icon: "ðŸ—️" },
   { id: "cavalo-mecanico", label: "Cavalo Mecânico", icon: "🚛" },
   { id: "compressor", label: "Compressor", icon: "🛠️" },
   { id: "empilhadeira", label: "Empilhadeira", icon: "📦" },
   { id: "escavadeira", label: "Escavadeira", icon: "⛏️" },
   { id: "gerador-energia", label: "Gerador de Energia", icon: "⚡" },
-  { id: "mini-carregadeira", label: "Mini Carregadeira", icon: "🏗️" },
+  { id: "mini-carregadeira", label: "Mini Carregadeira", icon: "ðŸ—️" },
   { id: "motoniveladora", label: "Motoniveladora", icon: "🛣️" },
   { id: "onibus", label: "Ônibus", icon: "🚌" },
   { id: "perfuratriz", label: "Perfuratriz", icon: "🪨" },
   { id: "prancha", label: "Prancha", icon: "🚛" },
-  { id: "retroescavadeira", label: "Retroescavadeira", icon: "🏗️" },
+  { id: "retroescavadeira", label: "Retroescavadeira", icon: "ðŸ—️" },
   { id: "rompedor", label: "Rompedor", icon: "🔨" },
   { id: "trator-esteira", label: "Trator de Esteira", icon: "🚜" },
   { id: "veiculos-leves", label: "Veículos Leves", icon: "🚗" }
@@ -2795,12 +3282,561 @@ function formatDateBR(value) {
   return date.toLocaleDateString('pt-BR');
 }
 
-const PDF_TEMPLATE_PATHS = {
-  'veiculos-leves': '/pdfs/checklist-veiculos-leves-template.pdf'
-};
+function downloadBytesAsPdf(bytes, fileName) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
 
-function getPdfTemplatePath(checklistKey) {
-  return PDF_TEMPLATE_PATHS[checklistKey] || null;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function getMonthNamePtBr(monthIndex) {
+  return [
+    'janeiro',
+    'fevereiro',
+    'marco',
+    'abril',
+    'maio',
+    'junho',
+    'julho',
+    'agosto',
+    'setembro',
+    'outubro',
+    'novembro',
+    'dezembro'
+  ][monthIndex] || '';
+}
+
+function formatReportDateTime(value) {
+  return new Date(value).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function getCurrentMonthChecklistItems() {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  return [...allChecklists]
+    .filter((item) => {
+      const timestamp = getChecklistHistoryTimestamp(item);
+      if (!timestamp) return false;
+
+      const date = new Date(timestamp);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    })
+    .sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a));
+}
+
+async function fetchChecklistReportLogoBytes() {
+  try {
+    const response = await fetch('pdfs/checklist-veiculos-leves.xlsx');
+    if (!response.ok) {
+      return null;
+    }
+
+    const buffer = await response.arrayBuffer();
+    return getEmbeddedTemplateImage(buffer, 'xl/media/image1.png');
+  } catch (error) {
+    console.warn('Nao foi possivel carregar a logo do relatorio:', error);
+    return null;
+  }
+}
+
+async function generateChecklistMonthlyReportPdf() {
+  try {
+    if (!window.PDFLib) {
+      throw new Error('pdf-lib nao foi carregado.');
+    }
+
+    const items = getCurrentMonthChecklistItems();
+
+    if (!items.length) {
+      alert('Nao ha checklists registrados no mes atual para gerar o relatorio.');
+      return;
+    }
+
+    const { PDFDocument, StandardFonts } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+    const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const logoBytes = await fetchChecklistReportLogoBytes();
+    const logoImage = logoBytes ? await pdfDoc.embedPng(logoBytes) : null;
+    const theme = getReportTheme();
+
+    const pageWidth = 841.89;
+    const pageHeight = 595.28;
+    const margin = 40;
+    const rowHeight = 24;
+    const tableTopStart = 455;
+    const columns = [
+      { key: 'data', label: 'Data', width: 110 },
+      { key: 'equipamento', label: 'Checklist', width: 250 },
+      { key: 'operador', label: 'Operador', width: 170 },
+      { key: 'status', label: 'Status', width: 110 },
+      { key: 'unidade', label: 'Unidade', width: 120 }
+    ];
+
+    const reportRows = items.map((item) => ({
+      data: formatReportDateTime(getChecklistHistoryTimestamp(item)),
+      equipamento: getChecklistHistoryEquipmentName(item),
+      operador: item.operador || item.operator || 'Nao informado',
+      status: getStatusPresentation(item.status).label,
+      unidade: item.unidade || item.area || '-'
+    }));
+
+    const drawHeader = (page, pageNumber) => {
+      drawReportHeaderBlock({
+        page,
+        pageWidth,
+        pageHeight,
+        margin,
+        title: 'RELATORIO DE CHECKLISTS',
+        subtitle: `Mes: ${getMonthNamePtBr(new Date().getMonth())} / ${new Date().getFullYear()}  •  Data de emissao: ${formatReportDateTime(new Date())}`,
+        pageNumber,
+        fontRegular,
+        fontBold,
+        logoImage,
+        theme
+      });
+    };
+
+    const drawTableHeader = (page, y) => {
+      let x = margin;
+      columns.forEach((column) => {
+        page.drawRectangle({
+          x,
+          y,
+          width: column.width,
+          height: rowHeight,
+          color: theme.navy
+        });
+
+        page.drawText(column.label, {
+          x: x + 6,
+          y: y + 7,
+          size: 9,
+          font: fontBold,
+          color: theme.white
+        });
+
+        x += column.width;
+      });
+    };
+
+    const drawTableRow = (page, y, row, rowIndex) => {
+      let x = margin;
+      const fillColor = rowIndex % 2 === 0 ? theme.white : theme.sky;
+
+      columns.forEach((column) => {
+        page.drawRectangle({
+          x,
+          y,
+          width: column.width,
+          height: rowHeight,
+          color: fillColor,
+          borderColor: theme.border,
+          borderWidth: 0.7
+        });
+
+        const rawText = String(row[column.key] ?? '');
+        const maxChars = Math.max(8, Math.floor((column.width - 10) / 5.2));
+        const cellText = rawText.length > maxChars ? `${rawText.slice(0, maxChars - 3)}...` : rawText;
+
+        page.drawText(cellText, {
+          x: x + 6,
+          y: y + 7,
+          size: 8.5,
+          font: fontRegular,
+          color: theme.ink
+        });
+
+        x += column.width;
+      });
+    };
+
+    let page = pdfDoc.addPage([pageWidth, pageHeight]);
+    let pageNumber = 1;
+    let currentY = tableTopStart;
+
+    drawHeader(page, pageNumber);
+    drawTableHeader(page, currentY);
+    currentY -= rowHeight;
+
+    reportRows.forEach((row, index) => {
+      if (currentY < 55) {
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        pageNumber += 1;
+        drawHeader(page, pageNumber);
+        currentY = tableTopStart;
+        drawTableHeader(page, currentY);
+        currentY -= rowHeight;
+      }
+
+      drawTableRow(page, currentY, row, index);
+      currentY -= rowHeight;
+    });
+
+    const bytes = await pdfDoc.save();
+    downloadBytesAsPdf(bytes, `relatorio-checklists-${new Date().toISOString().slice(0, 7)}.pdf`);
+  } catch (error) {
+    console.error('Erro ao gerar relatorio de checklists:', error);
+    alert(`Erro ao gerar relatorio: ${error.message}`);
+  }
+}
+
+function getEquipmentPerformanceReportData() {
+  const equipmentMap = new Map();
+
+  allChecklists.forEach((item) => {
+    const equipmentName = getChecklistHistoryEquipmentName(item);
+    const ocorrencias = Array.isArray(item.ocorrencias) ? item.ocorrencias : [];
+
+    if (!equipmentMap.has(equipmentName)) {
+      equipmentMap.set(equipmentName, {
+        equipamento: equipmentName,
+        checklists: 0,
+        falhas: 0,
+        problemas: []
+      });
+    }
+
+    const current = equipmentMap.get(equipmentName);
+    current.checklists += ocorrencias.length > 0 ? 1 : 0;
+    current.falhas += ocorrencias.length;
+
+    ocorrencias.forEach((ocorrencia) => {
+      const texto = String(ocorrencia?.text || ocorrencia?.descricao || '').trim();
+      if (texto && !current.problemas.includes(texto)) {
+        current.problemas.push(texto);
+      }
+    });
+  });
+
+  return Array.from(equipmentMap.values()).sort((a, b) => {
+    if (b.falhas !== a.falhas) {
+      return b.falhas - a.falhas;
+    }
+    return a.equipamento.localeCompare(b.equipamento, 'pt-BR');
+  });
+}
+
+function sanitizeFileNamePart(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[<>:"/\\|?*]+/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+}
+
+function getChecklistsByDateRange(startDate, endDate) {
+  return [...allChecklists].filter((item) => {
+    const dateValue = getChecklistHistoryDateValue(item);
+    if (!dateValue) return false;
+    if (startDate && dateValue < startDate) return false;
+    if (endDate && dateValue > endDate) return false;
+    return true;
+  }).sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a));
+}
+
+function downloadBytesAsZip(bytes, fileName) {
+  const blob = new Blob([bytes], { type: 'application/zip' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function exportChecklistRangeAsZip(startDate, endDate) {
+  if (!window.JSZip) {
+    throw new Error('JSZip não foi carregado.');
+  }
+
+  if (!startDate || !endDate) {
+    throw new Error('Preencha a data inicial e a data final.');
+  }
+
+  if (startDate > endDate) {
+    throw new Error('A data inicial deve ser menor ou igual à data final.');
+  }
+
+  const checklists = getChecklistsByDateRange(startDate, endDate);
+
+  if (!checklists.length) {
+    throw new Error('Não existem checklists no período selecionado.');
+  }
+
+  const zip = new JSZip();
+
+  for (const checklist of checklists) {
+    const bytes = await buildChecklistExcelBytes(checklist);
+    const equipmentName = sanitizeFileNamePart(getChecklistHistoryEquipmentName(checklist)) || 'checklist';
+    const datePart = sanitizeFileNamePart(getChecklistHistoryDateValue(checklist)) || 'sem-data';
+    const turnoPart = sanitizeFileNamePart(checklist.turno || 'turno');
+    const fileName = `${datePart}-${equipmentName}-${turnoPart}.xlsx`;
+    zip.file(fileName, bytes);
+  }
+
+  const zipBytes = await zip.generateAsync({ type: 'uint8array' });
+  downloadBytesAsZip(zipBytes, `checklists-${startDate}-a-${endDate}.zip`);
+}
+
+function getReportTheme() {
+  return {
+    navy: PDFLib.rgb(0.1, 0.19, 0.33),
+    blue: PDFLib.rgb(0.16, 0.36, 0.64),
+    sky: PDFLib.rgb(0.87, 0.93, 0.98),
+    pale: PDFLib.rgb(0.95, 0.98, 1),
+    white: PDFLib.rgb(1, 1, 1),
+    ink: PDFLib.rgb(0.12, 0.16, 0.22),
+    muted: PDFLib.rgb(0.36, 0.43, 0.5),
+    border: PDFLib.rgb(0.79, 0.86, 0.93)
+  };
+}
+
+function drawReportHeaderBlock({
+  page,
+  pageWidth,
+  pageHeight,
+  margin,
+  title,
+  subtitle,
+  pageNumber,
+  fontRegular,
+  fontBold,
+  logoImage,
+  theme
+}) {
+  page.drawRectangle({
+    x: margin,
+    y: pageHeight - 102,
+    width: pageWidth - (margin * 2),
+    height: 78,
+    color: theme.pale,
+    borderColor: theme.border,
+    borderWidth: 1
+  });
+
+  page.drawRectangle({
+    x: margin,
+    y: pageHeight - 44,
+    width: pageWidth - (margin * 2),
+    height: 20,
+    color: theme.navy
+  });
+
+  if (logoImage) {
+    page.drawImage(logoImage, {
+      x: pageWidth - 170,
+      y: pageHeight - 80,
+      width: 95,
+      height: 28
+    });
+  }
+
+  page.drawText(title, {
+    x: margin + 18,
+    y: pageHeight - 58,
+    size: 18,
+    font: fontBold,
+    color: theme.navy
+  });
+
+  page.drawText(subtitle, {
+    x: margin + 18,
+    y: pageHeight - 79,
+    size: 10,
+    font: fontRegular,
+    color: theme.muted
+  });
+
+  page.drawText(`Pagina ${pageNumber}`, {
+    x: pageWidth - 110,
+    y: 20,
+    size: 10,
+    font: fontRegular,
+    color: theme.muted
+  });
+}
+
+async function generateEquipmentPerformanceReportPdf() {
+  try {
+    if (!window.PDFLib) {
+      throw new Error('pdf-lib nao foi carregado.');
+    }
+
+    const reportItems = getEquipmentPerformanceReportData();
+
+    if (!reportItems.length) {
+      alert('Nao ha dados suficientes para gerar o relatorio de performance.');
+      return;
+    }
+
+    const { PDFDocument, StandardFonts } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+    const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const logoBytes = await fetchChecklistReportLogoBytes();
+    const logoImage = logoBytes ? await pdfDoc.embedPng(logoBytes) : null;
+    const theme = getReportTheme();
+
+    const pageWidth = 841.89;
+    const pageHeight = 595.28;
+    const margin = 40;
+    const lineHeight = 16;
+
+    let page = pdfDoc.addPage([pageWidth, pageHeight]);
+    let pageNumber = 1;
+    let currentY = pageHeight - 120;
+
+    const drawHeader = () => {
+      drawReportHeaderBlock({
+        page,
+        pageWidth,
+        pageHeight,
+        margin,
+        title: 'PERFORMANCE DE EQUIPAMENTOS',
+        subtitle: `Data de emissao: ${formatReportDateTime(new Date())}`,
+        pageNumber,
+        fontRegular,
+        fontBold,
+        logoImage,
+        theme
+      });
+    };
+
+    const ensureSpace = (requiredHeight) => {
+      if (currentY - requiredHeight >= 45) {
+        return;
+      }
+
+      page = pdfDoc.addPage([pageWidth, pageHeight]);
+      pageNumber += 1;
+      currentY = pageHeight - 120;
+      drawHeader();
+    };
+
+    drawHeader();
+
+    reportItems.forEach((item, index) => {
+      const issueLines = item.problemas.length
+        ? item.problemas.map(text => `• ${text}`)
+        : ['• Sem falhas registradas'];
+      const blockHeight = 54 + (issueLines.length * lineHeight);
+
+      ensureSpace(blockHeight);
+
+      page.drawRectangle({
+        x: margin,
+        y: currentY - blockHeight + 12,
+        width: pageWidth - (margin * 2),
+        height: blockHeight,
+        color: index % 2 === 0 ? theme.white : theme.sky,
+        borderColor: theme.border,
+        borderWidth: 1
+      });
+
+      page.drawText(item.equipamento, {
+        x: margin + 14,
+        y: currentY - 8,
+        size: 13,
+        font: fontBold,
+        color: theme.navy
+      });
+
+      page.drawText(`Checklists com problema: ${item.checklists}`, {
+        x: margin + 14,
+        y: currentY - 28,
+        size: 10,
+        font: fontRegular,
+        color: theme.blue
+      });
+
+      page.drawText(`Total de falhas registradas: ${item.falhas}`, {
+        x: margin + 220,
+        y: currentY - 28,
+        size: 10,
+        font: fontRegular,
+        color: theme.blue
+      });
+
+      let issueY = currentY - 48;
+      issueLines.forEach((line) => {
+        page.drawText(line, {
+          x: margin + 14,
+          y: issueY,
+          size: 9,
+          font: fontRegular,
+          color: theme.ink
+        });
+        issueY -= lineHeight;
+      });
+
+      currentY -= blockHeight + 14;
+    });
+
+    const bytes = await pdfDoc.save();
+    downloadBytesAsPdf(bytes, `performance-equipamentos-${new Date().toISOString().slice(0, 10)}.pdf`);
+  } catch (error) {
+    console.error('Erro ao gerar relatorio de performance de equipamentos:', error);
+    alert(`Erro ao gerar relatorio: ${error.message}`);
+  }
+}
+
+
+function preencherCabecalhoPdf(helpers, checklist) {
+  helpers.setTextFieldSafe('modelo', checklist.modelo);
+  helpers.setTextFieldSafe('tag_placa', checklist.tagPlaca);
+  helpers.setTextFieldSafe('data', normalizeChecklistDate(checklist.data));
+  helpers.setTextFieldSafe('unidade', checklist.unidade);
+}
+
+function getChecklistItemFieldName(itemId) {
+  return `item_${String(itemId).trim()}`;
+}
+
+function limparMarcacoesItensPdf(helpers, checklistKey) {
+  const def = getChecklistDef(checklistKey);
+  if (!def || !Array.isArray(def.sections)) return;
+
+  def.sections.forEach(section => {
+    (section.items || []).forEach(item => {
+      helpers.checkFieldSafe(getChecklistItemFieldName(item.id), false);
+    });
+  });
+}
+
+function preencherItensChecklistPdf(helpers, checklist) {
+  limparMarcacoesItensPdf(helpers, checklist.checklistKey);
+
+  const ocorrencias = Array.isArray(checklist.ocorrencias) ? checklist.ocorrencias : [];
+
+  ocorrencias.forEach(item => {
+    const fieldName = getChecklistItemFieldName(item.id);
+    helpers.checkFieldSafe(fieldName, true);
+  });
+}
+
+function preencherObservacoesPdf(helpers, checklist) {
+  helpers.setTextFieldSafe('observacoes', checklist.observacoes || '');
 }
 
 function normalizeChecklistDate(value) {
@@ -2823,120 +3859,556 @@ function normalizeChecklistDate(value) {
   return date.toLocaleDateString('pt-BR');
 }
 
-function downloadBytesAsPdf(bytes, fileName) {
-  const blob = new Blob([bytes], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+const EXCEL_TEMPLATE_PATHS = {
+  "caminhao-basculante": "pdfs/checklist-caminhao-basculante.xlsx",
+  "caminhao-carroceria": "pdfs/checklist-caminhao-carroceria.xlsx",
+  "caminhao-comboio": "pdfs/checklist-caminhao-comboio.xlsx",
+  "caminhao-munck": "pdfs/checklist-caminhao-munck.xlsx",
+  "caminhao-pipa": "pdfs/checklist-caminhao-pipa.xlsx",
+  "carregadeira": "pdfs/checklist-carregadeira.xlsx",
+  "cavalo-mecanico": "pdfs/checklist-cavalo-mecanico.xlsx",
+  "compressor": "pdfs/checklist-compressor.xlsx",
+  "empilhadeira": "pdfs/checklist-empilhadeira.xlsx",
+  "escavadeira": "pdfs/checklist-escavadeira.xlsx",
+  "gerador-energia": "pdfs/checklist-gerador.xlsx",
+  "mini-carregadeira": "pdfs/checklist-mini-carregadeira.xlsx",
+  "motoniveladora": "pdfs/checklist-motoniveladora.xlsx",
+  "onibus": "pdfs/checklist-onibus.xlsx",
+  "perfuratriz": "pdfs/checklist-perfuratriz.xlsx",
+  "prancha": "pdfs/checklist-prancha.xlsx",
+  "retroescavadeira": "pdfs/checklist-retroescavadeira.xlsx",
+  "rompedor": "pdfs/checklist-rompedor.xlsx",
+  "trator-esteira": "pdfs/checklist-trator-esteira.xlsx",
+  "veiculos-leves": "pdfs/checklist-veiculos-leves.xlsx"
+};
+
+function getExcelTemplatePath(checklistKey) {
+  return EXCEL_TEMPLATE_PATHS[String(checklistKey || "").trim()] || null;
+}
+
+function downloadBytesAsExcel(bytes, fileName) {
+  const blob = new Blob([bytes], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-
-function preencherCamposTurno(form, checklist) {
-  const turno = String(checklist.turno || '').trim();
-
-  if (turno === '1º TURNO') {
-    form.getTextField('operador_1').setText(checklist.operador || '');
-    form.getTextField('hora_inicial_1').setText(checklist.horaInicial || '');
-    form.getTextField('hora_final_1').setText(checklist.horaFinal || '');
-    form.getTextField('hr_km_inicial_1').setText(checklist.hrKmInicial || '');
-    form.getTextField('hr_km_final_1').setText(checklist.hrKmFinal || '');
+function setCellPreservingLabel(worksheet, address, value) {
+  if (!address) {
     return;
   }
 
-  if (turno === '2º TURNO') {
-    form.getTextField('operador_2').setText(checklist.operador || '');
-    form.getTextField('hora_inicial_2').setText(checklist.horaInicial || '');
-    form.getTextField('hora_final_2').setText(checklist.horaFinal || '');
-    form.getTextField('hr_km_inicial_2').setText(checklist.hrKmInicial || '');
-    form.getTextField('hr_km_final_2').setText(checklist.hrKmFinal || '');
+  const cell = worksheet.getCell(address);
+  const currentValue = String(cell.value ?? "").trim();
+  const suffix = String(value ?? "").trim();
+
+  if (!suffix) {
     return;
   }
 
-  if (turno === '3º TURNO') {
-    form.getTextField('operador_3').setText(checklist.operador || '');
-    form.getTextField('hora_inicial_3').setText(checklist.horaInicial || '');
-    form.getTextField('hora_final_3').setText(checklist.horaFinal || '');
-    form.getTextField('hr_km_inicial_3').setText(checklist.hrKmInicial || '');
-    form.getTextField('hr_km_final_3').setText(checklist.hrKmFinal || '');
+  if (!currentValue) {
+    cell.value = suffix;
+    return;
   }
+
+  cell.value = `${currentValue} ${suffix}`;
 }
 
-async function generateChecklistPdf(checklistId) {
+function normalizeWorksheetText(value) {
+  return String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+function getWorksheetCellText(cell) {
+  if (!cell) {
+    return "";
+  }
+
+  let value = null;
+
   try {
-    const checklist = allChecklists.find(item => item.id === checklistId);
+    value = cell.value;
+  } catch (error) {
+    console.warn("Erro ao ler valor da célula do template:", error);
+    return "";
+  }
 
-    if (!checklist) {
-      alert('Checklist não encontrado para gerar o PDF.');
-      return;
+  if (value == null) {
+    return "";
+  }
+
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  if (typeof value === "object") {
+    if (typeof value.richText === "object" && Array.isArray(value.richText)) {
+      return value.richText.map(part => part?.text || "").join("");
     }
 
-    const templatePath = getPdfTemplatePath(checklist.checklistKey);
-
-    if (!templatePath) {
-      alert(`Ainda não existe template preenchível configurado para: ${checklist.checklistKey}`);
-      return;
+    if (typeof value.text === "string") {
+      return value.text;
     }
 
-    const existingPdfBytes = await fetch(templatePath).then(async (res) => {
-      if (!res.ok) {
-        throw new Error(`Não foi possível carregar o template PDF: ${templatePath}`);
+    if (typeof value.result === "string" || typeof value.result === "number") {
+      return String(value.result);
+    }
+
+    if (typeof value.formula === "string") {
+      return value.formula;
+    }
+  }
+
+  return "";
+}
+
+function findCellAddressesByPrefix(worksheet, prefix) {
+  const matches = [];
+  const normalizedPrefix = normalizeWorksheetText(prefix);
+
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    row.eachCell({ includeEmpty: false }, (cell) => {
+      const cellText = normalizeWorksheetText(getWorksheetCellText(cell));
+
+      if (cellText.startsWith(normalizedPrefix)) {
+        matches.push(cell.address);
       }
-      return await res.arrayBuffer();
     });
+  });
 
-    const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-    const form = pdfDoc.getForm();
+  return matches;
+}
 
-    const fields = form.getFields();
-    console.log(
-      'Campos encontrados no PDF:',
-      fields.map(field => ({
-        name: field.getName(),
-        type: field.constructor.name
-      }))
-    );
+function getChecklistHeaderCellMap(worksheet) {
+  return {
+    modelo: findCellAddressesByPrefix(worksheet, "MODELO:")[0] || null,
+    tagPlaca: findCellAddressesByPrefix(worksheet, "TAG/PLACA:")[0] || null,
+    data: findCellAddressesByPrefix(worksheet, "DATA:")[0] || null,
+    unidade: findCellAddressesByPrefix(worksheet, "UNIDADE:")[0] || null
+  };
+}
 
-    function setTextFieldSafe(fieldName, value) {
-      const fieldExists = fields.find(field => field.getName() === fieldName);
+function getChecklistTurnCellMap(worksheet) {
+  return {
+    operador: findCellAddressesByPrefix(worksheet, "OPERADOR:"),
+    horaInicial: findCellAddressesByPrefix(worksheet, "HORA INICIAL:"),
+    horaFinal: findCellAddressesByPrefix(worksheet, "HORA FINAL:"),
+    hrKmInicial: findCellAddressesByPrefix(worksheet, "HR/KM INICIAL:"),
+    hrKmFinal: findCellAddressesByPrefix(worksheet, "HR/KM FINAL:")
+  };
+}
 
-      if (!fieldExists) {
-        console.error(`Campo não encontrado no template: ${fieldName}`);
+function getChecklistTurnStatusColumnMap(worksheet) {
+  const result = {
+    0: { col: null, row: -1 },
+    1: { col: null, row: -1 },
+    2: { col: null, row: -1 }
+  };
+
+  const labelMap = new Map([
+    ["1ºTURNO", 0],
+    ["2ºTURNO", 1],
+    ["3ºTURNO", 2]
+  ]);
+
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    row.eachCell({ includeEmpty: false }, (cell) => {
+      const compactText = normalizeWorksheetText(getWorksheetCellText(cell)).replace(/\s+/g, "");
+      const turnoIndex = labelMap.get(compactText);
+
+      if (turnoIndex == null) {
         return;
       }
 
-      form.getTextField(fieldName).setText(String(value || ''));
+      if (cell.row > result[turnoIndex].row) {
+        result[turnoIndex] = {
+          col: cell.col,
+          row: cell.row
+        };
+      }
+    });
+  });
+
+  return {
+    0: result[0].col,
+    1: result[1].col,
+    2: result[2].col
+  };
+}
+
+function getChecklistItemRowMap(worksheet) {
+  const rowMap = new Map();
+
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    const rawId = getWorksheetCellText(row.getCell(1)).trim();
+    const itemId = String(parseInt(rawId, 10));
+
+    if (!itemId || itemId === "NaN") {
+      return;
     }
 
-    setTextFieldSafe('modelo', checklist.modelo);
-    setTextFieldSafe('tag_placa', checklist.tagPlaca);
-    setTextFieldSafe('data', normalizeChecklistDate(checklist.data));
-    setTextFieldSafe('unidade', checklist.unidade);
+    const description = getWorksheetCellText(row.getCell(2)).trim();
 
-    preencherCamposTurno({
-      getTextField: (name) => ({
-        setText: (value) => setTextFieldSafe(name, value)
-      })
-    }, checklist);
+    if (!description) {
+      return;
+    }
 
-    const pdfBytes = await pdfDoc.save();
+    rowMap.set(itemId, row.number);
+  });
 
-    const safeDate = normalizeChecklistDate(checklist.data).replaceAll('/', '-');
-    const safeEquipment = String(checklist.checklistKey || 'checklist').replaceAll('/', '-');
-    const fileName = `${safeEquipment}-${safeDate || 'sem-data'}.pdf`;
+  return rowMap;
+}
 
-    downloadBytesAsPdf(pdfBytes, fileName);
-
-  } catch (error) {
-    console.error('Erro ao gerar PDF preenchível:', error);
-    alert('Erro ao gerar PDF. Veja o console para identificar qual campo não foi encontrado.');
+function setChecklistItemTurnStatus(worksheet, rowNumber, columnNumber, isOk) {
+  if (!rowNumber || !columnNumber) {
+    return;
   }
+
+  const cell = worksheet.getRow(rowNumber).getCell(columnNumber);
+  const baseFontName = cell.font?.name || "Calibri";
+  const baseFontSize = cell.font?.size || 11;
+
+  cell.value = isOk ? "OK" : "FALHA";
+  cell.alignment = {
+    horizontal: "center",
+    vertical: "middle"
+  };
+  cell.font = {
+    name: baseFontName,
+    size: baseFontSize,
+    bold: true,
+    color: {
+      argb: isOk ? "FF1F7A1F" : "FFC00000"
+    }
+  };
+}
+
+function getChecklistObservationAnchorCell(worksheet) {
+  const matches = findCellAddressesByPrefix(worksheet, "Observações:");
+
+  if (!matches.length) {
+    return null;
+  }
+
+  return matches
+    .map(address => worksheet.getCell(address))
+    .sort((a, b) => b.row - a.row)[0] || null;
+}
+
+function chunkObservationText(text, maxLength = 120) {
+  const normalizedText = String(text ?? "").replace(/\r\n/g, "\n").trim();
+
+  if (!normalizedText) {
+    return [];
+  }
+
+  const chunks = [];
+  const paragraphs = normalizedText.split("\n").map(part => part.trim()).filter(Boolean);
+
+  paragraphs.forEach((paragraph) => {
+    let current = "";
+
+    paragraph.split(/\s+/).forEach((word) => {
+      const candidate = current ? `${current} ${word}` : word;
+
+      if (candidate.length > maxLength && current) {
+        chunks.push(current);
+        current = word;
+      } else {
+        current = candidate;
+      }
+    });
+
+    if (current) {
+      chunks.push(current);
+    }
+  });
+
+  return chunks;
+}
+
+function fillChecklistObservationArea(worksheet, observationText) {
+  const anchorCell = getChecklistObservationAnchorCell(worksheet);
+  const chunks = chunkObservationText(observationText);
+
+  if (!anchorCell || !chunks.length) {
+    return;
+  }
+
+  const targetRows = [];
+
+  for (let rowNumber = anchorCell.row + 1; rowNumber < 90; rowNumber += 1) {
+    const cell = worksheet.getRow(rowNumber).getCell(anchorCell.col);
+    const cellText = getWorksheetCellText(cell).trim();
+
+    if (cellText) {
+      continue;
+    }
+
+    targetRows.push(rowNumber);
+  }
+
+  chunks.slice(0, targetRows.length).forEach((chunk, index) => {
+    const cell = worksheet.getRow(targetRows[index]).getCell(anchorCell.col);
+
+    cell.value = chunk;
+    cell.alignment = {
+      ...(cell.alignment || {}),
+      horizontal: "left",
+      wrapText: true,
+      vertical: "bottom"
+    };
+  });
+}
+
+function validateChecklistCellMap(headerCells, turnCells) {
+  const missing = [];
+
+  Object.entries(headerCells).forEach(([key, value]) => {
+    if (!value) {
+      missing.push(key);
+    }
+  });
+
+  Object.entries(turnCells).forEach(([key, value]) => {
+    if (!Array.isArray(value) || value.length < 3) {
+      missing.push(key);
+    }
+  });
+
+  if (missing.length) {
+    throw new Error(`Não foi possível localizar campos do template: ${missing.join(", ")}`);
+  }
+}
+
+async function getEmbeddedTemplateImage(buffer, imagePath) {
+  if (!window.JSZip) {
+    throw new Error("JSZip não foi carregado.");
+  }
+
+  const zip = await JSZip.loadAsync(buffer);
+  const imageFile = zip.file(imagePath);
+
+  if (!imageFile) {
+    return null;
+  }
+
+  return imageFile.async("uint8array");
+}
+
+async function buildChecklistExcelBytes(checklist) {
+  const templatePath = getExcelTemplatePath(checklist.checklistKey);
+
+  if (!templatePath) {
+    throw new Error(`Modelo Excel não encontrado para: ${checklist.checklistKey}`);
+  }
+
+  const response = await fetch(templatePath);
+
+  if (!response.ok) {
+    throw new Error(`Falha ao carregar arquivo Excel (${response.status}) em: ${templatePath}`);
+  }
+
+  const buffer = await response.arrayBuffer();
+
+  if (!buffer || buffer.byteLength === 0) {
+    throw new Error("O arquivo Excel veio vazio.");
+  }
+
+  if (!window.ExcelJS) {
+    throw new Error("ExcelJS não foi carregado.");
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
+
+  const worksheet = workbook.worksheets[0];
+
+  if (!worksheet) {
+    throw new Error("Nenhuma planilha encontrada no template.");
+  }
+
+  const headerCells = getChecklistHeaderCellMap(worksheet);
+  setCellPreservingLabel(worksheet, headerCells.modelo, checklist.modelo || "");
+  setCellPreservingLabel(worksheet, headerCells.tagPlaca, checklist.tagPlaca || "");
+  setCellPreservingLabel(worksheet, headerCells.data, normalizeChecklistDate(checklist.data) || "");
+  setCellPreservingLabel(worksheet, headerCells.unidade, checklist.unidade || "");
+
+  const turno = normalizeTurno(checklist.turno);
+  const turnoIndex =
+    turno === "1º TURNO" ? 0 :
+    turno === "2º TURNO" ? 1 :
+    turno === "3º TURNO" ? 2 :
+    -1;
+
+  const turnCells = getChecklistTurnCellMap(worksheet);
+  validateChecklistCellMap(headerCells, turnCells);
+  const turnStatusColumns = getChecklistTurnStatusColumnMap(worksheet);
+  const itemRowMap = getChecklistItemRowMap(worksheet);
+
+  if (turnoIndex !== -1) {
+    setCellPreservingLabel(worksheet, turnCells.operador?.[turnoIndex], checklist.operador || "");
+    setCellPreservingLabel(worksheet, turnCells.horaInicial?.[turnoIndex], checklist.horaInicial || "");
+    setCellPreservingLabel(worksheet, turnCells.horaFinal?.[turnoIndex], checklist.horaFinal || "");
+    setCellPreservingLabel(worksheet, turnCells.hrKmInicial?.[turnoIndex], checklist.hrKmInicial || "");
+    setCellPreservingLabel(worksheet, turnCells.hrKmFinal?.[turnoIndex], checklist.hrKmFinal || "");
+
+    const turnStatusColumn = turnStatusColumns[turnoIndex];
+
+    if (!turnStatusColumn) {
+      throw new Error("Não foi possível localizar a coluna do turno no template.");
+    }
+
+    getChecklistItemsForPrint(checklist).forEach((item) => {
+      const rowNumber = itemRowMap.get(String(item.id));
+      if (!rowNumber) return;
+      setChecklistItemTurnStatus(worksheet, rowNumber, turnStatusColumn, item.ok);
+    });
+  }
+
+  fillChecklistObservationArea(worksheet, checklist.observacoes || "");
+
+  const rightLogoBytes = await getEmbeddedTemplateImage(buffer, "xl/media/image1.png");
+  if (rightLogoBytes) {
+    const rightLogoId = workbook.addImage({ buffer: rightLogoBytes, extension: "png" });
+    worksheet.addImage(rightLogoId, {
+      tl: { col: 12.18, row: 0.12 },
+      br: { col: 13.72, row: 0.92 },
+      editAs: "oneCell"
+    });
+  }
+
+  return workbook.xlsx.writeBuffer();
+}
+
+async function generateChecklistExcel(checklistId) {
+  try {
+    const checklist = allChecklists.find(c => c.id === checklistId);
+    if (!checklist) {
+      alert("Checklist não encontrado");
+      return;
+    }
+    const bytes = await buildChecklistExcelBytes(checklist);
+    downloadBytesAsExcel(bytes, `${checklist.checklistKey || "checklist"}.xlsx`);
+  } catch (error) {
+    console.error("Erro ao gerar Excel:", error);
+    alert(`Erro ao gerar Excel: ${error.message}`);
+  }
+}
+function getChecklistItemsForPrint(checklist) {
+  const def = getChecklistDef(checklist.checklistKey);
+
+  if (!def || !Array.isArray(def.sections)) return [];
+
+  const itensComFalha = new Set(
+    (checklist.ocorrencias || []).map(item => String(item.id))
+  );
+
+  const itens = [];
+
+  def.sections.forEach(section => {
+    (section.items || []).forEach(item => {
+      itens.push({
+        id: String(item.id),
+        section: getSectionTitle(section),
+        text: item.text || '',
+        ok: !itensComFalha.has(String(item.id))
+      });
+    });
+  });
+
+  return itens;
+}
+
+function buildPdfHelpers(form) {
+  const fields = form.getFields();
+
+  function fieldExists(fieldName) {
+    return fields.some(field => field.getName() === fieldName);
+  }
+
+  function setTextFieldSafe(fieldName, value) {
+    if (!fieldExists(fieldName)) {
+      console.warn(`Campo de texto não encontrado no template: ${fieldName}`);
+      return;
+    }
+
+    try {
+      form.getTextField(fieldName).setText(String(value ?? ''));
+    } catch (error) {
+      console.warn(`Erro ao preencher campo "${fieldName}":`, error);
+    }
+  }
+
+  function setCheckBoxSafe(fieldName, checked = true) {
+    if (!fieldExists(fieldName)) {
+      console.warn(`Checkbox não encontrado no template: ${fieldName}`);
+      return;
+    }
+
+    try {
+      const checkBox = form.getCheckBox(fieldName);
+      if (checked) {
+        checkBox.check();
+      } else {
+        checkBox.uncheck();
+      }
+    } catch (error) {
+      console.warn(`Erro ao marcar checkbox "${fieldName}":`, error);
+    }
+  }
+
+  return {
+    fields,
+    fieldExists,
+    setTextFieldSafe,
+    setCheckBoxSafe
+  };
+}
+
+function limparCamposTurnoPdf(helpers) {
+  ['1', '2', '3'].forEach(num => {
+    helpers.setTextFieldSafe(`operador_${num}`, '');
+    helpers.setTextFieldSafe(`hora_inicial_${num}`, '');
+    helpers.setTextFieldSafe(`hora_final_${num}`, '');
+    helpers.setTextFieldSafe(`hrkm_inicial_${num}`, '');
+    helpers.setTextFieldSafe(`hrkm_final_${num}`, '');
+  });
+}
+
+function preencherCamposTurnoPdf(helpers, checklist) {
+  limparCamposTurnoPdf(helpers);
+
+  const idx = getTurnoIndex(checklist.turno);
+
+  if (!idx) return;
+
+  helpers.setTextFieldSafe(`operador_${idx}`, checklist.operador || '');
+  helpers.setTextFieldSafe(`hora_inicial_${idx}`, checklist.horaInicial || '');
+  helpers.setTextFieldSafe(`hora_final_${idx}`, checklist.horaFinal || '');
+  helpers.setTextFieldSafe(`hrkm_inicial_${idx}`, checklist.hrKmInicial || '');
+  helpers.setTextFieldSafe(`hrkm_final_${idx}`, checklist.hrKmFinal || '');
+}
+
+function preencherItensPdf(helpers, checklist) {
+  const itens = getChecklistItemsForPrint(checklist);
+
+  itens.forEach(item => {
+    const checkboxName = `item_${item.id}`;
+    helpers.setCheckBoxSafe(checkboxName, !item.ok ? true : false);
+  });
 }
 
 function openChecklistDetailsModal(checklistId) {
@@ -2956,82 +4428,89 @@ function openChecklistDetailsModal(checklistId) {
 
   selectedChecklistDetailsId = checklistId;
 
-  const status = checklist.status || 'pendente';
-  const statusText =
-    status === 'conforme' ? 'Conforme' :
-    status === 'nao-conforme' ? 'Não Conforme' :
-    'Pendente';
+  const statusMeta = getStatusPresentation(checklist.status);
 
   const itemsHtml = (checklist.ocorrencias || []).length
     ? checklist.ocorrencias.map(item => `
         <div class="p-3 rounded-xl bg-surface border border-border">
-          <p class="text-xs font-semibold text-text-secondary mb-1">${item.section || '-'}</p>
-          <p class="text-sm text-text-primary"><strong>${item.id}.</strong> ${item.text}</p>
+          <p class="text-xs font-semibold text-text-secondary mb-1">${escapeHtml(item.section || '-')}</p>
+          <p class="text-sm text-text-primary"><strong>${escapeHtml(item.id)}.</strong> ${escapeHtml(item.text)}</p>
         </div>
       `).join('')
     : '<p class="text-sm text-text-secondary">Nenhum item selecionado.</p>';
 
   checklistDetailsContent.innerHTML = `
     <div class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-surface rounded-xl p-4 border border-border">
-          <p class="text-xs text-text-secondary mb-1">Equipamento</p>
-          <p class="font-semibold text-text-primary">${checklist.equipment || '-'}</p>
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-2xl font-bold text-text-primary">Detalhes do Checklist</h2>
+          <p class="text-sm text-text-secondary mt-1">Visualização completa do checklist realizado</p>
         </div>
 
-        <div class="bg-surface rounded-xl p-4 border border-border">
-          <p class="text-xs text-text-secondary mb-1">Status atual</p>
-          <p class="font-semibold text-text-primary">${statusText}</p>
-        </div>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+          ${statusMeta.value === 'conforme'
+            ? 'bg-green-100 text-green-700'
+            : statusMeta.value === 'nao-conforme'
+            ? 'bg-red-100 text-red-700'
+            : 'bg-yellow-100 text-yellow-700'}">
+          ${statusMeta.label}
+        </span>
+      </div>
 
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <div class="bg-surface rounded-xl p-4 border border-border">
-          <p class="text-xs text-text-secondary mb-1">Data</p>
-          <p class="font-semibold text-text-primary">${formatDateBR(checklist.data)}</p>
+          <p class="text-xs text-text-secondary mb-1">Tipo</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.checklistLabel || checklist.checklistKey || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">Turno</p>
-          <p class="font-semibold text-text-primary">${checklist.turno || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.turno || '-')}</p>
+        </div>
+
+        <div class="bg-surface rounded-xl p-4 border border-border">
+          <p class="text-xs text-text-secondary mb-1">Data</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(normalizeChecklistDate(checklist.data) || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">Modelo</p>
-          <p class="font-semibold text-text-primary">${checklist.modelo || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.modelo || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
-          <p class="text-xs text-text-secondary mb-1">Tag / Placa</p>
-          <p class="font-semibold text-text-primary">${checklist.tagPlaca || '-'}</p>
+          <p class="text-xs text-text-secondary mb-1">Tag/Placa</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.tagPlaca || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">Unidade</p>
-          <p class="font-semibold text-text-primary">${checklist.unidade || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.unidade || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">Operador</p>
-          <p class="font-semibold text-text-primary">${checklist.operador || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.operador || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">Hora Inicial</p>
-          <p class="font-semibold text-text-primary">${checklist.horaInicial || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.horaInicial || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">Hora Final</p>
-          <p class="font-semibold text-text-primary">${checklist.horaFinal || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.horaFinal || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">HR/KM Inicial</p>
-          <p class="font-semibold text-text-primary">${checklist.hrKmInicial || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.hrKmInicial || '-')}</p>
         </div>
 
         <div class="bg-surface rounded-xl p-4 border border-border">
           <p class="text-xs text-text-secondary mb-1">HR/KM Final</p>
-          <p class="font-semibold text-text-primary">${checklist.hrKmFinal || '-'}</p>
+          <p class="font-semibold text-text-primary">${escapeHtml(checklist.hrKmFinal || '-')}</p>
         </div>
       </div>
 
@@ -3045,17 +4524,17 @@ function openChecklistDetailsModal(checklistId) {
       <div>
         <h3 class="text-lg font-bold text-text-primary mb-3">Observações</h3>
         <div class="bg-surface rounded-xl p-4 border border-border">
-          <p class="text-sm text-text-primary whitespace-pre-wrap">${checklist.observacoes || 'Sem observações.'}</p>
+          <p class="text-sm text-text-primary whitespace-pre-wrap">${escapeHtml(checklist.observacoes || 'Sem observações.')}</p>
         </div>
       </div>
-            <div class="flex justify-end">
+
+      <div class="flex justify-end">
         <button
-          type="button"
-          onclick="generateChecklistPdf('${checklist.id}')"
-          class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition"
-        >
-          Gerar PDF
-        </button>
+  onclick="generateChecklistExcel('${checklist.id}')"
+  class="px-4 py-2 rounded-xl bg-green-600 text-white font-medium hover:bg-green-700 transition"
+>
+  Gerar Excel
+</button>
       </div>
     </div>
   `;
@@ -3066,21 +4545,32 @@ function openChecklistDetailsModal(checklistId) {
   initChecklistDetailsElements();
 
   if (checklistStatusSelect) {
-    checklistStatusSelect.value = status;
+    checklistStatusSelect.value = statusMeta.value;
   }
 }
 
-
 function closeChecklistDetailsModalFn() {
   initChecklistDetailsElements();
+
   if (!checklistDetailsModal) return;
+
   checklistDetailsModal.classList.add('hidden');
   document.body.style.overflow = '';
   selectedChecklistDetailsId = null;
 }
 
+function openExportDataModal() {
+  if (!exportDataModal) return;
+  exportDataModal.classList.remove('hidden');
+}
+
+function closeExportDataModal() {
+  if (!exportDataModal) return;
+  exportDataModal.classList.add('hidden');
+}
+
 window.openChecklistDetailsModal = openChecklistDetailsModal;
-window.generateChecklistPdf = generateChecklistPdf;
+window.generateChecklistExcel = generateChecklistExcel;
 
 async function updateChecklistStatus(status) {
   if (!selectedChecklistDetailsId) {
@@ -3097,7 +4587,7 @@ async function updateChecklistStatus(status) {
     }
 
     await db.collection('checklists').doc(selectedChecklistDetailsId).update({
-      status: status,
+      status,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
@@ -3106,7 +4596,7 @@ async function updateChecklistStatus(status) {
     if (checklistIndex !== -1) {
       allChecklists[checklistIndex] = {
         ...allChecklists[checklistIndex],
-        status: status,
+        status,
         updatedAt: new Date().toISOString()
       };
     }
@@ -3119,7 +4609,6 @@ async function updateChecklistStatus(status) {
     if (checklistAtualizado) {
       openChecklistDetailsModal(checklistAtualizado.id);
     }
-
   } catch (error) {
     console.error('Erro ao atualizar status do checklist:', error);
     alert('Erro ao salvar alterações.');
@@ -3132,6 +4621,7 @@ async function updateChecklistStatus(status) {
     }
   }
 }
+
     function populateEquipmentGrid() {
       equipmentGrid.innerHTML = '';
 
@@ -3170,7 +4660,7 @@ async function updateChecklistStatus(status) {
 
     const sectionTitle = document.createElement('h4');
     sectionTitle.className = 'text-sm font-bold text-text-primary mb-3';
-    sectionTitle.textContent = section.title;
+    sectionTitle.textContent = getSectionTitle(section);
     sectionBlock.appendChild(sectionTitle);
 
     const itemsWrap = document.createElement('div');
@@ -3190,10 +4680,10 @@ async function updateChecklistStatus(status) {
             <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors">
               <input
                 type="radio"
-                name="item_status_${section.title}_${item.id}"
+                name="item_status_${getSectionTitle(section)}_${item.id}"
                 value="ok"
                 data-item-id="${item.id}"
-                data-section="${section.title}"
+                data-section="${getSectionTitle(section)}"
                 data-text="${item.text}"
                 class="w-4 h-4 accent-blue-600"
                 checked
@@ -3204,10 +4694,10 @@ async function updateChecklistStatus(status) {
             <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 transition-colors">
               <input
                 type="radio"
-                name="item_status_${section.title}_${item.id}"
+                name="item_status_${getSectionTitle(section)}_${item.id}"
                 value="falha"
                 data-item-id="${item.id}"
-                data-section="${section.title}"
+                data-section="${getSectionTitle(section)}"
                 data-text="${item.text}"
                 class="w-4 h-4 accent-red-600"
               >
@@ -3228,6 +4718,39 @@ initChecklistDetailsElements();
 
 if (newChecklistBtn) {
   newChecklistBtn.addEventListener('click', openEquipmentSelectionModal);
+}
+
+const generateChecklistReportBtn = document.getElementById('generateChecklistReportBtn');
+if (generateChecklistReportBtn) {
+  generateChecklistReportBtn.addEventListener('click', generateChecklistMonthlyReportPdf);
+}
+
+const generateEquipmentPerformanceReportBtn = document.getElementById('generateEquipmentPerformanceReportBtn');
+if (generateEquipmentPerformanceReportBtn) {
+  generateEquipmentPerformanceReportBtn.addEventListener('click', generateEquipmentPerformanceReportPdf);
+}
+
+if (openExportDataModalBtn) {
+  openExportDataModalBtn.addEventListener('click', openExportDataModal);
+}
+
+if (closeExportDataModalBtn) {
+  closeExportDataModalBtn.addEventListener('click', closeExportDataModal);
+}
+
+if (confirmExportDataBtn) {
+  confirmExportDataBtn.addEventListener('click', async () => {
+    const startDate = document.getElementById('exportStartDate')?.value || '';
+    const endDate = document.getElementById('exportEndDate')?.value || '';
+
+    try {
+      await exportChecklistRangeAsZip(startDate, endDate);
+      closeExportDataModal();
+    } catch (error) {
+      console.error('Erro ao exportar dados:', error);
+      alert(`Erro ao exportar dados: ${error.message}`);
+    }
+  });
 }
 
 if (closeEquipmentModal) {
@@ -3268,6 +4791,14 @@ if (checklistDetailsModal) {
   checklistDetailsModal.addEventListener('click', (e) => {
     if (e.target === checklistDetailsModal) {
       closeChecklistDetailsModalFn();
+    }
+  });
+}
+
+if (exportDataModal) {
+  exportDataModal.addEventListener('click', (e) => {
+    if (e.target === exportDataModal) {
+      closeExportDataModal();
     }
   });
 }
@@ -3319,16 +4850,6 @@ const ocorrencias = Array.from(allItemRadiosFalha).map(radio => ({
     return;
   }
 
-if (!selectedEquipmentType) {
-  alert('Selecione uma máquina antes de continuar.');
-  return;
-}
-
-if (!turno || !data || !modelo || !tagPlaca || !unidade || !operador || !horaInicial || !hrKmInicial) {
-  alert('Preencha todos os campos obrigatórios do cabeçalho.');
-  return;
-}
-
   try {
     const newChecklistData = {
   checklistKey: selectedEquipmentType,
@@ -3346,7 +4867,8 @@ if (!turno || !data || !modelo || !tagPlaca || !unidade || !operador || !horaIni
   observacoes,
   ocorrencias,
   createdBy: currentUser ? currentUser.uid : null,
-  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+createdByName: currentUserData?.name || currentUser?.displayName || 'Usuário',
+createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   status: ocorrencias.length > 0 ? 'nao-conforme' : 'conforme'
 };
 
@@ -3360,7 +4882,7 @@ if (!turno || !data || !modelo || !tagPlaca || !unidade || !operador || !horaIni
 
     const successMsg = document.createElement('div');
     successMsg.className = 'fixed top-4 right-4 bg-success text-white px-6 py-3 rounded-xl shadow-lg z-50 fade-in';
-    successMsg.innerHTML = `✓ Checklist de "${selectedEquipmentLabel}" iniciado com sucesso!`;
+    successMsg.textContent = `✓ Checklist de "${selectedEquipmentLabel}" iniciado com sucesso!`;
     document.body.appendChild(successMsg);
 
     setTimeout(() => {
@@ -3371,9 +4893,9 @@ if (!turno || !data || !modelo || !tagPlaca || !unidade || !operador || !horaIni
 
         await loadChecklistsFromFirestore();
 
-    if (currentPage === 'checklists') {
-      renderChecklists();
-    }
+    if (currentPage === 'historico') {
+  renderHistorico();
+}
 
 if (typeof loadDashboardData === 'function') {
   await loadDashboardData();
@@ -3389,6 +4911,7 @@ initializeCharts();
 
     // Initial setup
     attachChecklistFilters();
+    attachHistoricoFilters();
 
     // Handle window resize
     window.addEventListener('resize', () => {
@@ -3411,3 +4934,4 @@ initializeCharts();
   </script>
 </body>
 </html>
+
