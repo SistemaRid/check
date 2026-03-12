@@ -377,7 +377,7 @@ Primeiro acesso / Cadastre-se
          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><!-- Equipment Filter -->
           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Maquinário</label> <select id="equipmentSystemFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"><option value="">Selecione</option></select>
           </div><!-- System/Sector Filter -->
-          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Sistema</label> <select id="systemTypeFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="motor">Motor</option> <option value="hidraulico">Sistema Hidráulico</option> <option value="eletrico">Sistema Elétrico</option> <option value="arrefecimento">Sistema de Arrefecimento</option> <option value="combustivel">Sistema de Combustível</option> <option value="transmissao">Sistema de Transmissão</option> <option value="freios">Sistema de Freios</option> <option value="pneus">Pneus e Rodas</option> <option value="iluminacao">Iluminação e Sinalização</option> <option value="cabine">Cabine e Segurança</option> <option value="estrutura">Estrutura e Chassi</option> <option value="pneumatico">Sistema Pneumático</option> <option value="operacional">Componentes Operacionais</option> </select>
+          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Sistema</label> <select id="systemTypeFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="todos">Todos</option> <option value="motor">Motor</option> <option value="hidraulico">Sistema Hidráulico</option> <option value="eletrico">Sistema Elétrico</option> <option value="arrefecimento">Sistema de Arrefecimento</option> <option value="combustivel">Sistema de Combustível</option> <option value="transmissao">Sistema de Transmissão</option> <option value="freios">Sistema de Freios</option> <option value="pneus">Pneus e Rodas</option> <option value="iluminacao">Iluminação e Sinalização</option> <option value="cabine">Cabine e Segurança</option> <option value="estrutura">Estrutura e Chassi</option> <option value="pneumatico">Sistema Pneumático</option> <option value="operacional">Componentes Operacionais</option> </select>
           </div><!-- Period Filter -->
           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label> <select id="failureAnalysisPeriod" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="7">Últimos 7 dias</option> <option value="30">Últimos 30 dias</option> <option value="90">Últimos 90 dias</option> <option value="custom">Personalizado</option> </select>
           </div>
@@ -2576,6 +2576,15 @@ async function saveSettings(event) {
     }
 
     function matchesFailureAnalysisOccurrence(occurrence, system, equipment) {
+      if (!occurrence) {
+        return false;
+      }
+
+      if (!system || system === 'todos') {
+        const rawText = String(occurrence?.text || occurrence?.descricao || '').trim();
+        return Boolean(rawText);
+      }
+
       const normalizedSection = normalizeString(occurrence?.section || '');
       const normalizedText = normalizeString(occurrence?.text || '');
       const keywords = failureSystemKeywords[system] || [];
@@ -2591,7 +2600,8 @@ async function saveSettings(event) {
     const generateFailureData = (equipment, system, period, customPeriod) => {
       const relevantChecklists = getDashboardFilteredChecklists().filter(item => {
         const itemEquipment = getDashboardFailureEquipmentKey(item.checklistKey || item.equipmentKey || item.equipment || '');
-        return itemEquipment === equipment && matchesFailureAnalysisPeriod(item, period, customPeriod);
+        const matchesEquipment = !equipment || equipment === 'todos' || itemEquipment === equipment;
+        return matchesEquipment && matchesFailureAnalysisPeriod(item, period, customPeriod);
       });
 
       const failuresByItem = new Map();
@@ -2648,6 +2658,20 @@ async function saveSettings(event) {
       }
 
       return lines.length ? lines : ['-'];
+    }
+
+    function truncateChartLabel(text, maxChars = 34) {
+      const value = String(text || '').trim();
+
+      if (!value) {
+        return '-';
+      }
+
+      if (value.length <= maxChars) {
+        return value;
+      }
+
+      return `${value.slice(0, maxChars).trim()}...`;
     }
 
     // Store checklists data - starts empty
@@ -2786,7 +2810,17 @@ const equipmentData = rankingEquipamentos.length
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { display: false }
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title(context) {
+                    const item = context?.[0];
+                    const index = item?.dataIndex ?? 0;
+                    const fullLabels = item?.chart?.data?.fullLabels || [];
+                    return fullLabels[index] || item?.label || '';
+                  }
+                }
+              }
             },
             scales: {
               x: {
@@ -2854,14 +2888,13 @@ const equipmentData = rankingEquipamentos.length
       // Chart 4: Advanced Failure Analysis by System
       const failureAnalysisCtx = document.getElementById('failureAnalysisChart');
       if (failureAnalysisCtx) {
-        // Sample data for selected equipment and system
         chartInstances.failureAnalysis = new Chart(failureAnalysisCtx, {
           type: 'bar',
           data: {
-            labels: ['Faróis', 'Bateria', 'Fiação Elétrica', 'Buzina', 'Painel de Instrumentos'].map(label => wrapChartLabel(label)),
+            labels: [],
             datasets: [{
               label: 'Ocorrências',
-              data: [6, 4, 3, 2, 1],
+              data: [],
               backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'],
               borderRadius: 4,
               borderSkipped: false,
@@ -2880,14 +2913,13 @@ const equipmentData = rankingEquipamentos.length
             scales: {
               x: {
                 beginAtZero: true,
-                max: 8,
+                max: 1,
                 ticks: { color: '#64748b' },
                 grid: { color: '#e2e8f0' }
               },
               y: {
                 ticks: {
-                  color: '#64748b',
-                  autoSkip: false
+                  display: false
                 },
                 grid: { display: false }
               }
@@ -2903,30 +2935,8 @@ const equipmentData = rankingEquipamentos.length
     const updateFailureComponentsList = () => {
       const listContainer = document.getElementById('failureComponentsList');
       if (!listContainer) return;
-      
-      const components = [
-        { name: 'Faróis', failures: 6, lastDate: '17/01/2024 08:30', isHighest: true },
-        { name: 'Bateria', failures: 4, lastDate: '15/01/2024 14:20' },
-        { name: 'Fiação Elétrica', failures: 3, lastDate: '14/01/2024 10:15' },
-        { name: 'Buzina', failures: 2, lastDate: '12/01/2024 16:45' },
-        { name: 'Painel de Instrumentos', failures: 1, lastDate: '10/01/2024 09:00' }
-      ];
 
-      listContainer.innerHTML = components.map(comp => `
-        <div class="flex items-center justify-between p-3 rounded-lg ${comp.isHighest ? 'bg-danger/5 border border-danger/20' : 'bg-surface'}">
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <p class="text-sm font-medium text-text-primary">${comp.name}</p>
-              ${comp.isHighest ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-danger bg-danger/10 px-2 py-0.5 rounded">🔴 CRÍTICO</span>' : ''}
-            </div>
-            <p class="text-xs text-text-secondary mt-1">Última ocorrência: ${comp.lastDate}</p>
-          </div>
-          <div class="ml-3 text-right shrink-0">
-            <span class="block text-lg font-bold text-text-primary">${comp.failures}</span>
-            <span class="text-xs text-text-secondary">falhas</span>
-          </div>
-        </div>
-      `).join('');
+      listContainer.innerHTML = '';
     };
 
     // Update failure analysis components function
@@ -3276,11 +3286,12 @@ logoutBtn.addEventListener('click', async (e) => {
       const data = generateFailureData(equipment, system, period, activeCustomPeriod);
       const components = data.componentes;
       const failures = data.falhas;
-      const wrappedComponents = components.map(component => wrapChartLabel(component));
+      const truncatedComponents = components.map(component => truncateChartLabel(component, 34));
 
       // Update chart
       if (chartInstances.failureAnalysis) {
-        chartInstances.failureAnalysis.data.labels = wrappedComponents;
+        chartInstances.failureAnalysis.data.labels = truncatedComponents;
+        chartInstances.failureAnalysis.data.fullLabels = components;
         chartInstances.failureAnalysis.data.datasets[0].data = failures;
         
         // Generate gradient colors from red (highest) to yellow (lowest)
@@ -3469,7 +3480,7 @@ function getDashboardFailureEquipmentKey(value = '') {
     'trator-esteira': 'trator_esteira'
   };
 
-  return keyMap[normalized] || 'veiculo_leve';
+  return keyMap[normalized] || normalized || '';
 }
 
 function updateDashboardEquipmentFilterOptions() {
@@ -3479,16 +3490,18 @@ function updateDashboardEquipmentFilterOptions() {
     return;
   }
 
-  const currentValue = normalizeEquipmentKey(select.value) || checklistEquipmentCatalog[0]?.value || '';
+  const currentValue = normalizeEquipmentKey(select.value) || '';
 
-  select.innerHTML = checklistEquipmentCatalog
+  select.innerHTML = '<option value="">Todos</option>' + checklistEquipmentCatalog
     .map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`)
     .join('');
 
-  if (checklistEquipmentCatalog.some(item => item.value === currentValue)) {
+  if (!currentValue) {
+    select.value = '';
+  } else if (checklistEquipmentCatalog.some(item => item.value === currentValue)) {
     select.value = currentValue;
-  } else if (checklistEquipmentCatalog[0]) {
-    select.value = checklistEquipmentCatalog[0].value;
+  } else {
+    select.value = '';
   }
 }
 

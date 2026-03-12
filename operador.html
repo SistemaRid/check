@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CheckMaint Pro - Operador</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgSqRBPtB2OYDfzcxKm-A4y0m8CDpr89w",
+      authDomain: "checklist-64b92.firebaseapp.com",
+      projectId: "checklist-64b92",
+      storageBucket: "checklist-64b92.firebasestorage.app",
+      messagingSenderId: "264367718946",
+      appId: "1:264367718946:web:28b62d3e5e2548b32f807b"
+    };
+
+    let db = null;
+    let auth = null;
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      db = firebase.firestore();
+      auth = firebase.auth();
+    } catch (error) {
+      console.error("Erro ao inicializar Firebase:", error);
+    }
+
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#6366f1",
+            "primary-dark": "#4f46e5",
+            surface: "#f8fafc",
+            "surface-dark": "#eef2ff",
+            card: "#ffffff",
+            "text-primary": "#1e293b",
+            "text-secondary": "#64748b",
+            border: "#e2e8f0",
+            success: "#10b981",
+            danger: "#ef4444"
+          },
+          boxShadow: {
+            soft: "0 28px 80px rgba(15, 23, 42, 0.12)"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { font-family: "Inter", sans-serif; }
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.10), transparent 24%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #edf2f7; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+  </style>
+</head>
+<body class="min-h-screen text-text-primary">
+  <main class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <section class="w-full max-w-3xl rounded-[2rem] border border-white/70 bg-white/90 backdrop-blur shadow-soft overflow-hidden">
+      <div class="px-6 py-10 sm:px-12 sm:py-14 text-center">
+        <div class="mx-auto w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
+          <img src="xl_media_image4.png" alt="Grupo J. Demito" class="w-full h-full object-contain">
+        </div>
+        <h1 class="mt-5 text-3xl sm:text-5xl font-extrabold tracking-tight">CheckMaint Pro</h1>
+        <p class="mt-3 text-base sm:text-lg text-text-secondary">Emissao rapida de checklist operacional</p>
+
+        <div class="mt-10">
+          <button id="openEquipmentModalBtn" type="button" class="inline-flex items-center gap-3 rounded-2xl bg-primary px-7 py-4 text-lg font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-dark">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Novo Checklist</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="equipmentSelectionModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 p-4">
+    <div class="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-soft">
+      <div class="flex items-center justify-between border-b border-border px-6 py-5 sm:px-8">
+        <div>
+          <h2 class="text-2xl font-bold">Selecionar Maquina</h2>
+          <p class="mt-1 text-sm text-text-secondary">Escolha o equipamento para abrir o checklist</p>
+        </div>
+        <button id="closeEquipmentModalBtn" type="button" class="rounded-xl p-2 text-text-secondary transition hover:bg-surface hover:text-text-primary">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="max-h-[75vh] overflow-y-auto p-6 sm:p-8">
+        <div id="equipmentGrid" class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="checklistModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 p-4">
+    <div class="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-soft">
+      <div class="flex items-center justify-between border-b border-border px-6 py-5 sm:px-8">
+        <div>
+          <div id="selectedEquipmentBadge" class="mb-2 hidden w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary"></div>
+          <h2 class="text-2xl font-bold">Novo Checklist</h2>
+          <p id="selectedEquipmentLabel" class="mt-1 text-sm text-text-secondary">Nenhum equipamento selecionado.</p>
+        </div>
+        <button id="closeChecklistModalBtn" type="button" class="rounded-xl p-2 text-text-secondary transition hover:bg-surface hover:text-text-primary">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="operatorChecklistForm" class="max-h-[82vh] overflow-y-auto px-6 py-6 sm:px-8 sm:py-8">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div>
+            <label for="operatorName" class="mb-2 block text-sm font-semibold">Operador</label>
+            <input id="operatorName" type="text" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Nome do operador">
+          </div>
+          <div>
+            <label for="operatorShift" class="mb-2 block text-sm font-semibold">Turno</label>
+            <select id="operatorShift" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+              <option value="">Selecione</option>
+              <option value="1º TURNO">1º TURNO</option>
+              <option value="2º TURNO">2º TURNO</option>
+              <option value="3º TURNO">3º TURNO</option>
+            </select>
+          </div>
+          <div>
+            <label for="operatorDate" class="mb-2 block text-sm font-semibold">Data</label>
+            <input id="operatorDate" type="date" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+          </div>
+          <div>
+            <label for="operatorModel" class="mb-2 block text-sm font-semibold">Modelo</label>
+            <input id="operatorModel" type="text" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Modelo do equipamento">
+          </div>
+          <div>
+            <label for="operatorTag" class="mb-2 block text-sm font-semibold">Tag / Placa</label>
+            <input id="operatorTag" type="text" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Tag ou placa">
+          </div>
+          <div>
+            <label for="operatorUnit" class="mb-2 block text-sm font-semibold">Unidade</label>
+            <input id="operatorUnit" type="text" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Unidade">
+          </div>
+          <div>
+            <label for="operatorStartTime" class="mb-2 block text-sm font-semibold">Hora Inicial</label>
+            <input id="operatorStartTime" type="time" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+          </div>
+          <div>
+            <label for="operatorEndTime" class="mb-2 block text-sm font-semibold">Hora Final</label>
+            <input id="operatorEndTime" type="time" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+          </div>
+          <div>
+            <label for="operatorHrKmStart" class="mb-2 block text-sm font-semibold">HR/KM Inicial</label>
+            <input id="operatorHrKmStart" type="text" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Valor inicial">
+          </div>
+          <div class="xl:col-span-3">
+            <label for="operatorHrKmEnd" class="mb-2 block text-sm font-semibold">HR/KM Final</label>
+            <input id="operatorHrKmEnd" type="text" class="w-full rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Valor final">
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-bold">Sistemas / Secoes do Checklist</h3>
+              <p class="mt-1 text-sm text-text-secondary">Marque OK ou FALHA em cada item.</p>
+            </div>
+            <button id="changeEquipmentBtn" type="button" class="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium transition hover:bg-surface-dark">
+              Trocar equipamento
+            </button>
+          </div>
+          <div id="operatorChecklistItems" class="space-y-4"></div>
+        </div>
+
+        <div class="mt-8">
+          <label for="operatorObservation" class="mb-2 block text-sm font-semibold">Observacoes</label>
+          <textarea id="operatorObservation" rows="4" class="w-full resize-y rounded-2xl border border-border bg-white px-4 py-3 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Descreva observacoes gerais do checklist"></textarea>
+        </div>
+
+        <div class="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row">
+          <button id="resetOperatorFormBtn" type="button" class="inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-5 py-3 font-medium transition hover:bg-surface-dark">
+            Limpar
+          </button>
+          <button id="submitOperatorChecklistBtn" type="submit" class="inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark">
+            Emitir checklist
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="feedbackModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-900/45 p-4">
+    <div class="w-full max-w-md rounded-[1.75rem] border border-white/70 bg-white shadow-soft overflow-hidden">
+      <div class="border-b border-border px-6 py-5">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h3 id="feedbackModalTitle" class="text-xl font-bold">Aviso</h3>
+            <p id="feedbackModalSubtitle" class="mt-1 text-sm text-text-secondary">Mensagem do sistema</p>
+          </div>
+          <button id="closeFeedbackModalBtn" type="button" class="rounded-xl p-2 text-text-secondary transition hover:bg-surface hover:text-text-primary">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="px-6 py-6">
+        <p id="feedbackModalMessage" class="text-sm leading-6 text-text-primary"></p>
+        <div class="mt-6 flex justify-end">
+          <button id="feedbackModalConfirmBtn" type="button" class="rounded-2xl bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getChecklistDef } from "./assets/js/defs/index.js";
+
+    const equipmentTypes = [
+      { id: "veiculos-leves", label: "Veiculos leves", iconPath: "assets/icons/equipment/car.svg" },
+      { id: "caminhao-basculante", label: "Caminhao basculante", iconPath: "assets/icons/equipment/dump-truck.svg" },
+      { id: "caminhao-carroceria", label: "Caminhao carroceria", iconPath: "assets/icons/equipment/flatbed-truck.svg" },
+      { id: "caminhao-comboio", label: "Caminhao comboio", iconPath: "assets/icons/equipment/service-truck.svg" },
+      { id: "caminhao-munck", label: "Caminhao munck", iconPath: "assets/icons/equipment/crane-truck.svg" },
+      { id: "caminhao-pipa", label: "Caminhao pipa", iconPath: "assets/icons/equipment/water-truck.svg" },
+      { id: "carregadeira", label: "Carregadeira", iconPath: "assets/icons/equipment/loader.svg" },
+      { id: "cavalo-mecanico", label: "Cavalo mecanico", iconPath: "assets/icons/equipment/semi-truck.svg" },
+      { id: "compressor", label: "Compressor", iconPath: "assets/icons/equipment/compressor.svg" },
+      { id: "empilhadeira", label: "Empilhadeira", iconPath: "assets/icons/equipment/forklift.svg" },
+      { id: "escavadeira", label: "Escavadeira", iconPath: "assets/icons/equipment/excavator.svg" },
+      { id: "gerador-energia", label: "Gerador de energia", iconPath: "assets/icons/equipment/generator.svg" },
+      { id: "mini-carregadeira", label: "Mini carregadeira", iconPath: "assets/icons/equipment/loader.svg" },
+      { id: "motoniveladora", label: "Motoniveladora", iconPath: "assets/icons/equipment/grader.svg" },
+      { id: "onibus", label: "Onibus", iconPath: "assets/icons/equipment/bus.svg" },
+      { id: "perfuratriz", label: "Perfuratriz", iconPath: "assets/icons/equipment/drill-rig.svg" },
+      { id: "prancha", label: "Prancha", iconPath: "assets/icons/equipment/trailer.svg" },
+      { id: "retroescavadeira", label: "Retroescavadeira", iconPath: "assets/icons/equipment/backhoe.svg" },
+      { id: "rompedor", label: "Rompedor", iconPath: "assets/icons/equipment/breaker.svg" },
+      { id: "trator-esteira", label: "Trator de esteira", iconPath: "assets/icons/equipment/bulldozer.svg" }
+    ];
+
+    const openEquipmentModalBtn = document.getElementById("openEquipmentModalBtn");
+    const closeEquipmentModalBtn = document.getElementById("closeEquipmentModalBtn");
+    const closeChecklistModalBtn = document.getElementById("closeChecklistModalBtn");
+    const changeEquipmentBtn = document.getElementById("changeEquipmentBtn");
+    const resetOperatorFormBtn = document.getElementById("resetOperatorFormBtn");
+    const submitOperatorChecklistBtn = document.getElementById("submitOperatorChecklistBtn");
+    const equipmentSelectionModal = document.getElementById("equipmentSelectionModal");
+    const checklistModal = document.getElementById("checklistModal");
+    const feedbackModal = document.getElementById("feedbackModal");
+    const closeFeedbackModalBtn = document.getElementById("closeFeedbackModalBtn");
+    const feedbackModalConfirmBtn = document.getElementById("feedbackModalConfirmBtn");
+    const feedbackModalTitle = document.getElementById("feedbackModalTitle");
+    const feedbackModalSubtitle = document.getElementById("feedbackModalSubtitle");
+    const feedbackModalMessage = document.getElementById("feedbackModalMessage");
+    const equipmentGrid = document.getElementById("equipmentGrid");
+    const selectedEquipmentLabel = document.getElementById("selectedEquipmentLabel");
+    const selectedEquipmentBadge = document.getElementById("selectedEquipmentBadge");
+    const operatorChecklistItems = document.getElementById("operatorChecklistItems");
+    const operatorChecklistForm = document.getElementById("operatorChecklistForm");
+
+    let selectedEquipmentType = "";
+    let selectedEquipmentName = "";
+    let anonymousUser = null;
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getSectionTitle(section) {
+      return String(section?.title || "").trim();
+    }
+
+    function setPageScrollLocked(locked) {
+      document.body.style.overflow = locked ? "hidden" : "";
+    }
+
+    function setInitialDateTimeDefaults() {
+      const now = new Date();
+      const localDate = now.toISOString().slice(0, 10);
+      const localTime = now.toTimeString().slice(0, 5);
+      const dateField = document.getElementById("operatorDate");
+      const startTimeField = document.getElementById("operatorStartTime");
+
+      if (dateField && !dateField.value) dateField.value = localDate;
+      if (startTimeField && !startTimeField.value) startTimeField.value = localTime;
+    }
+
+    function openEquipmentModal() {
+      equipmentSelectionModal.classList.remove("hidden");
+      equipmentSelectionModal.classList.add("flex");
+      setPageScrollLocked(true);
+    }
+
+    function closeEquipmentModal() {
+      equipmentSelectionModal.classList.add("hidden");
+      equipmentSelectionModal.classList.remove("flex");
+      if (checklistModal.classList.contains("hidden")) {
+        setPageScrollLocked(false);
+      }
+    }
+
+    function openChecklistModal() {
+      checklistModal.classList.remove("hidden");
+      checklistModal.classList.add("flex");
+      setPageScrollLocked(true);
+    }
+
+    function closeChecklistModal() {
+      checklistModal.classList.add("hidden");
+      checklistModal.classList.remove("flex");
+      if (equipmentSelectionModal.classList.contains("hidden") && feedbackModal.classList.contains("hidden")) {
+        setPageScrollLocked(false);
+      }
+    }
+
+    function showFeedbackModal(message, type = "info") {
+      const variants = {
+        info: {
+          title: "Aviso",
+          subtitle: "Mensagem do sistema"
+        },
+        success: {
+          title: "Checklist emitido",
+          subtitle: "Operacao concluida"
+        },
+        error: {
+          title: "Nao foi possivel continuar",
+          subtitle: "Verifique os dados e tente novamente"
+        }
+      };
+
+      const variant = variants[type] || variants.info;
+      feedbackModalTitle.textContent = variant.title;
+      feedbackModalSubtitle.textContent = variant.subtitle;
+      feedbackModalMessage.textContent = message;
+      feedbackModal.classList.remove("hidden");
+      feedbackModal.classList.add("flex");
+      setPageScrollLocked(true);
+    }
+
+    function closeFeedbackModal() {
+      feedbackModal.classList.add("hidden");
+      feedbackModal.classList.remove("flex");
+      if (equipmentSelectionModal.classList.contains("hidden") && checklistModal.classList.contains("hidden")) {
+        setPageScrollLocked(false);
+      }
+    }
+
+    function populateEquipmentGrid() {
+      equipmentGrid.innerHTML = "";
+
+      equipmentTypes.forEach((equipment) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "rounded-2xl border border-border bg-white p-5 text-left transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg";
+        button.innerHTML = `
+          <div class="flex flex-col items-center gap-3 text-center">
+            <img src="${equipment.iconPath}" alt="${escapeHtml(equipment.label)}" class="h-16 w-16 object-contain" loading="lazy">
+            <div>
+              <h3 class="font-semibold">${escapeHtml(equipment.label)}</h3>
+              <p class="mt-1 text-xs text-text-secondary">Clique para selecionar</p>
+            </div>
+          </div>
+        `;
+
+        button.addEventListener("click", () => {
+          selectEquipment(equipment.id, equipment.label);
+        });
+
+        equipmentGrid.appendChild(button);
+      });
+    }
+
+    function renderChecklistItems(def) {
+      operatorChecklistItems.innerHTML = "";
+
+      if (!def?.sections?.length) {
+        operatorChecklistItems.innerHTML = '<p class="text-sm text-text-secondary">Nenhum item disponivel para este checklist.</p>';
+        return;
+      }
+
+      def.sections.forEach((section) => {
+        const sectionCard = document.createElement("section");
+        sectionCard.className = "rounded-[1.5rem] border border-border bg-white p-4 sm:p-5";
+
+        const sectionTitle = document.createElement("h3");
+        sectionTitle.className = "mb-4 text-sm font-bold uppercase tracking-wide text-text-secondary";
+        sectionTitle.textContent = getSectionTitle(section);
+        sectionCard.appendChild(sectionTitle);
+
+        const itemsWrapper = document.createElement("div");
+        itemsWrapper.className = "space-y-3";
+
+        section.items.forEach((item) => {
+          const groupName = `item_status_${getSectionTitle(section)}_${item.id}`.replace(/\s+/g, "_");
+          const itemBlock = document.createElement("div");
+          itemBlock.className = "rounded-2xl border border-border bg-surface p-4";
+          itemBlock.innerHTML = `
+            <div class="flex flex-col gap-3">
+              <p class="text-sm leading-relaxed sm:text-base">
+                <span class="font-semibold">${escapeHtml(item.id)}.</span> ${escapeHtml(item.text)}
+              </p>
+              <div class="flex flex-wrap gap-3">
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 font-medium text-blue-700">
+                  <input
+                    type="radio"
+                    name="${escapeHtml(groupName)}"
+                    value="ok"
+                    data-item-id="${escapeHtml(item.id)}"
+                    data-section="${escapeHtml(getSectionTitle(section))}"
+                    data-text="${escapeHtml(item.text)}"
+                    class="h-4 w-4 accent-blue-600"
+                    checked
+                  >
+                  <span class="text-sm">OK</span>
+                </label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 font-medium text-red-700">
+                  <input
+                    type="radio"
+                    name="${escapeHtml(groupName)}"
+                    value="falha"
+                    data-item-id="${escapeHtml(item.id)}"
+                    data-section="${escapeHtml(getSectionTitle(section))}"
+                    data-text="${escapeHtml(item.text)}"
+                    class="h-4 w-4 accent-red-600"
+                  >
+                  <span class="text-sm">FALHA</span>
+                </label>
+              </div>
+            </div>
+          `;
+
+          itemsWrapper.appendChild(itemBlock);
+        });
+
+        sectionCard.appendChild(itemsWrapper);
+        operatorChecklistItems.appendChild(sectionCard);
+      });
+    }
+
+    function selectEquipment(equipmentId, equipmentLabel) {
+      const def = getChecklistDef(equipmentId);
+
+      if (!def) {
+        showFeedbackModal("Checklist nao encontrado para este equipamento.", "error");
+        return;
+      }
+
+      selectedEquipmentType = equipmentId;
+      selectedEquipmentName = equipmentLabel;
+      selectedEquipmentLabel.textContent = `Equipamento selecionado: ${equipmentLabel}`;
+      selectedEquipmentBadge.textContent = equipmentLabel;
+      selectedEquipmentBadge.classList.remove("hidden");
+
+      renderChecklistItems(def);
+      setInitialDateTimeDefaults();
+      closeEquipmentModal();
+      openChecklistModal();
+    }
+
+    async function ensureAnonymousAuth() {
+      if (!auth) {
+        throw new Error("Firebase Auth nao foi inicializado.");
+      }
+
+      if (auth.currentUser) {
+        anonymousUser = auth.currentUser;
+        return;
+      }
+
+      const cred = await auth.signInAnonymously();
+      anonymousUser = cred.user;
+    }
+
+    function resetOperatorForm(keepEquipment = false) {
+      operatorChecklistForm.reset();
+      operatorChecklistItems.innerHTML = keepEquipment && selectedEquipmentType
+        ? operatorChecklistItems.innerHTML
+        : "";
+
+      if (!keepEquipment) {
+        selectedEquipmentType = "";
+        selectedEquipmentName = "";
+        selectedEquipmentLabel.textContent = "Nenhum equipamento selecionado.";
+        selectedEquipmentBadge.textContent = "";
+        selectedEquipmentBadge.classList.add("hidden");
+      }
+
+      setInitialDateTimeDefaults();
+    }
+
+    async function submitChecklist(event) {
+      event.preventDefault();
+
+      if (!db) {
+        showFeedbackModal("Firestore nao foi inicializado.", "error");
+        return;
+      }
+
+      if (!selectedEquipmentType) {
+        showFeedbackModal("Selecione um equipamento antes de emitir o checklist.", "error");
+        return;
+      }
+
+      const operador = document.getElementById("operatorName").value.trim();
+      const turno = document.getElementById("operatorShift").value;
+      const data = document.getElementById("operatorDate").value;
+      const modelo = document.getElementById("operatorModel").value.trim();
+      const tagPlaca = document.getElementById("operatorTag").value.trim();
+      const unidade = document.getElementById("operatorUnit").value.trim();
+      const horaInicial = document.getElementById("operatorStartTime").value;
+      const horaFinal = document.getElementById("operatorEndTime").value;
+      const hrKmInicial = document.getElementById("operatorHrKmStart").value.trim();
+      const hrKmFinal = document.getElementById("operatorHrKmEnd").value.trim();
+      const observacoes = document.getElementById("operatorObservation").value.trim();
+
+      if (!operador || !turno || !data || !modelo || !tagPlaca || !unidade || !horaInicial || !hrKmInicial) {
+        showFeedbackModal("Preencha os campos obrigatorios do cabecalho.", "error");
+        return;
+      }
+
+      const selectedFailures = Array.from(
+        document.querySelectorAll('#operatorChecklistItems input[type="radio"][value="falha"]:checked')
+      ).map((input) => ({
+        id: input.dataset.itemId,
+        section: input.dataset.section,
+        text: input.dataset.text
+      }));
+
+      submitOperatorChecklistBtn.disabled = true;
+      submitOperatorChecklistBtn.textContent = "Enviando...";
+
+      try {
+        await ensureAnonymousAuth();
+
+        await db.collection("checklists").add({
+          checklistKey: selectedEquipmentType,
+          equipment: selectedEquipmentName,
+          turno,
+          data,
+          modelo,
+          tagPlaca,
+          unidade,
+          operador,
+          horaInicial,
+          horaFinal,
+          hrKmInicial,
+          hrKmFinal,
+          observacoes,
+          ocorrencias: selectedFailures,
+          status: selectedFailures.length > 0 ? "nao-conforme" : "conforme",
+          createdBy: anonymousUser?.uid || null,
+          createdByName: operador,
+          source: "operador",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showFeedbackModal(`Checklist de ${selectedEquipmentName} emitido com sucesso.`, "success");
+        resetOperatorForm(false);
+        closeChecklistModal();
+      } catch (error) {
+        console.error("Erro ao emitir checklist:", error);
+        showFeedbackModal(`Nao foi possivel emitir o checklist: ${error.message}`, "error");
+      } finally {
+        submitOperatorChecklistBtn.disabled = false;
+        submitOperatorChecklistBtn.textContent = "Emitir checklist";
+      }
+    }
+
+    populateEquipmentGrid();
+    setInitialDateTimeDefaults();
+
+    ensureAnonymousAuth().catch((error) => {
+      console.error("Erro no login anonimo:", error);
+    });
+
+    openEquipmentModalBtn.addEventListener("click", openEquipmentModal);
+    closeEquipmentModalBtn.addEventListener("click", closeEquipmentModal);
+    closeChecklistModalBtn.addEventListener("click", closeChecklistModal);
+    closeFeedbackModalBtn.addEventListener("click", closeFeedbackModal);
+    feedbackModalConfirmBtn.addEventListener("click", closeFeedbackModal);
+    changeEquipmentBtn.addEventListener("click", () => {
+      closeChecklistModal();
+      openEquipmentModal();
+    });
+    resetOperatorFormBtn.addEventListener("click", () => resetOperatorForm(true));
+    operatorChecklistForm.addEventListener("submit", submitChecklist);
+
+    equipmentSelectionModal.addEventListener("click", (event) => {
+      if (event.target === equipmentSelectionModal) {
+        closeEquipmentModal();
+      }
+    });
+
+    checklistModal.addEventListener("click", (event) => {
+      if (event.target === checklistModal) {
+        closeChecklistModal();
+      }
+    });
+
+    feedbackModal.addEventListener("click", (event) => {
+      if (event.target === feedbackModal) {
+        closeFeedbackModal();
+      }
+    });
+  </script>
+</body>
+</html>
