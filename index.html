@@ -346,7 +346,7 @@ Primeiro acesso / Cadastre-se
        <div class="bg-card rounded-2xl border border-border p-6">
         <div class="mb-4">
          <h3 class="font-semibold text-text-primary text-lg mb-1">Falhas Marcadas por Equipamento</h3>
-<p class="text-sm text-text-secondary">Quantidade de itens marcados na emissão do checklist</p>
+         <p class="text-sm text-text-secondary">Soma das falhas dos checklists do mês atual</p>
         </div>
         <div class="chart-container" style="height: 300px;">
          <canvas id="equipmentFailuresChart"></canvas>
@@ -2770,14 +2770,39 @@ window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
 
       // Chart 2: Equipment Failures (Horizontal Bar Chart)
 const falhasPorEquipamento = {};
+const equipmentLabelMap = Object.fromEntries(
+  checklistEquipmentCatalog.map(item => [item.value, item.label])
+);
+const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
 
-(dashboardChecklists || []).forEach(item => {
-  const equipamento = item.equipment || 'Não informado';
+const currentMonthChecklists = (dashboardChecklists || []).filter(item => {
+  let dateObj = null;
+
+  if (item.data) {
+    const parts = String(item.data).split('-');
+    if (parts.length === 3) {
+      dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    } else {
+      dateObj = new Date(item.data);
+    }
+  } else if (item.createdAt) {
+    dateObj = new Date(item.createdAt);
+  }
+
+  return dateObj && !Number.isNaN(dateObj.getTime()) && dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear;
+});
+
+currentMonthChecklists.forEach(item => {
+  const equipmentKey = normalizeEquipmentKey(item.checklistKey || item.equipmentId || item.equipment || '');
   const totalFalhas = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
 
-  if (totalFalhas > 0) {
-    falhasPorEquipamento[equipamento] = (falhasPorEquipamento[equipamento] || 0) + totalFalhas;
+  if (!equipmentKey || totalFalhas <= 0) {
+    return;
   }
+
+  falhasPorEquipamento[equipmentKey] = (falhasPorEquipamento[equipmentKey] || 0) + totalFalhas;
 });
 
 const rankingEquipamentos = Object.entries(falhasPorEquipamento)
@@ -2785,7 +2810,7 @@ const rankingEquipamentos = Object.entries(falhasPorEquipamento)
   .slice(0, 5);
 
 const equipmentLabels = rankingEquipamentos.length
-  ? rankingEquipamentos.map(([nome]) => nome)
+  ? rankingEquipamentos.map(([key]) => equipmentLabelMap[key] || key)
   : ['Sem falhas registradas'];
 
 const equipmentData = rankingEquipamentos.length
@@ -2797,6 +2822,7 @@ const equipmentData = rankingEquipamentos.length
           type: 'bar',
           data: {
   labels: equipmentLabels,
+  fullLabels: equipmentLabels,
   datasets: [{
     label: 'Número de Falhas',
     data: equipmentData,
