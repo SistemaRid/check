@@ -1,104 +1,94 @@
 export default {
   key: "mini-carregadeira",
-  title: "CHECKLIST DE PRÉ-USO DE INSPEÇÃO MÓVEL - MINI CARREGADEIRA",
+  title: "CHECKLIST DE PRE-USO DE INSPECAO MOVEL - MINI CARREGADEIRA",
   version: "rev03",
 
   sections: [
-
     {
       title: "100 - SISTEMA MOTOR",
       items: [
-        { id: "1", text: "Verificar escapamentos e saídas", type: "yesno" },
-        { id: "2", text: "Verificar condições de emissão de poluentes (Particulados)", type: "yesno" },
+        { id: "1", text: "Verificar escapamentos e saidas", type: "yesno" },
+        { id: "2", text: "Verificar condicoes de emissao de poluentes (Particulados)", type: "yesno" },
         { id: "3", text: "Verificar se existe desgaste ou folga nas correias e tensores", type: "yesno" },
-        { id: "4", text: "Verificar tubulações/mangotes/mangueiras", type: "yesno" },
-        { id: "5", text: "Avaliar nível de óleo do motor", type: "yesno" },
-        { id: "6", text: "Avaliar nível do líquido arrefecedor", type: "yesno" },
-        { id: "7", text: "Verificar funcionamento do motor quanto a ruídos anormais de operação", type: "yesno" }
+        { id: "4", text: "Verificar tubulacoes/mangotes/mangueiras", type: "yesno" },
+        { id: "5", text: "Avaliar nivel de oleo do motor", type: "yesno" },
+        { id: "6", text: "Avaliar Nivel do Liquido Arrefecedor", type: "yesno" },
+        { id: "7", text: "Verificar funcionamento do motor quanto a ruidos anormais de operacao", type: "yesno" }
       ]
     },
-
     {
-      title: "200 - SISTEMA ELÉTRICO",
+      title: "200 - SISTEMA ELETRICO",
       items: [
-        { id: "8", text: "Verificar painel de instrumentos / manômetros", type: "yesno" },
-        { id: "9", text: "Verificar lanternas", type: "yesno" },
-        { id: "10", text: "Verificar farol de ré e giroflex", type: "yesno" },
-        { id: "11", text: "Verificar farol de ré (noturno)", type: "yesno" },
-        { id: "12", text: "Testar alarme de ré", type: "yesno" },
-        { id: "13", text: "Verificar iluminação interna", type: "yesno" },
-        { id: "14", text: "Testar rádio de comunicação", type: "yesno" },
-        { id: "15", text: "Verificar ar condicionado / interclima", type: "yesno" }
+        { id: "9", text: "Verificar painel de intrumentos / manometros", type: "yesno" },
+        { id: "10", text: "Verificar lanternas", type: "yesno" },
+        { id: "11", text: "Verificar farol de re e Giroflex", type: "yesno" },
+        { id: "12", text: "Verificar Farol de re (Noturno)", type: "yesno" },
+        { id: "13", text: "Testar Alarme de re", type: "yesno" },
+        { id: "14", text: "Verificar Iluminacao interna", type: "yesno" },
+        { id: "15", text: "Testar Radio de comunicacao", type: "yesno" },
+        { id: "16", text: "Verificar Ar Condicionado/Interclima", type: "yesno" }
       ]
     },
-
     {
-      title: "300 - SISTEMA SUSPENSÃO E EIXOS",
+      title: "300 - SISTEMA SUSPENSAO E EIXOS",
       items: [
-        { id: "16", text: "Verificar balança em tandem LD e LE", type: "yesno" }
+        { id: "17", text: "Verificar balanca em tandem LD e LE", type: "yesno" }
       ]
     },
-
     {
       title: "400 - SISTEMA FREIOS",
       items: [
-        { id: "17", text: "Verificar freio estacionário", type: "yesno" },
-        { id: "18", text: "Verificar acionamento e funcionamento do freio de serviço", type: "yesno" },
-        { id: "19", text: "Verificar ruídos anormais na frenagem", type: "yesno" },
-        { id: "20", text: "Verificar acumulador de freios", type: "yesno" }
+        { id: "27", text: "Verificar Freio estacionario", type: "yesno" },
+        { id: "28", text: "Verificar Acionamento e funcionamento do freio de servico", type: "yesno" },
+        { id: "29", text: "Verificar ruidos anormais na frenagem", type: "yesno" },
+        { id: "30", text: "Verificar acumulador de freios", type: "yesno" }
       ]
     },
-
     {
       title: "500 - SISTEMA CABINE E ESTRUTURA",
       items: [
-        { id: "21", text: "Verificar fechadura de portas", type: "yesno" },
-        { id: "22", text: "Verificar para-choque, paralamas, para-brisa quanto a trincas", type: "yesno" },
-        { id: "23", text: "Verificar retrovisores", type: "yesno" },
-        { id: "24", text: "Verificar corrimão de acesso à cabine da máquina", type: "yesno" },
-        { id: "25", text: "Verificar níveis de água no reservatório de limpeza do para-brisa", type: "yesno" },
-        { id: "26", text: "Verificar funilaria em geral buscando arranhões ou avarias", type: "yesno" }
+        { id: "32", text: "Verificar Fechadura de Portas", type: "yesno" },
+        { id: "33", text: "Verificar Parachoque, paralamas, para-brisa quanto a trincas", type: "yesno" },
+        { id: "34", text: "Verificar Retrovisores", type: "yesno" },
+        { id: "35", text: "Verificar Corrimao de acesso a cabine da maquina", type: "yesno" },
+        { id: "36", text: "Verificar niveis de agua no reservatorio de agua para limpeza do para-brisa", type: "yesno" },
+        { id: "37", text: "Verificar funilaria em geral, buscando achar arranhoes ou avarias", type: "yesno" }
       ]
     },
-
     {
-      title: "600 - SISTEMA TRANSMISSÃO / DIREÇÃO",
+      title: "600 - SISTEMA TRANSMISSAO / DIRECAO",
       items: [
-        { id: "27", text: "Verificar vazamentos em mangueiras", type: "yesno" },
-        { id: "28", text: "Testar direção para esquerda e para direita", type: "yesno" },
-        { id: "29", text: "Avaliar possível folga na alavanca de direção (joystick)", type: "yesno" }
+        { id: "38", text: "Verificar Vazamentos em mangueiras", type: "yesno" },
+        { id: "39", text: "Testar direcao para a esquerda e testar a direcao para a direita", type: "yesno" },
+        { id: "40", text: "Avaliar possivel folga existente na alavanca de direcao (Joystick)", type: "yesno" }
       ]
     },
-
     {
-      title: "700 - SISTEMA HIDRÁULICO / LANÇA",
+      title: "700 - SISTEMA HIDRAULICO / LANCA",
       items: [
-        { id: "30", text: "Verificar cilindros de elevação do braço", type: "yesno" },
-        { id: "31", text: "Verificar cilindros da concha", type: "yesno" },
-        { id: "32", text: "Verificar nível de óleo hidráulico", type: "yesno" },
-        { id: "33", text: "Verificar presença de vazamentos no sistema hidráulico geral da máquina", type: "yesno" },
-        { id: "34", text: "Verificar condições de pinos e buchas dos braços", type: "yesno" }
+        { id: "41", text: "Verificar cilindros de elevacao do braco", type: "yesno" },
+        { id: "42", text: "Verificar cilindros da concha", type: "yesno" },
+        { id: "43", text: "Verificar condicoes de pinos e buchas dos bracos", type: "yesno" },
+        { id: "44", text: "Verificar nivel de Nivel do oleo hidraulico", type: "yesno" },
+        { id: "45", text: "Verificar a presenca de vazamentos pelo sistema hidraulico geral da maquina", type: "yesno" }
       ]
     },
-
     {
       title: "800 - SISTEMA MATERIAL RODANTE / PNEUS",
       items: [
-        { id: "35", text: "Verificar condições dos pneus (calibragem, cortes, banda de rodagem)", type: "yesno" },
-        { id: "36", text: "Verificar prisioneiros das rodas", type: "yesno" }
+        { id: "46", text: "Verificar condicoes dos pneus quanto (Calibragem, Cortes, Banda de Rodagem)", type: "yesno" },
+        { id: "47", text: "Verificar prisioneiros das rodas", type: "yesno" }
       ]
     },
-
     {
-      title: "900 - ITENS DE SEGURANÇA",
+      title: "900 - ITENS DE SEGURANCA",
       items: [
-        { id: "37", text: "Verificar estados e condições do cinto de segurança", type: "yesno" },
-        { id: "38", text: "Verificar banco do operador (fixação, encosto, amortecedor, ajuste)", type: "yesno" },
-        { id: "39", text: "Verificar extintor de incêndio (suporte, pressão, lacre e validade)", type: "yesno" },
-        { id: "40", text: "Verificar posicionamento da maçaneta para saída de emergência", type: "yesno" },
-        { id: "41", text: "Realizar 5S da cabine do equipamento e demais pontos necessários", type: "yesno" }
+        { id: "48", text: "Verifique o banco do operador (fixacao, encosto, amortecedor, ajuste)", type: "yesno" },
+        { id: "49", text: "Verificar estados e condicoes do cinto de seguranca", type: "yesno" },
+        { id: "50", text: "Verificar extintor de incendio (suporte, Pressao, Lacre e Validade)", type: "yesno" },
+        { id: "51", text: "Verificar posicionamento da macaneta para caso de saida de emergencia", type: "yesno" },
+        { id: "52", text: "Realizar 5s da cabine do equipamento e demais pontos necessarios pela maquina", type: "yesno" }
       ]
     }
-
   ]
 };

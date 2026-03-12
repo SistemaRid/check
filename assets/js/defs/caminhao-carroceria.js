@@ -1,114 +1,104 @@
 export default {
   key: "caminhao-carroceria",
-  title: "CHECKLIST DE PRÉ-USO DE INSPEÇÃO MÓVEL - CAMINHÃO DE CARROCERIA",
-  version: "rev03",
+  title: "CHECKLIST DE PRE-USO DE INSPECAO MOVEL - CAMINHAO DE CARROCERIA",
+  version: "rev02",
 
   sections: [
-
     {
       title: "100 - SISTEMA MOTOR",
       items: [
-        { id: "1", text: "Verificar escapamentos e saídas", type: "yesno" },
-        { id: "2", text: "Verificar funcionamento do motor quanto a ruídos anormais de operação", type: "yesno" },
-        { id: "3", text: "Verificar condições de emissão de poluentes (Particulados)", type: "yesno" },
+        { id: "1", text: "Verificar escapamentos e saidas", type: "yesno" },
+        { id: "2", text: "Verificar funcionamento do motor quanto a ruidos anormais de operacao", type: "yesno" },
+        { id: "3", text: "Verificar condicoes de emissao de poluentes (Particulados)", type: "yesno" },
         { id: "4", text: "Verificar se existe desgaste ou folga nas correias e tensores", type: "yesno" },
-        { id: "5", text: "Verificar tubulações/mangotes/mangueiras", type: "yesno" },
-        { id: "6", text: "Avaliar nível de óleo do motor", type: "yesno" },
-        { id: "7", text: "Avaliar nível do líquido arrefecedor", type: "yesno" },
+        { id: "5", text: "Verificar tubulacoes/mangotes/mangueiras", type: "yesno" },
+        { id: "6", text: "Avaliar nivel de oleo do motor", type: "yesno" },
+        { id: "7", text: "Avaliar Nivel do Liquido Arrefecedor", type: "yesno" },
         { id: "8", text: "Verificar aletas do radiador", type: "yesno" },
-        { id: "9", text: "Verificar reservatório do aditivo Arla 32", type: "yesno" }
+        { id: "9", text: "Verificar reservatorio do aditivo Arla 32", type: "yesno" }
       ]
     },
-
     {
-      title: "200 - SISTEMA ELÉTRICO",
+      title: "200 - SISTEMA ELETRICO",
       items: [
-        { id: "10", text: "Verificar painel de instrumentos e interruptores", type: "yesno" },
+        { id: "10", text: "Verificar painel de intrumentos e interruptores", type: "yesno" },
         { id: "11", text: "Verificar lanternas traseiras, setas e pisca alerta", type: "yesno" },
-        { id: "12", text: "Verificar farol de ré e giroflex", type: "yesno" },
-        { id: "13", text: "Verificar farol de ré e alarme de ré", type: "yesno" },
-        { id: "14", text: "Verificar iluminação interna", type: "yesno" },
+        { id: "12", text: "Verificar farol de re e Giroflex", type: "yesno" },
+        { id: "13", text: "Vericar  Farol de re e alarme de re", type: "yesno" },
+        { id: "14", text: "Verificar iluminacao interna", type: "yesno" },
         { id: "15", text: "Verificar funcionamento da buzina", type: "yesno" },
-        { id: "16", text: "Avaliar funcionamento do tacógrafo", type: "yesno" },
-        { id: "17", text: "Testar rádio de comunicação e funcionamento do relógio de horímetro", type: "yesno" },
-        { id: "18", text: "Fazer teste de funcionamento do painel de informações do caminhão", type: "yesno" },
-        { id: "19", text: "Verificar faróis frontais (noturno)", type: "yesno" },
+        { id: "16", text: "Avaliar funcionamento do tacografo", type: "yesno" },
+        { id: "17", text: "Testar radio de comunicacao e funcionamento do relogio de horimetro", type: "yesno" },
+        { id: "18", text: "Fazer teste de funcionamento do painel de informacoes do caminhao", type: "yesno" },
+        { id: "19", text: "Verificar Farois frontais (Noturno)", type: "yesno" },
         { id: "20", text: "Verificar ar-condicionado", type: "yesno" }
       ]
     },
-
     {
-      title: "300 - SISTEMA SUSPENSÃO E EIXOS",
+      title: "300 - SISTEMA SUSPENSAO E EIXOS",
       items: [
-        { id: "21", text: "Verificar feixe de mola, amortecedor e batentes", type: "yesno" },
-        { id: "22", text: "Verificar cubo das rodas (bocais de enchimento e parafusos)", type: "yesno" },
-        { id: "23", text: "Avaliar cardan, cruzetas e luva do estriado", type: "yesno" }
+        { id: "21", text: "Verificar Feixe de mola, amortecedor e batentes", type: "yesno" },
+        { id: "22", text: "Verificar Cubo das rodas (bocais de enchimento e parafusos)", type: "yesno" },
+        { id: "23", text: "Avaliar cardam, cruzetas e luva do estriado", type: "yesno" }
       ]
     },
-
     {
       title: "400 - SISTEMA DE FREIOS",
       items: [
-        { id: "24", text: "Avaliar cuíca de freio (desgaste e vazamentos nas mangueiras, conexões e parafusos)", type: "yesno" },
-        { id: "25", text: "Avaliar em operação funcionamento do acionamento do freio motor", type: "yesno" },
-        { id: "26", text: "Testar funcionamento do freio estacionário", type: "yesno" },
-        { id: "27", text: "Avaliar nível de fluido de freio", type: "yesno" },
+        { id: "24", text: "Avaliar Cuica de freio (desgaste e vazamentos nas mangueiras, conexoes e parafusos)", type: "yesno" },
+        { id: "25", text: "Avaliar em operacao funcionamento o acionamento do freio motor", type: "yesno" },
+        { id: "26", text: "Testar funcionamento do freio estacionario", type: "yesno" },
+        { id: "27", text: "Avaliar nivel de fluido de freio", type: "yesno" },
         { id: "28", text: "Testar o funcionamento dos freios", type: "yesno" }
       ]
     },
-
     {
       title: "500 - SISTEMA CABINE E ESTRUTURA",
       items: [
-        { id: "29", text: "Verificar escada de acesso ao compartimento do motorista", type: "yesno" },
+        { id: "29", text: "Verificar Escada de acesso ao compartimento do motorista", type: "yesno" },
         { id: "30", text: "Verificar laterais da cabine (funilaria e pintura)", type: "yesno" },
         { id: "31", text: "Avaliar parte inferior do equipamento se existe algum dano, amassado ou vazamento", type: "yesno" },
-        { id: "32", text: "Avaliar fixação das grades laterais inferiores de proteção e para-choques", type: "yesno" },
+        { id: "32", text: "Avaliar fixacao das grades laterais inferiores de protecao e para-choques", type: "yesno" },
         { id: "33", text: "Avaliar retrovisores", type: "yesno" },
-        { id: "34", text: "Verificar maçanetas externas e internas do caminhão", type: "yesno" },
-        { id: "35", text: "Verificar nível de água e funcionamento dos limpadores do para-brisa", type: "yesno" },
-        { id: "36", text: "Verificar condições da carroceria quanto a folgas, partes danificadas e fixação", type: "yesno" }
+        { id: "34", text: "Verificar Macanetas externas e internas do caminhao", type: "yesno" },
+        { id: "35", text: "Verificar Nivel de agua e funcionamento dos limpadores parabrisa", type: "yesno" },
+        { id: "36", text: "Verificar condicoes da carroceria quanto a folgas, partes danificada, fixacao e partes danificadas do caminhao", type: "yesno" },
+        { id: "37", text: "Verificar fixacao da escada de acesso a carroceria", type: "yesno" },
+        { id: "38", text: "Verificar e garantir que a carga na carroceria esteja fixada corretamente", type: "yesno" }
       ]
     },
-
     {
-      title: "600 - SISTEMA TRANSMISSÃO / DIREÇÃO",
+      title: "600 - SISTEMA TRANSMISSAO / DIRECAO",
       items: [
-        { id: "37", text: "Avaliar barra de direção (verificação de terminais)", type: "yesno" },
-        { id: "38", text: "Verificar nível do óleo do câmbio", type: "yesno" },
-        { id: "39", text: "Testar controles, alavancas e pedais", type: "yesno" },
-        { id: "40", text: "Verificar diferencial (carcaça, fixação)", type: "yesno" }
+        { id: "39", text: "Avaliar barra de direcao (verif. Terminais)", type: "yesno" },
+        { id: "40", text: "Verificar Diferencial (carcaca, fixacao)", type: "yesno" },
+        { id: "41", text: "Verificar Nivel do oleo do cambio", type: "yesno" },
+        { id: "42", text: "Testar Controles, alavancas e pedais", type: "yesno" }
       ]
     },
-
     {
-      title: "700 - SISTEMA HIDRÁULICO / CARROCERIA",
+      title: "700 - SISTEMA HIDRAULICO / LANCA",
       items: [
-        { id: "41", text: "Verificar nível de óleo hidráulico", type: "yesno" },
-        { id: "42", text: "Verificar presença de vazamentos no sistema hidráulico geral do caminhão", type: "yesno" },
-        { id: "43", text: "Verificar fixação da escada de acesso à carroceria", type: "yesno" },
-        { id: "44", text: "Verificar e garantir que a carga na carroceria esteja fixada corretamente", type: "yesno" }
+        { id: "43", text: "Verificar nivel de oleo hidraulico", type: "yesno" },
+        { id: "44", text: "Verificar a presenca de vazamentos pelo sistema hidraulico geral do caminhao", type: "yesno" }
       ]
     },
-
     {
       title: "800 - SISTEMA MATERIAL RODANTE / PNEUS",
       items: [
-        { id: "45", text: "Verificar condições dos parafusos e porcas das rodas", type: "yesno" },
+        { id: "45", text: "Verificar condicoes dos parafusos e porcas das rodas", type: "yesno" },
         { id: "46", text: "Verificar banda de rodagem dos pneus ou cortes", type: "yesno" }
       ]
     },
-
     {
-      title: "900 - ITENS DE SEGURANÇA",
+      title: "900 - ITENS DE SEGURANCA",
       items: [
-        { id: "47", text: "Verificar banco do operador (fixação, encosto, amortecedor, ajuste)", type: "yesno" },
-        { id: "48", text: "Verificar estados e condições do cinto de segurança", type: "yesno" },
-        { id: "49", text: "Verificar extintor de incêndio (suporte, pressão, lacre e validade)", type: "yesno" },
-        { id: "50", text: "Verificar posicionamento da maçaneta para caso de saída de emergência", type: "yesno" },
-        { id: "51", text: "Realizar 5S da cabine e carroceria do caminhão", type: "yesno" }
+        { id: "47", text: "Verifique o banco do operador (fixacao, encosto, amortecedor, ajuste)", type: "yesno" },
+        { id: "48", text: "Verificar estados e condicoes do cinto de seguranca", type: "yesno" },
+        { id: "49", text: "Verificar extintor de incendio (suporte, Pressao, Lacre e Validade)", type: "yesno" },
+        { id: "50", text: "Verificar posicionamento da macaneta para caso de saida de emergencia", type: "yesno" },
+        { id: "51", text: "Realizar 5s da cabine e carroceria do caminhao", type: "yesno" }
       ]
     }
-
   ]
 };
