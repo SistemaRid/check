@@ -71,32 +71,33 @@ export default {
         { id: "37", text: "Verificar Bomba de abastecimento de diesel, mangueira", type: "yesno" },
         { id: "38", text: "Avaliar fixacao das grades laterais inferiores de protecao e para-choques", type: "yesno" },
         { id: "39", text: "Avaliar retrovisores", type: "yesno" },
-        { id: "40", text: "Verificar Macanetas externas e internas do caminhao", type: "yesno" }
+        { id: "40", text: "Verificar Macanetas externas e internas do caminhao", type: "yesno" },
+        { id: "41", text: "Verificar nivel de água e funcionamento dos limpadores do parabrisa", type: "yesno" },
+        { id: "42", text: "Avaliar porta slaterais quanto a travas e dobradiças danifecadas", type: "yesno" }
       ]
     },
     {
       title: "700 - SISTEMA TRANSMISSAO / DIRECAO",
       items: [
-        { id: "41", text: "Avaliar barra de direcao (verif. Terminais)", type: "yesno" },
-        { id: "42", text: "Verificar Nivel do oleo do cambio", type: "yesno" },
-        { id: "43", text: "Verificar Diferencial (carcaca, fixacao)", type: "yesno" },
-        { id: "44", text: "Testar Controles, alavancas e pedais", type: "yesno" },
-        { id: "45", text: "Verificar Nivel de agua e funcionamento dos limpadores parabrisa", type: "yesno" }
+        { id: "43", text: "Avaliar barra de direcao (verif. Terminais)", type: "yesno" },
+        { id: "44", text: "Verificar Nivel do oleo do cambio", type: "yesno" },
+        { id: "45", text: "Verificar Diferencial (carcaca, fixacao)", type: "yesno" },
+        { id: "46", text: "Testar Controles, alavancas e pedais", type: "yesno" },
       ]
     },
     {
       title: "800 - SISTEMA HIDRAULICO / LANCA",
       items: [
-        { id: "46", text: "Verificar nivel de oleo hidraulico", type: "yesno" },
-        { id: "47", text: "Verificar a presenca de vazamentos pelo sistema hidraulico geral do caminhao", type: "yesno" }
+        { id: "47", text: "Verificar nivel de oleo hidraulico", type: "yesno" },
+        { id: "48", text: "Verificar a presenca de vazamentos pelo sistema hidraulico geral do caminhao", type: "yesno" }
       ]
     },
     {
       title: "900 - SISTEMA MATERIAL RODANTE / PNEUS",
       items: [
-        { id: "48", text: "Verificar condicoes dos parafusos e porcas das rodas", type: "yesno" },
-        { id: "49", text: "Verificar banda de rodagem dos pneus ou cortes", type: "yesno" },
-        { id: "50", text: "Verificar se ja existe marca de fogo - caso nao exista, informar a manutencao.", type: "yesno" }
+        { id: "49", text: "Verificar condicoes dos parafusos e porcas das rodas", type: "yesno" },
+        { id: "50", text: "Verificar banda de rodagem dos pneus ou cortes", type: "yesno" },
+        { id: "51", text: "Verificar se ja existe marca de fogo - caso nao exista, informar a manutencao.", type: "yesno" }
       ]
     },
     {

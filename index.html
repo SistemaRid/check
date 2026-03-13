@@ -234,6 +234,11 @@ Primeiro acesso / Cadastre-se
     <span>Checklists</span>
   </a>
 
+  <a href="#" data-page="operadores" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10 0v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2m8-10a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+    <span>Operadores</span>
+  </a>
+
   <a href="#" data-page="historico" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary hover:text-text-primary font-medium">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
     <span>Histórico</span>
@@ -491,6 +496,56 @@ Primeiro acesso / Cadastre-se
 <div id="checklistsContainer" class="space-y-4 hidden">
   <!-- Checklists will be populated here -->
 </div>
+     </div><!-- OPERADORES PAGE -->
+     <div id="page-operadores" class="page-content hidden p-4 lg:p-6 fade-in">
+      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+       <div>
+        <h2 class="text-2xl font-bold text-text-primary">Operadores</h2>
+        <p class="text-text-secondary mt-1">Usuários cadastrados para emissão e acompanhamento de checklists</p>
+       </div>
+       <button id="newOperatorBtn" type="button" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-primary/25">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        <span>Cadastrar operador</span>
+       </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+       <div class="bg-card rounded-2xl border border-border p-5">
+        <p class="text-sm text-text-secondary">Total cadastrados</p>
+        <p id="operatorsCount" class="mt-2 text-3xl font-bold text-text-primary">0</p>
+       </div>
+       <div class="bg-card rounded-2xl border border-border p-5">
+        <p class="text-sm text-text-secondary">Funções distintas</p>
+        <p id="operatorsRolesCount" class="mt-2 text-3xl font-bold text-text-primary">0</p>
+       </div>
+       <div class="bg-card rounded-2xl border border-border p-5">
+        <p class="text-sm text-text-secondary">Último cadastro</p>
+        <p id="operatorsLastCreated" class="mt-2 text-base font-semibold text-text-primary">-</p>
+       </div>
+      </div>
+
+      <div class="bg-card rounded-2xl border border-border overflow-hidden">
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead class="bg-surface-dark">
+          <tr>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Nome</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">CPF</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Função</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">E-mail</th>
+           <th class="px-5 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider">Cadastro</th>
+          </tr>
+         </thead>
+         <tbody id="operatorsTableBody" class="divide-y divide-border">
+          <tr>
+            <td colspan="5" class="px-5 py-8 text-center text-text-secondary">
+              <p class="text-sm">Nenhum operador cadastrado ainda.</p>
+            </td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
      </div><!-- HISTORICO PAGE -->
      <div id="page-historico" class="page-content hidden p-4 lg:p-6 fade-in">
      <div class="mb-6">
@@ -674,6 +729,57 @@ Primeiro acesso / Cadastre-se
         Exportar
       </button>
     </div>
+  </div>
+</div>
+
+<div id="newOperatorModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="w-full max-w-xl bg-card rounded-3xl border border-border shadow-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+      <div>
+        <h3 class="text-xl font-bold text-text-primary">Cadastrar operador</h3>
+        <p class="text-sm text-text-secondary mt-1">Crie um novo acesso para a página do operador</p>
+      </div>
+      <button id="closeNewOperatorModalBtn" type="button" class="p-2 hover:bg-surface rounded-xl transition-colors">
+        <svg class="w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <form id="newOperatorForm" class="p-6 space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="operatorCreateFirstName" class="block text-sm font-medium text-text-primary mb-2">Nome</label>
+          <input id="operatorCreateFirstName" type="text" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+          <label for="operatorCreateLastName" class="block text-sm font-medium text-text-primary mb-2">Último nome</label>
+          <input id="operatorCreateLastName" type="text" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="operatorCreateCpf" class="block text-sm font-medium text-text-primary mb-2">CPF</label>
+          <input id="operatorCreateCpf" type="text" maxlength="14" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary" placeholder="000.000.000-00">
+        </div>
+        <div>
+          <label for="operatorCreateRole" class="block text-sm font-medium text-text-primary mb-2">Função</label>
+          <input id="operatorCreateRole" type="text" value="OPERADOR" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="operatorCreatePassword" class="block text-sm font-medium text-text-primary mb-2">Senha</label>
+          <input id="operatorCreatePassword" type="password" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+          <label for="operatorCreateConfirmPassword" class="block text-sm font-medium text-text-primary mb-2">Confirmar senha</label>
+          <input id="operatorCreateConfirmPassword" type="password" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+      </div>
+      <div id="newOperatorStatus" class="hidden text-sm px-4 py-3 rounded-xl"></div>
+      <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
+        <button id="cancelNewOperatorBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">Cancelar</button>
+        <button id="saveNewOperatorBtn" type="submit" class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold transition-colors">Cadastrar operador</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -905,12 +1011,16 @@ Primeiro acesso / Cadastre-se
 
       <div>
         <label for="modalModelo" class="block text-sm font-semibold text-text-primary mb-2">Modelo *</label>
-        <input type="text" id="modalModelo" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: Mercedes Actros" required>
+        <select id="modalModelo" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" required>
+          <option value="">Selecione o modelo</option>
+        </select>
       </div>
 
       <div>
         <label for="modalTagPlaca" class="block text-sm font-semibold text-text-primary mb-2">Tag/Placa *</label>
-        <input type="text" id="modalTagPlaca" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" placeholder="Ex: ABC-1234" required>
+        <select id="modalTagPlaca" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary outline-none" required>
+          <option value="">Selecione a tag</option>
+        </select>
       </div>
 
       <div>
@@ -1099,6 +1209,9 @@ let notificationsDismissed = false;
 let notificationsClearedAt = 0;
 let notificationsReadMap = {};
 let reportActivityHistory = [];
+let checklistsUnsubscribe = null;
+let operatorsUnsubscribe = null;
+let allOperators = [];
 
 function onlyNumbers(value = '') {
   return String(value).replace(/\D/g, '');
@@ -1119,6 +1232,14 @@ function normalizeString(value = '') {
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .toLowerCase();
+}
+
+function formatCpfValue(value = '') {
+  const digits = onlyNumbers(value).slice(0, 11);
+  return digits
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1-$2');
 }
 
 function normalizeStatus(value) {
@@ -1327,6 +1448,7 @@ function getReportActivitySourceLabel(sourcePage) {
   const map = {
     dashboard: 'Dashboard',
     checklists: 'Checklists',
+    operadores: 'Operadores',
     historico: 'Histórico',
     manutencao: 'Manutenção',
     relatorios: 'Relatórios',
@@ -1855,6 +1977,7 @@ function populateSettingsPage() {
   document.getElementById('settingsSummaryLandingPage').textContent = ({
     dashboard: 'Dashboard',
     checklists: 'Checklists',
+    operadores: 'Operadores',
     historico: 'Histórico',
     relatorios: 'Relatórios',
     configuracoes: 'Configurações'
@@ -1875,6 +1998,189 @@ function populateSettingsPage() {
   if (passwordStatusEl) {
     passwordStatusEl.classList.add('hidden');
     passwordStatusEl.textContent = '';
+  }
+}
+
+function setNewOperatorStatus(message = '', type = 'error') {
+  const statusEl = document.getElementById('newOperatorStatus');
+  if (!statusEl) return;
+
+  if (!message) {
+    statusEl.classList.add('hidden');
+    statusEl.textContent = '';
+    return;
+  }
+
+  statusEl.textContent = message;
+  statusEl.className = `text-sm px-4 py-3 rounded-xl ${
+    type === 'success'
+      ? 'bg-success/10 text-success'
+      : 'bg-danger/10 text-danger'
+  }`;
+  statusEl.classList.remove('hidden');
+}
+
+function openNewOperatorModal() {
+  const modal = document.getElementById('newOperatorModal');
+  const form = document.getElementById('newOperatorForm');
+  if (!modal || !form) return;
+  form.reset();
+  document.getElementById('operatorCreateRole').value = 'OPERADOR';
+  setNewOperatorStatus('');
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeNewOperatorModal() {
+  const modal = document.getElementById('newOperatorModal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function renderOperatorsPage() {
+  const tableBody = document.getElementById('operatorsTableBody');
+  const countEl = document.getElementById('operatorsCount');
+  const rolesCountEl = document.getElementById('operatorsRolesCount');
+  const lastCreatedEl = document.getElementById('operatorsLastCreated');
+
+  if (!tableBody) return;
+
+  const sortedItems = [...allOperators].sort((a, b) => {
+    const aName = (a.name || `${a.firstName || ''} ${a.lastName || ''}`).trim();
+    const bName = (b.name || `${b.firstName || ''} ${b.lastName || ''}`).trim();
+    return aName.localeCompare(bName, 'pt-BR');
+  });
+
+  if (countEl) countEl.textContent = String(sortedItems.length);
+  if (rolesCountEl) {
+    rolesCountEl.textContent = String(new Set(sortedItems.map(item => String(item.role || item.funcao || 'Operador').trim()).filter(Boolean)).size);
+  }
+
+  const latestOperator = [...allOperators].sort((a, b) => {
+    const aTime = new Date(a.createdAt?.toDate?.() || a.createdAt || 0).getTime() || 0;
+    const bTime = new Date(b.createdAt?.toDate?.() || b.createdAt || 0).getTime() || 0;
+    return bTime - aTime;
+  })[0];
+
+  if (lastCreatedEl) {
+    lastCreatedEl.textContent = latestOperator ? formatDateTimePtBr(latestOperator.createdAt?.toDate?.() || latestOperator.createdAt) : '-';
+  }
+
+  if (!sortedItems.length) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="px-5 py-8 text-center text-text-secondary">
+          <p class="text-sm">Nenhum operador cadastrado ainda.</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = sortedItems.map((item) => {
+    const fullName = item.name || `${item.firstName || ''} ${item.lastName || ''}`.trim() || 'Sem nome';
+    const role = item.role || item.funcao || 'Operador';
+    const createdAt = item.createdAt?.toDate?.() || item.createdAt || null;
+    return `
+      <tr class="hover:bg-surface/60 transition-colors">
+        <td class="px-5 py-4">
+          <p class="font-medium text-text-primary">${escapeHtml(fullName)}</p>
+        </td>
+        <td class="px-5 py-4 text-sm text-text-secondary">${escapeHtml(formatCpfValue(item.cpf || ''))}</td>
+        <td class="px-5 py-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">${escapeHtml(role)}</span>
+        </td>
+        <td class="px-5 py-4 text-sm text-text-secondary">${escapeHtml(item.email || '-')}</td>
+        <td class="px-5 py-4 text-sm text-text-secondary">${escapeHtml(formatDateTimePtBr(createdAt))}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function subscribeOperatorsRealtime() {
+  if (!db) return;
+
+  if (typeof operatorsUnsubscribe === 'function') {
+    operatorsUnsubscribe();
+    operatorsUnsubscribe = null;
+  }
+
+  operatorsUnsubscribe = db.collection('users').onSnapshot((snapshot) => {
+    allOperators = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    renderOperatorsPage();
+  }, (error) => {
+    console.error('Erro ao carregar operadores:', error);
+  });
+}
+
+async function createOperatorAccount(event) {
+  event.preventDefault();
+
+  const saveBtn = document.getElementById('saveNewOperatorBtn');
+
+  try {
+    const firstName = document.getElementById('operatorCreateFirstName').value.trim();
+    const lastName = document.getElementById('operatorCreateLastName').value.trim();
+    const cpf = onlyNumbers(document.getElementById('operatorCreateCpf').value);
+    const role = document.getElementById('operatorCreateRole').value.trim() || 'OPERADOR';
+    const password = document.getElementById('operatorCreatePassword').value;
+    const confirmPassword = document.getElementById('operatorCreateConfirmPassword').value;
+
+    if (!firstName) throw new Error('Digite o nome do operador.');
+    if (!lastName) throw new Error('Digite o último nome do operador.');
+    if (cpf.length !== 11) throw new Error('Digite um CPF válido com 11 números.');
+    if (!password || password.length < 6) throw new Error('A senha deve ter pelo menos 6 dígitos.');
+    if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Cadastrando...';
+    }
+
+    const existingUser = await findUserByCpf(cpf);
+    if (existingUser) {
+      throw new Error('Já existe um usuário cadastrado com esse CPF.');
+    }
+
+    const email = `${cpf}@checkmaint.local`;
+    const secondaryAppName = `operator-registration-${Date.now()}`;
+    const secondaryApp = firebase.initializeApp(firebaseConfig, secondaryAppName);
+    const secondaryAuth = secondaryApp.auth();
+    const secondaryDb = secondaryApp.firestore();
+
+    try {
+      const cred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+      const fullName = `${firstName} ${lastName}`.trim();
+
+      await secondaryDb.collection('users').doc(cred.user.uid).set({
+        name: fullName,
+        firstName,
+        lastName,
+        cpf,
+        email,
+        role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } finally {
+      await secondaryAuth.signOut().catch(() => {});
+      await secondaryApp.delete().catch(() => {});
+    }
+
+    setNewOperatorStatus('Operador cadastrado com sucesso.', 'success');
+    renderOperatorsPage();
+    setTimeout(() => closeNewOperatorModal(), 800);
+  } catch (error) {
+    console.error('Erro ao cadastrar operador:', error);
+    setNewOperatorStatus(error.message || 'Não foi possível cadastrar o operador.');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Cadastrar operador';
+    }
   }
 }
 
@@ -3372,7 +3678,8 @@ loginForm.addEventListener('submit', async (e) => {
            populateSettingsPage();
            renderNotifications();
 
-    await loadChecklistsFromFirestore();
+    subscribeChecklistsRealtime();
+    subscribeOperatorsRealtime();
     await loadReportActivityHistory();
     await loadDashboardData();
 
@@ -3409,6 +3716,16 @@ logoutBtn.addEventListener('click', async (e) => {
   e.preventDefault();
 
   try {
+    if (typeof checklistsUnsubscribe === 'function') {
+      checklistsUnsubscribe();
+      checklistsUnsubscribe = null;
+    }
+
+    if (typeof operatorsUnsubscribe === 'function') {
+      operatorsUnsubscribe();
+      operatorsUnsubscribe = null;
+    }
+
     if (auth) {
       await auth.signOut();
     }
@@ -3429,8 +3746,10 @@ logoutBtn.addEventListener('click', async (e) => {
   notificationsClearedAt = 0;
   notificationsReadMap = {};
   reportActivityHistory = [];
+  allOperators = [];
   renderNotifications();
   renderReportActivityHistory();
+  renderOperatorsPage();
   setNotificationsOpen(false);
   populateSettingsPage();
 
@@ -3452,6 +3771,43 @@ logoutBtn.addEventListener('click', async (e) => {
 
     if (dashboardStatusFilter) {
       dashboardStatusFilter.addEventListener('change', applyDashboardFilters);
+    }
+
+    const newOperatorBtn = document.getElementById('newOperatorBtn');
+    const newOperatorForm = document.getElementById('newOperatorForm');
+    const closeNewOperatorModalBtn = document.getElementById('closeNewOperatorModalBtn');
+    const cancelNewOperatorBtn = document.getElementById('cancelNewOperatorBtn');
+    const newOperatorModal = document.getElementById('newOperatorModal');
+    const operatorCreateCpfInput = document.getElementById('operatorCreateCpf');
+
+    if (newOperatorBtn) {
+      newOperatorBtn.addEventListener('click', openNewOperatorModal);
+    }
+
+    if (closeNewOperatorModalBtn) {
+      closeNewOperatorModalBtn.addEventListener('click', closeNewOperatorModal);
+    }
+
+    if (cancelNewOperatorBtn) {
+      cancelNewOperatorBtn.addEventListener('click', closeNewOperatorModal);
+    }
+
+    if (newOperatorForm) {
+      newOperatorForm.addEventListener('submit', createOperatorAccount);
+    }
+
+    if (newOperatorModal) {
+      newOperatorModal.addEventListener('click', (e) => {
+        if (e.target === newOperatorModal) {
+          closeNewOperatorModal();
+        }
+      });
+    }
+
+    if (operatorCreateCpfInput) {
+      operatorCreateCpfInput.addEventListener('input', (e) => {
+        e.target.value = formatCpfValue(e.target.value);
+      });
     }
 
     // Failure Analysis Filters
@@ -3922,6 +4278,70 @@ async function loadChecklistsFromFirestore() {
   }
 }
 
+function subscribeChecklistsRealtime() {
+  if (!db) {
+    console.warn('Firestore não inicializado.');
+    return;
+  }
+
+  if (typeof checklistsUnsubscribe === 'function') {
+    checklistsUnsubscribe();
+    checklistsUnsubscribe = null;
+  }
+
+  checklistsUnsubscribe = db.collection('checklists').onSnapshot((snapshot) => {
+    allChecklists = snapshot.docs.map(doc => {
+      const data = doc.data();
+
+      let createdAt = '';
+      let updatedAt = '';
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        createdAt = data.createdAt.toDate().toISOString();
+      } else if (typeof data.createdAt === 'string') {
+        createdAt = data.createdAt;
+      }
+
+      if (data.updatedAt && typeof data.updatedAt.toDate === 'function') {
+        updatedAt = data.updatedAt.toDate().toISOString();
+      } else if (typeof data.updatedAt === 'string') {
+        updatedAt = data.updatedAt;
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt,
+        updatedAt
+      };
+    });
+
+    allChecklists.sort((a, b) => {
+      const dataA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dataB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dataB - dataA;
+    });
+
+    updateDashboardEquipmentFilterOptions();
+
+    if (currentPage === 'checklists') {
+      renderChecklists();
+    }
+
+    if (currentPage === 'historico') {
+      renderHistorico();
+    }
+
+    renderNotifications();
+    loadDashboardData();
+
+    if (currentPage === 'dashboard') {
+      initializeCharts();
+    }
+  }, (error) => {
+    console.error('Erro no listener em tempo real de checklists:', error);
+  });
+}
+
 async function loadDashboardData() {
   if (!db) return;
 
@@ -3990,6 +4410,10 @@ async function loadDashboardData() {
 } else if (page === 'checklists') {
   setTimeout(() => {
     renderChecklists();
+  }, 50);
+} else if (page === 'operadores') {
+  setTimeout(() => {
+    renderOperatorsPage();
   }, 50);
 } else if (page === 'historico') {
   setTimeout(() => {
@@ -4444,7 +4868,7 @@ function initChecklistDetailsElements() {
 }
 
 
-   const equipmentTypes = [
+const equipmentTypes = [
   { id: "caminhao-basculante", label: "Caminhão Basculante", iconPath: "assets/icons/equipment/dump-truck.svg" },
   { id: "caminhao-carroceria", label: "Caminhão Carroceria", iconPath: "assets/icons/equipment/flatbed-truck.svg" },
   { id: "caminhao-comboio", label: "Caminhão Comboio", iconPath: "assets/icons/equipment/service-truck.svg" },
@@ -4467,6 +4891,69 @@ function initChecklistDetailsElements() {
   { id: "veiculos-leves", label: "Veículos Leves", iconPath: "assets/icons/equipment/car.svg" }
 ];
 
+const equipmentModelCatalog = [
+  {
+    model: "EC-380DL",
+    tags: ["EC-402", "EC-418", "EC-403"]
+  },
+  {
+    model: "EC-320D2L",
+    tags: ["EC-432"]
+  },
+  {
+    model: "L-556",
+    tags: ["CA-301"]
+  },
+  {
+    model: "L-580",
+    tags: ["CA-303"]
+  },
+  {
+    model: "XAMS-900",
+    tags: ["COM-551"]
+  },
+  {
+    model: "PWH-500",
+    tags: ["PER-601"]
+  },
+  {
+    model: "STG-190C",
+    tags: ["MNT-802"]
+  },
+  {
+    model: "FMX-500",
+    tags: ["CB-180", "CB-182"]
+  },
+  {
+    model: "AXOR 3131",
+    tags: ["CB-101", "CB-102", "CB-172"]
+  },
+  {
+    model: "ATEGO1420",
+    tags: ["CC-520"]
+  },
+  {
+    model: "VW-23.310",
+    tags: ["CP-501"]
+  },
+  {
+    model: "VW-31.280",
+    tags: ["CM-901"]
+  },
+  {
+    model: "VW-11.180",
+    tags: ["VA-006"]
+  },
+  {
+    model: "MARCOPOLO 1050",
+    tags: ["VA-008"]
+  },
+  {
+    model: "S-450",
+    tags: ["MCA-756"]
+  }
+];
+
     function openEquipmentSelectionModal() {
   if (!equipmentSelectionModal) {
     alert('A seleção de equipamento ainda não foi criada no HTML.');
@@ -4478,11 +4965,70 @@ function initChecklistDetailsElements() {
   populateEquipmentGrid();
 }
 
-    function closeEquipmentSelectionModal() {
+function closeEquipmentSelectionModal() {
   if (!equipmentSelectionModal) return;
 
   equipmentSelectionModal.classList.add('hidden');
   document.body.style.overflow = '';
+}
+
+function getEquipmentModels() {
+  return equipmentModelCatalog;
+}
+
+function populateModalTagOptions(modelValue = '', selectedTag = '') {
+  const tagSelect = document.getElementById('modalTagPlaca');
+  const models = getEquipmentModels();
+  const modelEntry = models.find((entry) => entry.model === modelValue);
+  const tags = Array.isArray(modelEntry?.tags) ? modelEntry.tags : [];
+
+  if (!tagSelect) return;
+
+  tagSelect.innerHTML = '';
+
+  if (!modelValue) {
+    tagSelect.innerHTML = '<option value="">Selecione a tag</option>';
+    return;
+  }
+
+  if (!tags.length) {
+    tagSelect.innerHTML = '<option value="">Selecione a tag</option>';
+    return;
+  }
+
+  tagSelect.innerHTML = tags.map((tag) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join('');
+
+  if (tags.length > 1) {
+    tagSelect.insertAdjacentHTML('afterbegin', '<option value="">Selecione a tag</option>');
+    tagSelect.value = tags.includes(selectedTag) ? selectedTag : '';
+  } else {
+    tagSelect.value = tags[0];
+  }
+}
+
+function populateModalModelOptions(selectedModel = '', selectedTag = '') {
+  const modelSelect = document.getElementById('modalModelo');
+  const tagSelect = document.getElementById('modalTagPlaca');
+  const models = getEquipmentModels();
+
+  if (!modelSelect || !tagSelect) return;
+
+  modelSelect.innerHTML = '';
+
+  modelSelect.insertAdjacentHTML('beforeend', '<option value="">Selecione o modelo</option>');
+  modelSelect.insertAdjacentHTML(
+    'beforeend',
+    models.map((entry) => `<option value="${escapeHtml(entry.model)}">${escapeHtml(entry.model)}</option>`).join('')
+  );
+
+  if (selectedModel && models.some((entry) => entry.model === selectedModel)) {
+    modelSelect.value = selectedModel;
+    populateModalTagOptions(selectedModel, selectedTag);
+    return;
+  }
+
+  modelSelect.value = '';
+  populateModalTagOptions('', '');
 }
 
   function openChecklistFormModal(equipmentId, equipmentLabel) {
@@ -4512,6 +5058,7 @@ function initChecklistDetailsElements() {
   newChecklistModal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
+  populateModalModelOptions();
   populateSystemsListFromDef(def);
 }
     function closeChecklistFormModal() {
@@ -5121,7 +5668,52 @@ function preencherItensChecklistPdf(helpers, checklist) {
 }
 
 function preencherObservacoesPdf(helpers, checklist) {
-  helpers.setTextFieldSafe('observacoes', checklist.observacoes || '');
+  helpers.setTextFieldSafe('observacoes', getChecklistObservationText(checklist));
+}
+
+function getChecklistObservationParts(checklist) {
+  const initialRaw = String(checklist?.observacoesIniciais || checklist?.initialObservations || '').trim();
+  const endRaw = String(checklist?.observacoesFinalTurno || checklist?.finalTurnObservations || '').trim();
+  const rawObservations = String(checklist?.observacoes || '').trim();
+  const failureObservationMatch = rawObservations.match(/Falha apos inicio:\s*([\s\S]*)$/i);
+  const fallbackInitial = failureObservationMatch
+    ? rawObservations.replace(/Falha apos inicio:\s*[\s\S]*$/i, '').trim()
+    : rawObservations;
+  const fallbackEnd = failureObservationMatch
+    ? failureObservationMatch[1].trim()
+    : '';
+
+  if (initialRaw || endRaw) {
+    return {
+      initial: initialRaw || fallbackInitial,
+      endOfShift: endRaw || fallbackEnd
+    };
+  }
+
+  return {
+    initial: fallbackInitial,
+    endOfShift: fallbackEnd
+  };
+}
+
+function getChecklistObservationText(checklist) {
+  const parts = getChecklistObservationParts(checklist);
+  if (parts.initial || parts.endOfShift) {
+    return [
+      parts.initial ? `Observacoes iniciais: ${parts.initial}` : '',
+      parts.endOfShift ? `Observacoes ao final do turno: ${parts.endOfShift}` : ''
+    ].filter(Boolean).join('\n\n');
+  }
+
+  const rawObservations = String(checklist?.observacoes || '').trim();
+  if (rawObservations) {
+    return rawObservations;
+  }
+
+  return [
+    parts.initial ? `Observacoes iniciais: ${parts.initial}` : '',
+    parts.endOfShift ? `Observacoes ao final do turno: ${parts.endOfShift}` : ''
+  ].filter(Boolean).join('\n\n');
 }
 
 function normalizeChecklistDate(value) {
@@ -5487,6 +6079,43 @@ function setChecklistItemTurnStatus(worksheet, rowNumber, columnNumber, isOk) {
   };
 }
 
+function getChecklistFailureObservationColumn(worksheet) {
+  let match = null;
+
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    row.eachCell({ includeEmpty: false }, (cell) => {
+      const compactText = normalizeWorksheetText(getWorksheetCellText(cell)).replace(/\s+/g, "");
+
+      if (!compactText.includes("EMPOUCASPALAVRASDESCREVERAFALHA")) {
+        return;
+      }
+
+      if (!match || cell.row > match.row) {
+        match = { col: cell.col, row: cell.row };
+      }
+    });
+  });
+
+  return match?.col || null;
+}
+
+function setChecklistItemFailureObservation(worksheet, rowNumber, columnNumber, observation) {
+  if (!rowNumber || !columnNumber) {
+    return;
+  }
+
+  const cell = worksheet.getRow(rowNumber).getCell(columnNumber);
+  const note = String(observation || "").trim();
+
+  cell.value = note;
+  cell.alignment = {
+    ...(cell.alignment || {}),
+    horizontal: "left",
+    vertical: "middle",
+    wrapText: true
+  };
+}
+
 function getChecklistObservationAnchorCell(worksheet) {
   const matches = findCellAddressesByPrefix(worksheet, "Observações:");
 
@@ -5540,16 +6169,26 @@ function fillChecklistObservationArea(worksheet, observationText) {
   }
 
   const targetRows = [];
+  const usedMasterRows = new Set();
 
   for (let rowNumber = anchorCell.row + 1; rowNumber < 90; rowNumber += 1) {
-    const cell = worksheet.getRow(rowNumber).getCell(anchorCell.col);
-    const cellText = getWorksheetCellText(cell).trim();
+    const currentCell = worksheet.getRow(rowNumber).getCell(anchorCell.col);
+    const targetCell = currentCell.master && currentCell.master.address !== currentCell.address
+      ? currentCell.master
+      : currentCell;
+    const targetRow = targetCell.row;
+    const cellText = getWorksheetCellText(targetCell).trim();
+
+    if (targetRow <= anchorCell.row || usedMasterRows.has(targetRow)) {
+      continue;
+    }
 
     if (cellText) {
       continue;
     }
 
-    targetRows.push(rowNumber);
+    usedMasterRows.add(targetRow);
+    targetRows.push(targetRow);
   }
 
   chunks.slice(0, targetRows.length).forEach((chunk, index) => {
@@ -5850,6 +6489,7 @@ async function buildChecklistExcelBytes(checklist) {
   validateChecklistCellMap(headerCells, turnCells);
   const turnStatusColumns = getChecklistTurnStatusColumnMap(worksheet);
   const itemRowMap = getChecklistItemRowMap(worksheet);
+  const failureObservationColumn = getChecklistFailureObservationColumn(worksheet);
 
   if (turnoIndex !== -1) {
     setCellPreservingLabel(worksheet, turnCells.operador?.[turnoIndex], checklist.operador || "");
@@ -5871,10 +6511,13 @@ async function buildChecklistExcelBytes(checklist) {
 
       if (!rowNumber) return;
       setChecklistItemTurnStatus(worksheet, rowNumber, turnStatusColumn, item.ok);
+      if (!item.ok && failureObservationColumn) {
+        setChecklistItemFailureObservation(worksheet, rowNumber, failureObservationColumn, item.failureNote);
+      }
     });
   }
 
-  fillChecklistObservationArea(worksheet, checklist.observacoes || "");
+  fillChecklistObservationArea(worksheet, getChecklistObservationText(checklist));
 
   const worksheetIndex = Math.max(1, workbook.worksheets.indexOf(worksheet) + 1);
   const drawingPath = await getWorksheetDrawingPath(buffer, worksheetIndex);
@@ -5915,24 +6558,32 @@ async function generateChecklistExcel(checklistId) {
     alert(`Erro ao gerar Excel: ${error.message}`);
   }
 }
+
 function getChecklistItemsForPrint(checklist) {
   const def = getChecklistDef(checklist.checklistKey);
 
   if (!def || !Array.isArray(def.sections)) return [];
 
-  const itensComFalha = new Set(
-    (checklist.ocorrencias || []).map(item => String(item.id))
+  const itensComFalha = new Map(
+    (checklist.ocorrencias || []).map(item => [String(item.id), item])
   );
 
   const itens = [];
 
   def.sections.forEach(section => {
     (section.items || []).forEach(item => {
+      const failureEntry = itensComFalha.get(String(item.id));
       itens.push({
         id: String(item.id),
         section: getSectionTitle(section),
         text: item.text || '',
-        ok: !itensComFalha.has(String(item.id))
+        ok: !failureEntry,
+        failureNote: String(
+          failureEntry?.failureNote ||
+          failureEntry?.observacaoCurta ||
+          failureEntry?.observation ||
+          ''
+        ).trim()
       });
     });
   });
@@ -6037,6 +6688,7 @@ function openChecklistDetailsModal(checklistId) {
   selectedChecklistDetailsId = checklistId;
 
   const statusMeta = getStatusPresentation(checklist.status);
+  const observationText = getChecklistObservationText(checklist);
 
   const itemsHtml = (checklist.ocorrencias || []).length
     ? checklist.ocorrencias.map(item => `
@@ -6123,7 +6775,7 @@ function openChecklistDetailsModal(checklistId) {
       </div>
 
       <div>
-        <h3 class="text-lg font-bold text-text-primary mb-3">Ocorrências encontradas</h3>
+        <h3 class="text-lg font-bold text-text-primary mb-3">Ocorrências encontradas ao iniciar atividade</h3>
         <div class="space-y-2">
           ${itemsHtml}
         </div>
@@ -6132,7 +6784,7 @@ function openChecklistDetailsModal(checklistId) {
       <div>
         <h3 class="text-lg font-bold text-text-primary mb-3">Observações</h3>
         <div class="bg-surface rounded-xl p-4 border border-border">
-          <p class="text-sm text-text-primary whitespace-pre-wrap">${escapeHtml(checklist.observacoes || 'Sem observações.')}</p>
+          <p class="text-sm text-text-primary whitespace-pre-wrap">${escapeHtml(observationText || 'Sem observações.')}</p>
         </div>
       </div>
 
@@ -6354,9 +7006,10 @@ async function updateChecklistStatus(status) {
     const itemsWrap = document.createElement('div');
     itemsWrap.className = 'space-y-3';
 
-    section.items.forEach((item) => {
+   section.items.forEach((item) => {
       const itemRow = document.createElement('div');
       itemRow.className = 'p-3 rounded-xl border border-border bg-surface';
+      itemRow.dataset.checklistItem = 'true';
 
       itemRow.innerHTML = `
         <div class="flex flex-col gap-3">
@@ -6392,6 +7045,15 @@ async function updateChecklistStatus(status) {
               <span class="text-sm font-medium text-red-700">FALHA</span>
             </label>
           </div>
+
+          <div data-failure-note-wrapper class="hidden">
+            <input
+              type="text"
+              data-failure-note-input
+              class="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-text-primary outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-200"
+              placeholder="Descreva a falha em poucas palavras"
+            >
+          </div>
         </div>
       `;
 
@@ -6404,6 +7066,36 @@ async function updateChecklistStatus(status) {
 }
 initChecklistDetailsElements();
 renderReportActivityHistory();
+
+function toggleModalFailureNoteField(container, isFailureSelected) {
+  if (!container) return;
+  const wrapper = container.querySelector('[data-failure-note-wrapper]');
+  const input = container.querySelector('[data-failure-note-input]');
+
+  if (!wrapper || !input) return;
+
+  wrapper.classList.toggle('hidden', !isFailureSelected);
+
+  if (!isFailureSelected) {
+    input.value = '';
+  }
+}
+
+if (modalSystemsList) {
+  modalSystemsList.addEventListener('change', (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'radio') {
+      return;
+    }
+
+    const itemRow = input.closest('[data-checklist-item]');
+    if (!itemRow) {
+      return;
+    }
+
+    toggleModalFailureNoteField(itemRow, input.value === 'falha');
+  });
+}
 
 if (newChecklistBtn) {
   newChecklistBtn.addEventListener('click', openEquipmentSelectionModal);
@@ -6456,6 +7148,15 @@ if (closeChecklistDetailsModalBtn) {
 
 if (cancelChecklistBtn) {
   cancelChecklistBtn.addEventListener('click', closeChecklistFormModal);
+}
+
+const modalModeloSelect = document.getElementById('modalModelo');
+const modalTagSelect = document.getElementById('modalTagPlaca');
+
+if (modalModeloSelect) {
+  modalModeloSelect.addEventListener('change', () => {
+    populateModalTagOptions(modalModeloSelect.value, '');
+  });
 }
 
 // Close modals on overlay click
@@ -6536,8 +7237,10 @@ newChecklistForm.addEventListener('submit', async (e) => {
 
   const turno = document.getElementById('modalTurno').value;
   const data = document.getElementById('modalData').value;
-  const modelo = document.getElementById('modalModelo').value.trim();
-  const tagPlaca = document.getElementById('modalTagPlaca').value.trim();
+  const modalModeloSelect = document.getElementById('modalModelo');
+  const modalTagSelect = document.getElementById('modalTagPlaca');
+  const modelo = modalModeloSelect?.value || '';
+  const tagPlaca = modalTagSelect?.value || '';
   const unidade = document.getElementById('modalUnidade').value.trim();
   const operador = document.getElementById('modalOperator').value.trim();
   const horaInicial = document.getElementById('modalHoraInicial').value;
@@ -6548,11 +7251,15 @@ newChecklistForm.addEventListener('submit', async (e) => {
 
   const allItemRadiosFalha = document.querySelectorAll('#modalSystemsList input[type="radio"][value="falha"]:checked');
 
-const ocorrencias = Array.from(allItemRadiosFalha).map(radio => ({
-  id: radio.dataset.itemId,
-  section: radio.dataset.section,
-  text: radio.dataset.text
-}));
+const ocorrencias = Array.from(allItemRadiosFalha).map(radio => {
+  const itemRow = radio.closest('[data-checklist-item]');
+  return {
+    id: radio.dataset.itemId,
+    section: radio.dataset.section,
+    text: radio.dataset.text,
+    failureNote: itemRow?.querySelector('[data-failure-note-input]')?.value.trim() || ''
+  };
+});
 
   if (!selectedEquipmentType) {
     alert('Selecione uma máquina antes de continuar.');
@@ -6605,9 +7312,7 @@ createdAt: firebase.firestore.FieldValue.serverTimestamp(),
 
     closeChecklistFormModal();
 
-        await loadChecklistsFromFirestore();
-
-    if (currentPage === 'historico') {
+if (currentPage === 'historico') {
   renderHistorico();
 }
 

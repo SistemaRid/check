@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="pt-BR">
+﻿<!doctype html>
+<html lang="pt-BR" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,24 +70,232 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
   </style>
 </head>
-<body class="min-h-screen text-text-primary">
-  <main class="min-h-screen flex items-center justify-center p-4 sm:p-6">
-    <section class="w-full max-w-3xl rounded-[2rem] border border-white/70 bg-white/90 backdrop-blur shadow-soft overflow-hidden">
-      <div class="px-6 py-10 sm:px-12 sm:py-14 text-center">
-        <div class="mx-auto w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center">
-          <img src="xl_media_image4.png" alt="Grupo J. Demito" class="w-full h-full object-contain">
+<body class="h-full bg-surface text-text-primary">
+  <main class="mx-auto min-h-screen w-full max-w-6xl p-4 sm:p-6">
+    <section id="loginView" class="min-h-screen flex items-center justify-center p-4">
+      <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-32 h-32 mb-4">
+            <img src="xl_media_image4.png" alt="Grupo J. Demito" class="w-full h-full object-contain scale-110">
+          </div>
+          <h1 class="text-2xl font-bold text-text-primary">CheckMaint Pro</h1>
+          <p class="text-text-secondary mt-1">Sistema de ManutenÃ§Ã£o e Checklists</p>
         </div>
-        <h1 class="mt-5 text-3xl sm:text-5xl font-extrabold tracking-tight">CheckMaint Pro</h1>
-        <p class="mt-3 text-base sm:text-lg text-text-secondary">Emissao rapida de checklist operacional</p>
 
-        <div class="mt-10">
-          <button id="openEquipmentModalBtn" type="button" class="inline-flex items-center gap-3 rounded-2xl bg-primary px-7 py-4 text-lg font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-dark">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Novo Checklist</span>
+        <div class="bg-card rounded-2xl shadow-xl p-8 border border-border">
+          <div class="mb-6">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 id="operatorAuthCardTitle" class="text-xl font-semibold text-text-primary">Acesso ao Sistema</h2>
+                <p id="operatorAuthCardSubtitle" class="text-sm text-text-secondary mt-1">Entre com seu CPF e senha para continuar</p>
+              </div>
+              <button id="operatorBackToLoginBtn" type="button" class="hidden px-3 py-2 rounded-xl bg-surface hover:bg-surface-dark text-text-primary text-sm font-medium transition-colors">
+                Voltar
+              </button>
+            </div>
+          </div>
+
+          <form id="operatorLoginForm" class="space-y-5">
+            <div id="operatorRegisterFields" class="hidden space-y-5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="operatorRegFirstName" class="block text-sm font-medium text-text-primary mb-2">Nome</label>
+                  <input id="operatorRegFirstName" type="text" placeholder="Seu nome" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+                </div>
+                <div>
+                  <label for="operatorRegLastName" class="block text-sm font-medium text-text-primary mb-2">Ãšltimo nome</label>
+                  <input id="operatorRegLastName" type="text" placeholder="Seu sobrenome" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+                </div>
+              </div>
+              <div>
+                <label for="operatorRegRole" class="block text-sm font-medium text-text-primary mb-2">FunÃ§Ã£o</label>
+                <input id="operatorRegRole" type="text" placeholder="Ex: OPERADOR" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+              </div>
+            </div>
+            <div>
+              <label for="operatorCpf" class="block text-sm font-medium text-text-primary mb-2">CPF</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </span>
+                <input id="operatorCpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" class="w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+              </div>
+            </div>
+            <div>
+              <label for="operatorPassword" class="block text-sm font-medium text-text-primary mb-2">Senha</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </span>
+                <input id="operatorPassword" type="password" placeholder="MÃ­nimo 6 dÃ­gitos" class="w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+              </div>
+            </div>
+            <div id="operatorConfirmPasswordField" class="hidden">
+              <label for="operatorConfirmPassword" class="block text-sm font-medium text-text-primary mb-2">Confirmar senha</label>
+              <input id="operatorConfirmPassword" type="password" placeholder="Repita a senha" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+            </div>
+            <p id="operatorLoginMessage" class="hidden bg-danger/10 text-danger text-sm p-3 rounded-lg"></p>
+            <button type="submit" id="operatorLoginBtn" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25">
+              <span>Entrar</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </button>
+            <button type="button" id="operatorRegisterBtn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all">
+              Primeiro acesso / Cadastre-se
+            </button>
+          </form>
+        </div>
+
+        <p class="text-center text-text-secondary text-sm mt-6">Â© 2026 Todos os direitos reservados | Dev. por Juan Carlos</p>
+      </div>
+    </section>
+
+    <section id="operatorApp" class="hidden space-y-4 sm:space-y-5">
+      <header class="rounded-[1.5rem] border border-border bg-white px-4 py-4 shadow-sm sm:px-5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p id="operatorUserName" class="truncate text-base font-bold text-text-primary">Operador</p>
+            <p id="operatorUserRole" class="mt-1 text-sm text-text-secondary">Funcao</p>
+          </div>
+          <button id="operatorLogoutBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-semibold text-text-primary transition hover:bg-surface">
+            Sair
           </button>
         </div>
+      </header>
+
+      <div class="flex justify-end">
+        <button id="openEquipmentModalBtn" type="button" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+          <span>Novo Checklist</span>
+        </button>
+      </div>
+
+      <div class="hidden">
+        <span id="operatorChecklistCount">0</span>
+        <span id="operatorChecklistOpenCount">0</span>
+        <span id="operatorChecklistClosedCount">0</span>
+      </div>
+
+      <section class="rounded-[1.5rem] border border-border bg-white p-4 shadow-sm sm:p-5">
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-text-primary">Checklists emitidos</h2>
+        </div>
+        <div id="operatorMyChecklistsList" class="space-y-3"></div>
+      </section>
+    </section>
+
+    <section id="legacyLoginView" class="hidden min-h-screen flex items-center justify-center">
+      <div class="grid w-full max-w-5xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div class="rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-soft backdrop-blur sm:p-12">
+          <div class="mx-auto flex h-24 w-24 items-center justify-center sm:mx-0 sm:h-28 sm:w-28">
+            <img src="xl_media_image4.png" alt="Grupo J. Demito" class="h-full w-full object-contain">
+          </div>
+          <h1 class="mt-6 text-3xl font-extrabold tracking-tight sm:text-5xl">CheckMaint Pro</h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-text-secondary sm:text-lg">
+            Acesso do operador para emitir checklists e finalizar a atividade depois, no mesmo equipamento.
+          </p>
+          <div class="mt-8 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-border bg-surface p-4">
+              <p class="text-sm font-semibold">EmissÃ£o rÃ¡pida</p>
+              <p class="mt-1 text-sm text-text-secondary">Abra um checklist em poucos toques.</p>
+            </div>
+            <div class="rounded-2xl border border-border bg-surface p-4">
+              <p class="text-sm font-semibold">HistÃ³rico prÃ³prio</p>
+              <p class="mt-1 text-sm text-text-secondary">Veja somente os checklists emitidos por vocÃª.</p>
+            </div>
+            <div class="rounded-2xl border border-border bg-surface p-4">
+              <p class="text-sm font-semibold">FinalizaÃ§Ã£o posterior</p>
+              <p class="mt-1 text-sm text-text-secondary">Preencha hora e HR/KM final ao encerrar a atividade.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-[2rem] border border-white/70 bg-white p-8 shadow-soft sm:p-10">
+          <div class="mb-8">
+            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Acesso do operador</p>
+            <h2 class="mt-3 text-2xl font-bold">Entrar na operaÃ§Ã£o</h2>
+            <p class="mt-2 text-sm leading-6 text-text-secondary">Use o mesmo CPF e senha cadastrados no sistema principal.</p>
+          </div>
+
+          <form id="operatorLoginForm" class="space-y-5">
+            <div>
+              <label for="operatorCpf" class="mb-2 block text-sm font-semibold">CPF</label>
+              <input id="operatorCpf" type="text" inputmode="numeric" maxlength="14" class="w-full rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="000.000.000-00">
+            </div>
+            <div>
+              <label for="operatorPassword" class="mb-2 block text-sm font-semibold">Senha</label>
+              <input id="operatorPassword" type="password" class="w-full rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Digite sua senha">
+            </div>
+            <button id="operatorLoginBtn" type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark">
+              Entrar
+            </button>
+            <p id="operatorLoginMessage" class="hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="legacyOperatorApp" class="hidden space-y-6">
+      <div class="rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-soft backdrop-blur sm:p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary">OperaÃ§Ã£o autenticada</p>
+            <h1 class="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Checklists do Operador</h1>
+            <p class="mt-2 text-base text-text-secondary">Emita o checklist no inÃ­cio e finalize a atividade no encerramento.</p>
+          </div>
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="rounded-2xl border border-border bg-surface px-4 py-3 text-sm">
+              <p id="operatorUserName" class="font-semibold text-text-primary">Operador</p>
+              <p id="operatorUserRole" class="text-text-secondary">FunÃ§Ã£o</p>
+            </div>
+            <button id="openEquipmentModalBtn" type="button" class="inline-flex items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary-dark">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Novo Checklist</span>
+            </button>
+            <button id="operatorLogoutBtn" type="button" class="inline-flex items-center justify-center rounded-2xl border border-border bg-white px-5 py-3 text-sm font-semibold transition hover:bg-surface">
+              Sair
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <section class="rounded-[2rem] border border-white/70 bg-white p-6 shadow-soft sm:p-8">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Resumo</p>
+              <h2 class="mt-3 text-2xl font-bold">Sua operaÃ§Ã£o</h2>
+              <p class="mt-2 text-sm leading-6 text-text-secondary">Acompanhe rapidamente quantos checklists seus ainda estÃ£o em aberto.</p>
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-2xl border border-border bg-surface p-4">
+              <p class="text-sm text-text-secondary">Emitidos</p>
+              <p id="operatorChecklistCount" class="mt-2 text-3xl font-extrabold">0</p>
+            </div>
+            <div class="rounded-2xl border border-border bg-surface p-4">
+              <p class="text-sm text-text-secondary">Em aberto</p>
+              <p id="operatorChecklistOpenCount" class="mt-2 text-3xl font-extrabold text-amber-500">0</p>
+            </div>
+            <div class="rounded-2xl border border-border bg-surface p-4">
+              <p class="text-sm text-text-secondary">Finalizados</p>
+              <p id="operatorChecklistClosedCount" class="mt-2 text-3xl font-extrabold text-emerald-600">0</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-white/70 bg-white p-6 shadow-soft sm:p-8">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary">Meus checklists</p>
+              <h2 class="mt-3 text-2xl font-bold">Atividades emitidas por vocÃª</h2>
+              <p class="mt-2 text-sm leading-6 text-text-secondary">Use a aÃ§Ã£o de finalizar para registrar a hora e o HR/KM final quando encerrar a atividade.</p>
+            </div>
+          </div>
+          <div id="operatorMyChecklistsList" class="mt-6 space-y-4"></div>
+        </section>
       </div>
     </section>
   </main>
@@ -127,7 +335,7 @@
       </div>
 
       <form id="operatorChecklistForm" class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-8">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div id="operatorInitialFields" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <div>
             <label for="operatorName" class="mb-2 block text-sm font-semibold">Operador</label>
             <input id="operatorName" type="text" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Nome do operador">
@@ -136,9 +344,9 @@
             <label for="operatorShift" class="mb-2 block text-sm font-semibold">Turno</label>
             <select id="operatorShift" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
               <option value="">Selecione</option>
-              <option value="1º TURNO">1º TURNO</option>
-              <option value="2º TURNO">2º TURNO</option>
-              <option value="3º TURNO">3º TURNO</option>
+              <option value="1Âº TURNO">1Âº TURNO</option>
+              <option value="2Âº TURNO">2Âº TURNO</option>
+              <option value="3Âº TURNO">3Âº TURNO</option>
             </select>
           </div>
           <div>
@@ -147,11 +355,15 @@
           </div>
           <div>
             <label for="operatorModel" class="mb-2 block text-sm font-semibold">Modelo</label>
-            <input id="operatorModel" type="text" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Modelo do equipamento">
+            <select id="operatorModel" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+              <option value="">Selecione o modelo</option>
+            </select>
           </div>
           <div>
             <label for="operatorTag" class="mb-2 block text-sm font-semibold">Tag / Placa</label>
-            <input id="operatorTag" type="text" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Tag ou placa">
+            <select id="operatorTag" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+              <option value="">Selecione a tag</option>
+            </select>
           </div>
           <div>
             <label for="operatorUnit" class="mb-2 block text-sm font-semibold">Unidade</label>
@@ -161,25 +373,28 @@
             <label for="operatorStartTime" class="mb-2 block text-sm font-semibold">Hora Inicial</label>
             <input id="operatorStartTime" type="time" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
           </div>
-          <div>
+        </div>
+
+        <div id="operatorFinalizeFields" class="mt-4 grid grid-cols-1 gap-4">
+          <div id="operatorEndTimeWrapper">
             <label for="operatorEndTime" class="mb-2 block text-sm font-semibold">Hora Final</label>
             <input id="operatorEndTime" type="time" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
           </div>
-          <div>
+          <div id="operatorHrKmStartWrapper">
             <label for="operatorHrKmStart" class="mb-2 block text-sm font-semibold">HR/KM Inicial</label>
             <input id="operatorHrKmStart" type="text" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Valor inicial">
           </div>
-          <div class="md:col-span-2 xl:col-span-3">
+          <div id="operatorHrKmEndWrapper" class="md:col-span-2 xl:col-span-3">
             <label for="operatorHrKmEnd" class="mb-2 block text-sm font-semibold">HR/KM Final</label>
-            <input id="operatorHrKmEnd" type="text" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Valor final">
+            <input id="operatorHrKmEnd" type="time" class="w-full min-w-0 rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
           </div>
         </div>
 
-        <div class="mt-8">
+        <div id="operatorChecklistItemsSection" class="mt-8">
           <div class="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 class="text-lg font-bold">Sistemas / Secoes do Checklist</h3>
-              <p class="mt-1 text-sm text-text-secondary">Marque OK ou FALHA em cada item.</p>
+              <p class="mt-1 text-sm text-text-secondary">No checklist em andamento, use FALHA para registrar problemas surgidos depois do início.</p>
             </div>
             <button id="changeEquipmentBtn" type="button" class="w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium transition hover:bg-surface-dark sm:w-auto">
               Trocar equipamento
@@ -189,6 +404,16 @@
         </div>
 
         <div class="mt-8">
+          <button id="toggleFailureCommunicationBtn" type="button" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100">
+            Comunicar falha após o início do trabalho
+          </button>
+          <div id="operatorFailureCommunicationWrapper" class="hidden mt-4">
+            <label for="operatorFailureCommunication" class="mb-2 block text-sm font-semibold">Falha comunicada após início</label>
+            <textarea id="operatorFailureCommunication" rows="4" class="w-full min-w-0 resize-y rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Descreva a falha surgida durante a atividade"></textarea>
+          </div>
+        </div>
+
+        <div id="operatorGeneralObservationSection" class="mt-8">
           <label for="operatorObservation" class="mb-2 block text-sm font-semibold">Observacoes</label>
           <textarea id="operatorObservation" rows="4" class="w-full min-w-0 resize-y rounded-2xl border border-border bg-white px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Descreva observacoes gerais do checklist"></textarea>
         </div>
@@ -199,6 +424,60 @@
           </button>
           <button id="submitOperatorChecklistBtn" type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark sm:w-auto">
             Emitir checklist
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="finalizeChecklistModal" class="fixed inset-0 z-[55] hidden items-center justify-center bg-slate-950/55 p-4">
+    <div class="w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-soft">
+      <div class="bg-[linear-gradient(135deg,#0f172a_0%,#312e81_55%,#4f46e5_100%)] px-6 py-6 text-white sm:px-7">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-xs font-semibold uppercase tracking-[0.32em] text-white/65">Encerramento</p>
+            <h3 class="mt-2 text-2xl font-extrabold tracking-tight">Finalizar atividade</h3>
+            <p id="finalizeChecklistSubtitle" class="mt-3 max-w-xl text-sm leading-6 text-white/75">Preencha os dados finais do checklist.</p>
+          </div>
+          <button id="closeFinalizeChecklistModalBtn" type="button" class="rounded-2xl border border-white/15 bg-white/10 p-2.5 text-white/80 transition hover:bg-white/15 hover:text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <form id="finalizeChecklistForm" class="space-y-6 px-6 py-6 sm:px-7 sm:py-7">
+        <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-[1.25rem] bg-white p-4 shadow-sm">
+              <label for="finalizeEndTime" class="block text-[11px] font-semibold uppercase tracking-[0.22em] text-text-secondary">Hora final *</label>
+              <input id="finalizeEndTime" type="time" class="mt-3 w-full rounded-2xl border border-border bg-white px-4 py-3 text-base font-semibold outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">
+            </div>
+            <div class="rounded-[1.25rem] bg-white p-4 shadow-sm">
+              <label for="finalizeHrKmEnd" class="block text-[11px] font-semibold uppercase tracking-[0.22em] text-text-secondary">HR/KM final *</label>
+              <input id="finalizeHrKmEnd" type="text" class="mt-3 w-full rounded-2xl border border-border bg-white px-4 py-3 text-base font-semibold outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Valor final">
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 sm:p-5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-secondary">Comunicar falha</p>
+              <h4 class="mt-1 text-lg font-bold tracking-tight text-text-primary">Observacoes finais</h4>
+            </div>
+            <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">Opcional</span>
+          </div>
+          <textarea id="finalizeObservation" rows="4" class="mt-4 w-full resize-y rounded-[1.25rem] border border-border bg-slate-50 px-4 py-3 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Descreva a falha identificada ao final ou durante a atividade"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+          <button id="cancelFinalizeChecklistBtn" type="button" class="inline-flex min-h-12 items-center justify-center rounded-[1.15rem] border border-border bg-white px-5 py-3 font-medium transition hover:bg-surface">
+            Cancelar
+          </button>
+          <button id="submitFinalizeChecklistBtn" type="submit" class="inline-flex min-h-12 items-center justify-center rounded-[1.15rem] bg-primary px-6 py-3 font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-dark">
+            Salvar finalizacao
           </button>
         </div>
       </form>
@@ -257,14 +536,107 @@
       { id: "trator-esteira", label: "Trator de esteira", iconPath: "assets/icons/equipment/bulldozer.svg" }
     ];
 
+    const equipmentModelCatalog = [
+      {
+        model: "EC-380DL",
+        tags: ["EC-402", "EC-418", "EC-403"]
+      },
+      {
+        model: "EC-320D2L",
+        tags: ["EC-432"]
+      },
+      {
+        model: "L-556",
+        tags: ["CA-301"]
+      },
+      {
+        model: "L-580",
+        tags: ["CA-303"]
+      },
+      {
+        model: "XAMS-900",
+        tags: ["COM-551"]
+      },
+      {
+        model: "PWH-500",
+        tags: ["PER-601"]
+      },
+      {
+        model: "STG-190C",
+        tags: ["MNT-802"]
+      },
+      {
+        model: "FMX-500",
+        tags: ["CB-180", "CB-182"]
+      },
+      {
+        model: "AXOR 3131",
+        tags: ["CB-101", "CB-102", "CB-172"]
+      },
+      {
+        model: "ATEGO1420",
+        tags: ["CC-520"]
+      },
+      {
+        model: "VW-23.310",
+        tags: ["CP-501"]
+      },
+      {
+        model: "VW-31.280",
+        tags: ["CM-901"]
+      },
+      {
+        model: "VW-11.180",
+        tags: ["VA-006"]
+      },
+      {
+        model: "MARCOPOLO 1050",
+        tags: ["VA-008"]
+      },
+      {
+        model: "S-450",
+        tags: ["MCA-756"]
+      }
+    ];
+
+    const loginView = document.getElementById("loginView");
+    const operatorApp = document.getElementById("operatorApp");
+    const operatorLoginForm = document.getElementById("operatorLoginForm");
+    const operatorCpfInput = document.getElementById("operatorCpf");
+    const operatorPasswordInput = document.getElementById("operatorPassword");
+    const operatorConfirmPasswordInput = document.getElementById("operatorConfirmPassword");
+    const operatorConfirmPasswordField = document.getElementById("operatorConfirmPasswordField");
+    const operatorRegisterFields = document.getElementById("operatorRegisterFields");
+    const operatorRegisterBtn = document.getElementById("operatorRegisterBtn");
+    const operatorBackToLoginBtn = document.getElementById("operatorBackToLoginBtn");
+    const operatorAuthCardTitle = document.getElementById("operatorAuthCardTitle");
+    const operatorAuthCardSubtitle = document.getElementById("operatorAuthCardSubtitle");
+    const operatorRegFirstNameInput = document.getElementById("operatorRegFirstName");
+    const operatorRegLastNameInput = document.getElementById("operatorRegLastName");
+    const operatorRegRoleInput = document.getElementById("operatorRegRole");
+    const operatorLoginBtn = document.getElementById("operatorLoginBtn");
+    const operatorLoginMessage = document.getElementById("operatorLoginMessage");
+    const operatorLogoutBtn = document.getElementById("operatorLogoutBtn");
+    const operatorUserName = document.getElementById("operatorUserName");
+    const operatorUserRole = document.getElementById("operatorUserRole");
+    const operatorChecklistCount = document.getElementById("operatorChecklistCount");
+    const operatorChecklistOpenCount = document.getElementById("operatorChecklistOpenCount");
+    const operatorChecklistClosedCount = document.getElementById("operatorChecklistClosedCount");
+    const operatorMyChecklistsList = document.getElementById("operatorMyChecklistsList");
     const openEquipmentModalBtn = document.getElementById("openEquipmentModalBtn");
     const closeEquipmentModalBtn = document.getElementById("closeEquipmentModalBtn");
     const closeChecklistModalBtn = document.getElementById("closeChecklistModalBtn");
+    const closeFinalizeChecklistModalBtn = document.getElementById("closeFinalizeChecklistModalBtn");
+    const cancelFinalizeChecklistBtn = document.getElementById("cancelFinalizeChecklistBtn");
     const changeEquipmentBtn = document.getElementById("changeEquipmentBtn");
     const resetOperatorFormBtn = document.getElementById("resetOperatorFormBtn");
     const submitOperatorChecklistBtn = document.getElementById("submitOperatorChecklistBtn");
+    const submitFinalizeChecklistBtn = document.getElementById("submitFinalizeChecklistBtn");
     const equipmentSelectionModal = document.getElementById("equipmentSelectionModal");
     const checklistModal = document.getElementById("checklistModal");
+    const finalizeChecklistModal = document.getElementById("finalizeChecklistModal");
+    const finalizeChecklistForm = document.getElementById("finalizeChecklistForm");
+    const finalizeChecklistSubtitle = document.getElementById("finalizeChecklistSubtitle");
     const feedbackModal = document.getElementById("feedbackModal");
     const closeFeedbackModalBtn = document.getElementById("closeFeedbackModalBtn");
     const feedbackModalConfirmBtn = document.getElementById("feedbackModalConfirmBtn");
@@ -275,11 +647,33 @@
     const selectedEquipmentLabel = document.getElementById("selectedEquipmentLabel");
     const selectedEquipmentBadge = document.getElementById("selectedEquipmentBadge");
     const operatorChecklistItems = document.getElementById("operatorChecklistItems");
+    const operatorChecklistItemsSection = document.getElementById("operatorChecklistItemsSection");
     const operatorChecklistForm = document.getElementById("operatorChecklistForm");
+    const operatorNameInput = document.getElementById("operatorName");
+    const operatorInitialFields = document.getElementById("operatorInitialFields");
+    const operatorFinalizeFields = document.getElementById("operatorFinalizeFields");
+    const operatorGeneralObservationSection = document.getElementById("operatorGeneralObservationSection");
+    const operatorEndTimeWrapper = document.getElementById("operatorEndTimeWrapper");
+    const operatorHrKmStartWrapper = document.getElementById("operatorHrKmStartWrapper");
+    const operatorHrKmEndWrapper = document.getElementById("operatorHrKmEndWrapper");
+    const toggleFailureCommunicationBtn = document.getElementById("toggleFailureCommunicationBtn");
+    const operatorFailureCommunicationWrapper = document.getElementById("operatorFailureCommunicationWrapper");
+    const operatorFailureCommunicationInput = document.getElementById("operatorFailureCommunication");
+    const finalizeEndTimeInput = document.getElementById("finalizeEndTime");
+    const finalizeHrKmEndInput = document.getElementById("finalizeHrKmEnd");
+    const finalizeObservationInput = document.getElementById("finalizeObservation");
+    const operatorModelSelect = document.getElementById("operatorModel");
+    const operatorTagSelect = document.getElementById("operatorTag");
 
     let selectedEquipmentType = "";
     let selectedEquipmentName = "";
-    let anonymousUser = null;
+    let currentUser = null;
+    let currentUserData = null;
+    let operatorChecklists = [];
+    let operatorChecklistsUnsubscribe = null;
+    let selectedChecklistToFinalize = null;
+    let editingChecklistId = null;
+    let operatorAuthMode = "login";
 
     function escapeHtml(value) {
       return String(value ?? "")
@@ -292,6 +686,226 @@
 
     function getSectionTitle(section) {
       return String(section?.title || "").trim();
+    }
+
+    function onlyNumbers(value = "") {
+      return String(value).replace(/\D/g, "");
+    }
+
+    function normalizeText(value = "") {
+      return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function formatCpf(value = "") {
+      const digits = onlyNumbers(value).slice(0, 11);
+
+      return digits
+        .replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1-$2");
+    }
+
+    function cpfToInternalEmail(cpf) {
+      return `${String(cpf || "").replace(/\D/g, "")}@checkmaint.local`;
+    }
+
+    function forceUppercaseInput(input) {
+      if (!input) return;
+      input.addEventListener("input", () => {
+        input.value = input.value.toUpperCase();
+      });
+    }
+
+    function formatDateDisplay(value) {
+      if (!value) return "-";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const [year, month, day] = value.split("-");
+        return `${day}/${month}/${year}`;
+      }
+
+      const date = value?.toDate ? value.toDate() : new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleDateString("pt-BR");
+    }
+
+    function formatDateTimeDisplay(value) {
+      if (!value) return "-";
+      const date = value?.toDate ? value.toDate() : new Date(value);
+      if (Number.isNaN(date.getTime())) return "-";
+      return date.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function normalizeStatus(value) {
+      const normalized = normalizeText(value).replace(/_/g, "-").replace(/\s+/g, "-");
+      if (normalized === "conforme") return "conforme";
+      if (normalized === "nao-conforme") return "nao-conforme";
+      return "pendente";
+    }
+
+    function getChecklistStatusMeta(status) {
+      const value = normalizeStatus(status);
+      if (value === "conforme") {
+        return { label: "Conforme", className: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+      }
+      if (value === "nao-conforme") {
+        return { label: "Nao conforme", className: "border-red-200 bg-red-50 text-red-700" };
+      }
+      return { label: "Pendente", className: "border-amber-200 bg-amber-50 text-amber-700" };
+    }
+
+    function getActivityStatusMeta(status) {
+      const normalized = normalizeText(status);
+      if (normalized === "finalizado") {
+        return { label: "Finalizado", className: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+      }
+      return { label: "Em aberto", className: "border-amber-200 bg-amber-50 text-amber-700" };
+    }
+
+    function getOperatorDisplayName() {
+      return currentUserData?.name || currentUserData?.nome || currentUser?.displayName || "";
+    }
+
+    function getOperatorRoleLabel() {
+      return currentUserData?.role || currentUserData?.funcao || "Operador";
+    }
+
+    function setLoginMessage(message = "", type = "error") {
+      if (!operatorLoginMessage) return;
+
+      if (!message) {
+        operatorLoginMessage.textContent = "";
+        operatorLoginMessage.classList.add("hidden");
+        return;
+      }
+
+      operatorLoginMessage.textContent = message;
+      operatorLoginMessage.classList.remove("hidden");
+      operatorLoginMessage.className = `rounded-2xl border px-4 py-3 text-sm ${
+        type === "success"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : "border-red-200 bg-red-50 text-red-700"
+      }`;
+    }
+
+    function setOperatorAuthMode(mode = "login") {
+      operatorAuthMode = mode === "register" ? "register" : "login";
+      const isRegister = operatorAuthMode === "register";
+
+      if (operatorAuthCardTitle) {
+        operatorAuthCardTitle.textContent = isRegister ? "Primeiro acesso" : "Acesso ao Sistema";
+      }
+
+      if (operatorAuthCardSubtitle) {
+        operatorAuthCardSubtitle.textContent = isRegister
+          ? "Preencha seus dados para criar a conta de acesso"
+          : "Entre com seu CPF e senha para continuar";
+      }
+
+      if (operatorRegisterFields) {
+        operatorRegisterFields.classList.toggle("hidden", !isRegister);
+      }
+
+      if (operatorConfirmPasswordField) {
+        operatorConfirmPasswordField.classList.toggle("hidden", !isRegister);
+      }
+
+      if (operatorRegisterBtn) {
+        operatorRegisterBtn.classList.toggle("hidden", isRegister);
+      }
+
+      if (operatorBackToLoginBtn) {
+        operatorBackToLoginBtn.classList.toggle("hidden", !isRegister);
+      }
+
+      const label = operatorLoginBtn?.querySelector("span");
+      if (label) {
+        label.textContent = isRegister ? "Criar conta" : "Entrar";
+      }
+
+      setLoginMessage("");
+    }
+
+    function setLoginLoading(isLoading) {
+      if (!operatorLoginBtn) return;
+      operatorLoginBtn.disabled = isLoading;
+      const label = operatorLoginBtn.querySelector("span");
+      if (label) {
+        label.textContent = isLoading
+          ? (operatorAuthMode === "register" ? "Criando..." : "Entrando...")
+          : (operatorAuthMode === "register" ? "Criar conta" : "Entrar");
+      }
+    }
+
+    function setAuthenticatedView(isAuthenticated) {
+      loginView.classList.toggle("hidden", isAuthenticated);
+      operatorApp.classList.toggle("hidden", !isAuthenticated);
+    }
+
+    async function findUserByCpf(cpfLimpo) {
+      const snapshot = await db
+        .collection("users")
+        .where("cpf", "==", cpfLimpo)
+        .limit(1)
+        .get();
+
+      if (snapshot.empty) return null;
+
+      const doc = snapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data()
+      };
+    }
+
+    async function loadUserDataByUid(uid) {
+      if (!uid) return null;
+      const doc = await db.collection("users").doc(uid).get();
+      if (!doc.exists) return null;
+      return {
+        id: doc.id,
+        ...doc.data()
+      };
+    }
+
+    async function loginWithCpfAndPassword(cpf, password) {
+      if (!db || !auth) {
+        throw new Error("Firebase nao foi inicializado corretamente.");
+      }
+
+      const cpfLimpo = onlyNumbers(cpf);
+
+      if (cpfLimpo.length !== 11) {
+        throw new Error("Digite um CPF valido com 11 numeros.");
+      }
+
+      if (!password || password.length < 4) {
+        throw new Error("Digite sua senha.");
+      }
+
+      const userData = await findUserByCpf(cpfLimpo);
+
+      if (!userData) {
+        throw new Error("CPF nao encontrado.");
+      }
+
+      if (!userData.email) {
+        throw new Error("Este usuario nao possui e-mail cadastrado.");
+      }
+
+      const cred = await auth.signInWithEmailAndPassword(userData.email, password);
+      currentUser = cred.user;
+      currentUserData = userData;
+      return { cred, userData };
     }
 
     function setPageScrollLocked(locked) {
@@ -307,6 +921,361 @@
 
       if (dateField && !dateField.value) dateField.value = localDate;
       if (startTimeField && !startTimeField.value) startTimeField.value = localTime;
+    }
+
+    function setFinalizeDefaults() {
+      if (finalizeEndTimeInput && !finalizeEndTimeInput.value) {
+        finalizeEndTimeInput.value = new Date().toTimeString().slice(0, 5);
+      }
+    }
+
+    function getEquipmentModels() {
+      return equipmentModelCatalog;
+    }
+
+    function getSelectedOperatorModelValue() {
+      return operatorModelSelect?.value || "";
+    }
+
+    function getSelectedOperatorTagValue() {
+      return operatorTagSelect?.value || "";
+    }
+
+    function populateOperatorTagOptions(modelValue = "", selectedTag = "") {
+      if (!operatorTagSelect) return;
+
+      const models = getEquipmentModels();
+      const modelEntry = models.find((entry) => entry.model === modelValue);
+      const tags = Array.isArray(modelEntry?.tags) ? modelEntry.tags : [];
+
+      operatorTagSelect.innerHTML = "";
+
+      if (!modelValue) {
+        operatorTagSelect.innerHTML = '<option value="">Selecione a tag</option>';
+        return;
+      }
+
+      if (!tags.length) {
+        operatorTagSelect.innerHTML = '<option value="">Selecione a tag</option>';
+        return;
+      }
+
+      operatorTagSelect.innerHTML = tags.map((tag) => `<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`).join("");
+
+      if (tags.length > 1) {
+        operatorTagSelect.insertAdjacentHTML("afterbegin", '<option value="">Selecione a tag</option>');
+        operatorTagSelect.value = tags.includes(selectedTag) ? selectedTag : "";
+      } else {
+        operatorTagSelect.value = tags[0];
+      }
+    }
+
+    function populateOperatorModelOptions(selectedModel = "", selectedTag = "") {
+      if (!operatorModelSelect) return;
+
+      const models = getEquipmentModels();
+      operatorModelSelect.innerHTML = "";
+
+      operatorModelSelect.insertAdjacentHTML("beforeend", '<option value="">Selecione o modelo</option>');
+      operatorModelSelect.insertAdjacentHTML(
+        "beforeend",
+        models.map((entry) => `<option value="${escapeHtml(entry.model)}">${escapeHtml(entry.model)}</option>`).join("")
+      );
+
+      if (selectedModel && models.some((entry) => entry.model === selectedModel)) {
+        operatorModelSelect.value = selectedModel;
+        populateOperatorTagOptions(selectedModel, selectedTag);
+        return;
+      }
+
+      operatorModelSelect.value = "";
+      populateOperatorTagOptions("", "");
+    }
+
+    function applyAuthenticatedUserToForm() {
+      const operatorName = getOperatorDisplayName() || "Operador";
+
+      if (operatorNameInput) {
+        operatorNameInput.value = operatorName;
+        operatorNameInput.readOnly = true;
+        operatorNameInput.classList.add("bg-slate-50");
+      }
+
+      if (operatorUserName) operatorUserName.textContent = operatorName;
+      if (operatorUserRole) operatorUserRole.textContent = getOperatorRoleLabel();
+    }
+
+    function getChecklistTimestamp(item) {
+      const raw = item?.createdAt?.toDate ? item.createdAt.toDate() : item?.createdAt;
+      const date = raw ? new Date(raw) : null;
+      if (date && !Number.isNaN(date.getTime())) return date.getTime();
+      return 0;
+    }
+
+    function getObservationPartsFromChecklist(checklist = null) {
+      const initialStored = String(checklist?.observacoesIniciais || "").trim();
+      const finalStored = String(checklist?.observacoesFinalTurno || "").trim();
+
+      if (initialStored || finalStored) {
+        return {
+          initial: initialStored,
+          endOfShift: finalStored
+        };
+      }
+
+      const legacyObservation = String(checklist?.observacoes || "").trim();
+      const match = legacyObservation.match(/Falha apos inicio:\s*([\s\S]*)$/i);
+
+      return {
+        initial: match ? legacyObservation.replace(/Falha apos inicio:\s*[\s\S]*$/i, "").trim() : legacyObservation,
+        endOfShift: match ? match[1].trim() : ""
+      };
+    }
+
+    function buildCombinedObservationText(initialObservation = "", endOfShiftObservation = "") {
+      return [
+        initialObservation ? `Observacoes iniciais: ${initialObservation}` : "",
+        endOfShiftObservation ? `Observacoes ao final do turno: ${endOfShiftObservation}` : ""
+      ].filter(Boolean).join("\n\n");
+    }
+
+    function toggleFailureNoteField(container, isFailureSelected) {
+      if (!container) return;
+      const wrapper = container.querySelector("[data-failure-note-wrapper]");
+      const input = container.querySelector("[data-failure-note-input]");
+
+      if (!wrapper || !input) return;
+
+      wrapper.classList.toggle("hidden", !isFailureSelected);
+
+      if (!isFailureSelected) {
+        input.value = "";
+      }
+    }
+
+    function syncFailureNoteFields(root) {
+      if (!root) return;
+
+      root.querySelectorAll("[data-checklist-item]").forEach((itemCard) => {
+        const failureRadio = itemCard.querySelector('input[type="radio"][value="falha"]');
+        toggleFailureNoteField(itemCard, !!failureRadio?.checked);
+      });
+    }
+
+    function setFieldLocked(input, locked) {
+      if (!input) return;
+      input.disabled = !!locked;
+      input.readOnly = !!locked;
+      input.classList.toggle("bg-slate-50", !!locked);
+      input.classList.toggle("cursor-not-allowed", !!locked);
+    }
+
+    function setChecklistEditMode(isEditing) {
+      operatorInitialFields?.classList.toggle("hidden", isEditing);
+      operatorGeneralObservationSection?.classList.toggle("hidden", isEditing);
+      operatorChecklistItemsSection?.classList.toggle("hidden", isEditing);
+      operatorEndTimeWrapper?.classList.remove("hidden");
+      operatorHrKmStartWrapper?.classList.toggle("hidden", isEditing);
+      operatorHrKmEndWrapper?.classList.remove("hidden");
+      toggleFailureCommunicationBtn?.classList.toggle("hidden", !isEditing);
+      changeEquipmentBtn?.classList.toggle("hidden", isEditing);
+
+      if (!isEditing) {
+        operatorFailureCommunicationWrapper?.classList.add("hidden");
+        if (operatorFailureCommunicationInput) {
+          operatorFailureCommunicationInput.value = "";
+        }
+      }
+    }
+
+    function getFormFieldsMap() {
+      return {
+        operatorName: document.getElementById("operatorName"),
+        operatorShift: document.getElementById("operatorShift"),
+        operatorDate: document.getElementById("operatorDate"),
+        operatorModel: document.getElementById("operatorModel"),
+        operatorUnit: document.getElementById("operatorUnit"),
+        operatorStartTime: document.getElementById("operatorStartTime"),
+        operatorEndTime: document.getElementById("operatorEndTime"),
+        operatorHrKmStart: document.getElementById("operatorHrKmStart"),
+        operatorHrKmEnd: document.getElementById("operatorHrKmEnd"),
+        operatorObservation: document.getElementById("operatorObservation")
+      };
+    }
+
+    function applyChecklistFormValues(checklist = null) {
+      const fields = getFormFieldsMap();
+
+      const values = checklist ? {
+        operatorName: checklist.operador || getOperatorDisplayName() || "",
+        operatorShift: checklist.turno || "",
+        operatorDate: checklist.data || "",
+        operatorUnit: checklist.unidade || "",
+        operatorStartTime: checklist.horaInicial || "",
+        operatorEndTime: checklist.horaFinal || "",
+        operatorHrKmStart: checklist.hrKmInicial || "",
+        operatorHrKmEnd: checklist.hrKmFinal || "",
+        operatorObservation: checklist.observacoes || ""
+      } : {
+        operatorName: getOperatorDisplayName() || "",
+        operatorShift: "",
+        operatorDate: "",
+        operatorModel: "",
+        operatorTag: "",
+        operatorUnit: "",
+        operatorStartTime: "",
+        operatorEndTime: "",
+        operatorHrKmStart: "",
+        operatorHrKmEnd: "",
+        operatorObservation: ""
+      };
+
+      Object.entries(fields).forEach(([key, input]) => {
+        if (!input) return;
+        input.value = values[key] || "";
+      });
+
+      populateOperatorModelOptions(checklist?.modelo || "", checklist?.tagPlaca || "");
+    }
+
+    function applyChecklistFieldLocks(checklist = null) {
+      const fields = getFormFieldsMap();
+      const hasChecklist = !!checklist;
+      const editableOnClose = new Set(["operatorEndTime", "operatorHrKmEnd"]);
+
+      Object.entries(fields).forEach(([key, input]) => {
+        if (!input) return;
+
+        if (key === "operatorName") {
+          setFieldLocked(input, true);
+          return;
+        }
+
+        if (editableOnClose.has(key)) {
+          setFieldLocked(input, false);
+          return;
+        }
+
+        if (!hasChecklist) {
+          setFieldLocked(input, false);
+          return;
+        }
+
+        const isFilled = String(input.value || "").trim() !== "";
+        setFieldLocked(input, isFilled);
+      });
+    }
+
+    function updateChecklistCounters(items) {
+      operatorChecklistCount.textContent = String(items.length);
+      operatorChecklistOpenCount.textContent = String(items.filter(item => normalizeText(item.activityStatus || "aberto") !== "finalizado").length);
+      operatorChecklistClosedCount.textContent = String(items.filter(item => normalizeText(item.activityStatus) === "finalizado").length);
+    }
+
+    function renderMyChecklists(items) {
+      updateChecklistCounters(items);
+
+      if (!items.length) {
+        operatorMyChecklistsList.innerHTML = `
+          <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+            <p class="text-base font-bold text-text-primary">Nenhum checklist emitido por voce ainda.</p>
+            <p class="mt-2 text-sm leading-6 text-text-secondary">Assim que voce emitir um checklist, ele aparecera nesta lista.</p>
+          </div>
+        `;
+        return;
+      }
+
+      operatorMyChecklistsList.innerHTML = items.map((item) => {
+        const checklistStatus = getChecklistStatusMeta(item.status);
+        const activityStatus = getActivityStatusMeta(item.activityStatus || "aberto");
+        const hasEndTime = String(item.horaFinal || "").trim() !== "";
+        const equipmentLabel = item.equipment || item.checklistKey || "Checklist";
+        const openSince = hasEndTime ? "Encerrado" : "Em andamento";
+
+        return `
+          <button
+            type="button"
+            class="w-full rounded-[1.6rem] border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-lg sm:p-5"
+            data-action="open-checklist"
+            data-id="${escapeHtml(item.id)}"
+          >
+            <div class="flex flex-col gap-4">
+              <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-text-secondary">${escapeHtml(openSince)}</p>
+                  <h3 class="mt-2 truncate text-lg font-extrabold tracking-tight text-text-primary">${escapeHtml(equipmentLabel)}</h3>
+                </div>
+                <p class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">${escapeHtml(formatDateDisplay(item.data))}</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-secondary">Hora inicial</p>
+                  <p class="mt-2 text-base font-bold text-text-primary">${escapeHtml(item.horaInicial || "-")}</p>
+                </div>
+                <div class="rounded-2xl bg-slate-50 px-4 py-3">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-secondary">Hora final</p>
+                  <p class="mt-2 text-base font-bold text-text-primary">${escapeHtml(item.horaFinal || "-")}</p>
+                </div>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${checklistStatus.className}">
+                  ${checklistStatus.label}
+                </span>
+                <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${activityStatus.className}">
+                  ${activityStatus.label}
+                </span>
+                <span class="ml-auto text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary">Toque para abrir</span>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function subscribeOperatorChecklists() {
+      if (!db || !currentUser?.uid) return;
+
+      if (operatorChecklistsUnsubscribe) {
+        operatorChecklistsUnsubscribe();
+        operatorChecklistsUnsubscribe = null;
+      }
+
+      operatorChecklistsUnsubscribe = db
+        .collection("checklists")
+        .where("createdBy", "==", currentUser.uid)
+        .onSnapshot((snapshot) => {
+          operatorChecklists = snapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data()
+            }))
+            .filter((item) => normalizeText(item.source) === "operador")
+            .sort((a, b) => getChecklistTimestamp(b) - getChecklistTimestamp(a));
+
+          renderMyChecklists(operatorChecklists);
+        }, (error) => {
+          console.error("Erro ao acompanhar checklists do operador:", error);
+          showFeedbackModal(`Nao foi possivel carregar seus checklists: ${error.message}`, "error");
+        });
+    }
+
+    function clearOperatorSessionState() {
+      if (operatorChecklistsUnsubscribe) {
+        operatorChecklistsUnsubscribe();
+        operatorChecklistsUnsubscribe = null;
+      }
+
+      currentUser = null;
+      currentUserData = null;
+      operatorChecklists = [];
+      selectedChecklistToFinalize = null;
+      closeEquipmentModal();
+      closeChecklistModal();
+      closeFinalizeChecklistModal();
+      closeFeedbackModal();
+      renderMyChecklists([]);
+      resetOperatorForm(false);
+      setAuthenticatedView(false);
     }
 
     function openEquipmentModal() {
@@ -333,6 +1302,36 @@
       checklistModal.classList.add("hidden");
       checklistModal.classList.remove("flex");
       if (equipmentSelectionModal.classList.contains("hidden") && feedbackModal.classList.contains("hidden")) {
+        setPageScrollLocked(false);
+      }
+    }
+
+    function openFinalizeChecklistModal(checklistId) {
+      const checklist = operatorChecklists.find((item) => item.id === checklistId);
+
+      if (!checklist) {
+        showFeedbackModal("Checklist nao encontrado para finalizacao.", "error");
+        return;
+      }
+
+      selectedChecklistToFinalize = checklist;
+      finalizeChecklistSubtitle.textContent = `${checklist.equipment || checklist.checklistKey || "Checklist"} â€¢ ${formatDateDisplay(checklist.data)}`;
+      finalizeChecklistForm.reset();
+      finalizeEndTimeInput.value = checklist.horaFinal || "";
+      finalizeHrKmEndInput.value = checklist.hrKmFinal || "";
+      finalizeObservationInput.value = "";
+      setFinalizeDefaults();
+      finalizeChecklistModal.classList.remove("hidden");
+      finalizeChecklistModal.classList.add("flex");
+      setPageScrollLocked(true);
+    }
+
+    function closeFinalizeChecklistModal() {
+      finalizeChecklistModal.classList.add("hidden");
+      finalizeChecklistModal.classList.remove("flex");
+      selectedChecklistToFinalize = null;
+
+      if (equipmentSelectionModal.classList.contains("hidden") && checklistModal.classList.contains("hidden") && feedbackModal.classList.contains("hidden")) {
         setPageScrollLocked(false);
       }
     }
@@ -365,7 +1364,7 @@
     function closeFeedbackModal() {
       feedbackModal.classList.add("hidden");
       feedbackModal.classList.remove("flex");
-      if (equipmentSelectionModal.classList.contains("hidden") && checklistModal.classList.contains("hidden")) {
+      if (equipmentSelectionModal.classList.contains("hidden") && checklistModal.classList.contains("hidden") && finalizeChecklistModal.classList.contains("hidden")) {
         setPageScrollLocked(false);
       }
     }
@@ -395,7 +1394,7 @@
       });
     }
 
-    function renderChecklistItems(def) {
+    function renderChecklistItems(def, checklist = null) {
       operatorChecklistItems.innerHTML = "";
 
       if (!def?.sections?.length) {
@@ -415,10 +1414,22 @@
         const itemsWrapper = document.createElement("div");
         itemsWrapper.className = "space-y-3";
 
+        const failureMap = new Map((checklist?.ocorrencias || []).map((entry) => [String(entry.id), entry]));
+
         section.items.forEach((item) => {
           const groupName = `item_status_${getSectionTitle(section)}_${item.id}`.replace(/\s+/g, "_");
+          const failureEntry = failureMap.get(String(item.id));
+          const isFailure = !!failureEntry;
+          const failureNote = String(
+            failureEntry?.failureNote ||
+            failureEntry?.observacaoCurta ||
+            failureEntry?.observation ||
+            ""
+          ).trim();
+          const isEditing = !!checklist;
           const itemBlock = document.createElement("div");
           itemBlock.className = "rounded-2xl border border-border bg-surface p-4";
+          itemBlock.dataset.checklistItem = "true";
           itemBlock.innerHTML = `
             <div class="flex flex-col gap-3">
               <p class="text-sm leading-relaxed sm:text-base">
@@ -434,7 +1445,8 @@
                     data-section="${escapeHtml(getSectionTitle(section))}"
                     data-text="${escapeHtml(item.text)}"
                     class="h-4 w-4 accent-blue-600"
-                    checked
+                    ${isFailure ? "" : "checked"}
+                    ${isEditing ? "disabled" : ""}
                   >
                   <span class="text-sm">OK</span>
                 </label>
@@ -446,10 +1458,21 @@
                     data-item-id="${escapeHtml(item.id)}"
                     data-section="${escapeHtml(getSectionTitle(section))}"
                     data-text="${escapeHtml(item.text)}"
+                    data-failure-note="${escapeHtml(failureNote)}"
                     class="h-4 w-4 accent-red-600"
+                    ${isFailure ? "checked" : ""}
                   >
                   <span class="text-sm">FALHA</span>
                 </label>
+              </div>
+              <div data-failure-note-wrapper class="${isFailure ? "" : "hidden"}">
+                <input
+                  type="text"
+                  data-failure-note-input
+                  class="w-full min-w-0 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-red-400 focus:ring-2 focus:ring-red-200"
+                  placeholder="Descreva a falha em poucas palavras"
+                  value="${escapeHtml(failureNote)}"
+                >
               </div>
             </div>
           `;
@@ -460,6 +1483,8 @@
         sectionCard.appendChild(itemsWrapper);
         operatorChecklistItems.appendChild(sectionCard);
       });
+
+      syncFailureNoteFields(operatorChecklistItems);
     }
 
     function selectEquipment(equipmentId, equipmentLabel) {
@@ -472,37 +1497,65 @@
 
       selectedEquipmentType = equipmentId;
       selectedEquipmentName = equipmentLabel;
+      editingChecklistId = null;
       selectedEquipmentLabel.textContent = `Equipamento selecionado: ${equipmentLabel}`;
       selectedEquipmentBadge.textContent = equipmentLabel;
       selectedEquipmentBadge.classList.remove("hidden");
 
-      renderChecklistItems(def);
+      applyChecklistFormValues(null);
+      renderChecklistItems(def, null);
+      populateOperatorModelOptions();
       setInitialDateTimeDefaults();
+      applyAuthenticatedUserToForm();
+      applyChecklistFieldLocks(null);
+      setChecklistEditMode(false);
+      submitOperatorChecklistBtn.textContent = "Emitir checklist";
       closeEquipmentModal();
       openChecklistModal();
     }
 
-    async function ensureAnonymousAuth() {
-      if (!auth) {
-        throw new Error("Firebase Auth nao foi inicializado.");
-      }
+    function openChecklistEditor(checklistId) {
+      const checklist = operatorChecklists.find((item) => item.id === checklistId);
 
-      if (auth.currentUser) {
-        anonymousUser = auth.currentUser;
+      if (!checklist) {
+        showFeedbackModal("Checklist nao encontrado.", "error");
         return;
       }
 
-      const cred = await auth.signInAnonymously();
-      anonymousUser = cred.user;
+      const def = getChecklistDef(checklist.checklistKey);
+      if (!def) {
+        showFeedbackModal("Definicao do checklist nao encontrada.", "error");
+        return;
+      }
+
+      editingChecklistId = checklist.id;
+      selectedEquipmentType = checklist.checklistKey || "";
+      selectedEquipmentName = checklist.equipment || checklist.checklistKey || "";
+      selectedEquipmentLabel.textContent = `Equipamento selecionado: ${selectedEquipmentName}`;
+      selectedEquipmentBadge.textContent = selectedEquipmentName;
+      selectedEquipmentBadge.classList.remove("hidden");
+
+      applyChecklistFormValues(checklist);
+      renderChecklistItems(def, checklist);
+      applyChecklistFieldLocks(checklist);
+      setChecklistEditMode(true);
+      submitOperatorChecklistBtn.textContent = "Salvar checklist";
+      closeEquipmentModal();
+      openChecklistModal();
     }
 
     function resetOperatorForm(keepEquipment = false) {
       operatorChecklistForm.reset();
-      operatorChecklistItems.innerHTML = keepEquipment && selectedEquipmentType
-        ? operatorChecklistItems.innerHTML
-        : "";
+      if (keepEquipment && selectedEquipmentType) {
+        const def = getChecklistDef(selectedEquipmentType);
+        renderChecklistItems(def, null);
+        populateOperatorModelOptions();
+      } else {
+        operatorChecklistItems.innerHTML = "";
+      }
 
       if (!keepEquipment) {
+        editingChecklistId = null;
         selectedEquipmentType = "";
         selectedEquipmentName = "";
         selectedEquipmentLabel.textContent = "Nenhum equipamento selecionado.";
@@ -510,7 +1563,15 @@
         selectedEquipmentBadge.classList.add("hidden");
       }
 
+      if (!keepEquipment) {
+        populateOperatorModelOptions();
+      }
+
       setInitialDateTimeDefaults();
+      applyAuthenticatedUserToForm();
+      applyChecklistFieldLocks(null);
+      setChecklistEditMode(false);
+      submitOperatorChecklistBtn.textContent = "Emitir checklist";
     }
 
     async function submitChecklist(event) {
@@ -526,36 +1587,82 @@
         return;
       }
 
-      const operador = document.getElementById("operatorName").value.trim();
+      if (!currentUser?.uid || !currentUserData) {
+        showFeedbackModal("Sua sessao expirou. Entre novamente para emitir checklists.", "error");
+        clearOperatorSessionState();
+        return;
+      }
+
+      const operador = getOperatorDisplayName().trim();
       const turno = document.getElementById("operatorShift").value;
       const data = document.getElementById("operatorDate").value;
-      const modelo = document.getElementById("operatorModel").value.trim();
-      const tagPlaca = document.getElementById("operatorTag").value.trim();
+      const modelo = getSelectedOperatorModelValue();
+      const tagPlaca = getSelectedOperatorTagValue();
       const unidade = document.getElementById("operatorUnit").value.trim();
       const horaInicial = document.getElementById("operatorStartTime").value;
       const horaFinal = document.getElementById("operatorEndTime").value;
       const hrKmInicial = document.getElementById("operatorHrKmStart").value.trim();
       const hrKmFinal = document.getElementById("operatorHrKmEnd").value.trim();
       const observacoes = document.getElementById("operatorObservation").value.trim();
+      const failureCommunication = operatorFailureCommunicationInput?.value.trim() || "";
 
-      if (!operador || !turno || !data || !modelo || !tagPlaca || !unidade || !horaInicial || !hrKmInicial) {
+      if (editingChecklistId) {
+        if (!horaFinal || !hrKmFinal) {
+          showFeedbackModal("Preencha a hora final e o HR/KM final para encerrar a atividade.", "error");
+          return;
+        }
+      }
+
+      if (!editingChecklistId && (!operador || !turno || !data || !modelo || !tagPlaca || !unidade || !horaInicial || !hrKmInicial)) {
         showFeedbackModal("Preencha os campos obrigatorios do cabecalho.", "error");
         return;
       }
-
-      const selectedFailures = Array.from(
-        document.querySelectorAll('#operatorChecklistItems input[type="radio"][value="falha"]:checked')
-      ).map((input) => ({
-        id: input.dataset.itemId,
-        section: input.dataset.section,
-        text: input.dataset.text
-      }));
 
       submitOperatorChecklistBtn.disabled = true;
       submitOperatorChecklistBtn.textContent = "Enviando...";
 
       try {
-        await ensureAnonymousAuth();
+        const isFinishedOnCreate = Boolean(horaFinal && hrKmFinal);
+        const selectedFailuresPayload = editingChecklistId
+          ? []
+          : Array.from(
+              document.querySelectorAll('#operatorChecklistItems input[type="radio"][value="falha"]:checked')
+            ).map((input) => {
+              const itemCard = input.closest("[data-checklist-item]");
+              const failureNote = itemCard?.querySelector("[data-failure-note-input]")?.value.trim() || "";
+
+              return {
+                id: input.dataset.itemId,
+                section: input.dataset.section,
+                text: input.dataset.text,
+                failureNote
+              };
+            });
+
+        if (editingChecklistId) {
+          const currentChecklist = operatorChecklists.find((item) => item.id === editingChecklistId);
+          const currentObservationParts = getObservationPartsFromChecklist(currentChecklist);
+          const initialObservations = currentObservationParts.initial;
+          const endOfShiftObservations = failureCommunication || currentObservationParts.endOfShift;
+          const mergedObservation = buildCombinedObservationText(initialObservations, endOfShiftObservations);
+
+          await db.collection("checklists").doc(editingChecklistId).update({
+            horaFinal,
+            hrKmFinal,
+            observacoesIniciais: initialObservations,
+            observacoesFinalTurno: endOfShiftObservations,
+            observacoes: mergedObservation,
+            status: failureCommunication ? "nao-conforme" : "conforme",
+            activityStatus: "finalizado",
+            finalizedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          showFeedbackModal("Checklist atualizado com sucesso.", "success");
+          resetOperatorForm(false);
+          closeChecklistModal();
+          return;
+        }
 
         await db.collection("checklists").add({
           checklistKey: selectedEquipmentType,
@@ -570,13 +1677,19 @@
           horaFinal,
           hrKmInicial,
           hrKmFinal,
-          observacoes,
-          ocorrencias: selectedFailures,
-          status: selectedFailures.length > 0 ? "nao-conforme" : "conforme",
-          createdBy: anonymousUser?.uid || null,
+          observacoesIniciais: observacoes,
+          observacoesFinalTurno: "",
+          observacoes: buildCombinedObservationText(observacoes, ""),
+          ocorrencias: selectedFailuresPayload,
+          status: selectedFailuresPayload.length > 0 ? "nao-conforme" : "conforme",
+          activityStatus: isFinishedOnCreate ? "finalizado" : "aberto",
+          createdBy: currentUser.uid,
           createdByName: operador,
+          createdByCpf: currentUserData?.cpf || null,
           source: "operador",
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          finalizedAt: isFinishedOnCreate ? firebase.firestore.FieldValue.serverTimestamp() : null
         });
 
         showFeedbackModal(`Checklist de ${selectedEquipmentName} emitido com sucesso.`, "success");
@@ -591,16 +1704,195 @@
       }
     }
 
+    async function submitFinalizeChecklist(event) {
+      event.preventDefault();
+
+      if (!db || !selectedChecklistToFinalize?.id || !currentUser?.uid) {
+        showFeedbackModal("Nao foi possivel finalizar este checklist.", "error");
+        return;
+      }
+
+      const horaFinal = finalizeEndTimeInput.value;
+      const hrKmFinal = finalizeHrKmEndInput.value.trim();
+      const observacaoFinal = finalizeObservationInput.value.trim();
+
+      if (!horaFinal || !hrKmFinal) {
+        showFeedbackModal("Preencha a hora final e o HR/KM final para concluir.", "error");
+        return;
+      }
+
+      submitFinalizeChecklistBtn.disabled = true;
+      submitFinalizeChecklistBtn.textContent = "Salvando...";
+
+      try {
+        const existingObservationParts = getObservationPartsFromChecklist(selectedChecklistToFinalize);
+        const existingInitialObservation = existingObservationParts.initial;
+        const finalObservation = observacaoFinal || existingObservationParts.endOfShift;
+        const mergedObservation = buildCombinedObservationText(existingInitialObservation, finalObservation);
+
+        await db.collection("checklists").doc(selectedChecklistToFinalize.id).update({
+          horaFinal,
+          hrKmFinal,
+          observacoesIniciais: existingInitialObservation,
+          observacoesFinalTurno: finalObservation,
+          observacoes: mergedObservation,
+          activityStatus: "finalizado",
+          finalizedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        closeFinalizeChecklistModal();
+        showFeedbackModal("Checklist finalizado com sucesso.", "success");
+      } catch (error) {
+        console.error("Erro ao finalizar checklist:", error);
+        showFeedbackModal(`Nao foi possivel finalizar o checklist: ${error.message}`, "error");
+      } finally {
+        submitFinalizeChecklistBtn.disabled = false;
+        submitFinalizeChecklistBtn.textContent = "Salvar finalizaÃ§Ã£o";
+      }
+    }
+
+    async function handleOperatorLogin(event) {
+      event.preventDefault();
+      setLoginMessage("");
+      setLoginLoading(true);
+
+      try {
+        if (operatorAuthMode === "register") {
+          const firstName = (operatorRegFirstNameInput?.value.trim() || "").toUpperCase();
+          const lastName = (operatorRegLastNameInput?.value.trim() || "").toUpperCase();
+          const cpf = onlyNumbers(operatorCpfInput.value);
+          const email = cpfToInternalEmail(cpf);
+          const role = (operatorRegRoleInput?.value.trim() || "").toUpperCase();
+          const password = operatorPasswordInput.value;
+          const confirmPassword = operatorConfirmPasswordInput?.value || "";
+
+          if (!db || !auth) throw new Error("Firebase nao foi inicializado corretamente.");
+          if (!firstName) throw new Error("Digite seu nome.");
+          if (!lastName) throw new Error("Digite seu ultimo nome.");
+          if (cpf.length !== 11) throw new Error("CPF invalido.");
+          if (!role) throw new Error("Informe a funcao.");
+          if (password.length < 6) throw new Error("A senha deve ter pelo menos 6 digitos.");
+          if (password !== confirmPassword) throw new Error("As senhas nao coincidem.");
+
+          const cred = await auth.createUserWithEmailAndPassword(email, password);
+          const fullName = `${firstName} ${lastName}`.trim();
+
+          await db.collection("users").doc(cred.user.uid).set({
+            name: fullName,
+            firstName,
+            lastName,
+            cpf,
+            email,
+            role,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          await auth.signOut();
+          operatorLoginForm.reset();
+          setOperatorAuthMode("login");
+          setLoginMessage("Conta criada com sucesso. FaÃ§a login para continuar.", "success");
+          return;
+        }
+
+        await loginWithCpfAndPassword(operatorCpfInput.value, operatorPasswordInput.value);
+        operatorPasswordInput.value = "";
+        applyAuthenticatedUserToForm();
+        setAuthenticatedView(true);
+        subscribeOperatorChecklists();
+      } catch (error) {
+        console.error("Erro ao autenticar operador:", error);
+        setLoginMessage(error.message || "Nao foi possivel entrar.");
+      } finally {
+        setLoginLoading(false);
+      }
+    }
+
+    async function handleOperatorLogout() {
+      try {
+        if (auth?.currentUser) {
+          await auth.signOut();
+        }
+      } catch (error) {
+        console.error("Erro ao sair da sessao:", error);
+      } finally {
+        clearOperatorSessionState();
+      }
+    }
+
+    async function hydrateAuthenticatedSession(user) {
+      if (!user || user.isAnonymous) {
+        clearOperatorSessionState();
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+        currentUserData = await loadUserDataByUid(user.uid);
+      } catch (error) {
+        console.error("Erro ao carregar dados do operador:", error);
+      }
+
+      if (!currentUserData) {
+        await handleOperatorLogout();
+        setLoginMessage("Sua conta nao possui cadastro valido na colecao de usuarios.");
+        return;
+      }
+
+      applyAuthenticatedUserToForm();
+      setAuthenticatedView(true);
+      subscribeOperatorChecklists();
+    }
+
+    function bindMyChecklistActions() {
+      operatorMyChecklistsList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-action='open-checklist']");
+        if (!button) return;
+        openChecklistEditor(button.dataset.id);
+      });
+    }
+
+    function bindChecklistFailureInteractions() {
+      toggleFailureCommunicationBtn?.addEventListener("click", () => {
+        operatorFailureCommunicationWrapper?.classList.toggle("hidden");
+      });
+
+      operatorChecklistItems.addEventListener("change", (event) => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement)) return;
+        if (input.type === "radio") {
+          const itemCard = input.closest("[data-checklist-item]");
+          if (itemCard) {
+            toggleFailureNoteField(itemCard, input.value === "falha");
+          }
+        }
+
+        if (input.value !== "falha" || !editingChecklistId) return;
+        operatorFailureCommunicationWrapper?.classList.remove("hidden");
+      });
+    }
+
     populateEquipmentGrid();
     setInitialDateTimeDefaults();
+    setFinalizeDefaults();
+    setOperatorAuthMode("login");
+    forceUppercaseInput(operatorRegFirstNameInput);
+    forceUppercaseInput(operatorRegLastNameInput);
+    forceUppercaseInput(operatorRegRoleInput);
+    renderMyChecklists([]);
+    bindMyChecklistActions();
+    bindChecklistFailureInteractions();
 
-    ensureAnonymousAuth().catch((error) => {
-      console.error("Erro no login anonimo:", error);
+    operatorModelSelect?.addEventListener("change", () => {
+      populateOperatorTagOptions(operatorModelSelect.value, "");
     });
 
     openEquipmentModalBtn.addEventListener("click", openEquipmentModal);
     closeEquipmentModalBtn.addEventListener("click", closeEquipmentModal);
     closeChecklistModalBtn.addEventListener("click", closeChecklistModal);
+    closeFinalizeChecklistModalBtn.addEventListener("click", closeFinalizeChecklistModal);
+    cancelFinalizeChecklistBtn.addEventListener("click", closeFinalizeChecklistModal);
     closeFeedbackModalBtn.addEventListener("click", closeFeedbackModal);
     feedbackModalConfirmBtn.addEventListener("click", closeFeedbackModal);
     changeEquipmentBtn.addEventListener("click", () => {
@@ -609,6 +1901,20 @@
     });
     resetOperatorFormBtn.addEventListener("click", () => resetOperatorForm(true));
     operatorChecklistForm.addEventListener("submit", submitChecklist);
+    finalizeChecklistForm.addEventListener("submit", submitFinalizeChecklist);
+    operatorLoginForm.addEventListener("submit", handleOperatorLogin);
+    operatorRegisterBtn?.addEventListener("click", () => {
+      operatorLoginForm.reset();
+      setOperatorAuthMode("register");
+    });
+    operatorBackToLoginBtn?.addEventListener("click", () => {
+      operatorLoginForm.reset();
+      setOperatorAuthMode("login");
+    });
+    operatorLogoutBtn.addEventListener("click", handleOperatorLogout);
+    operatorCpfInput.addEventListener("input", () => {
+      operatorCpfInput.value = formatCpf(operatorCpfInput.value);
+    });
 
     equipmentSelectionModal.addEventListener("click", (event) => {
       if (event.target === equipmentSelectionModal) {
@@ -622,11 +1928,22 @@
       }
     });
 
+    finalizeChecklistModal.addEventListener("click", (event) => {
+      if (event.target === finalizeChecklistModal) {
+        closeFinalizeChecklistModal();
+      }
+    });
+
     feedbackModal.addEventListener("click", (event) => {
       if (event.target === feedbackModal) {
         closeFeedbackModal();
       }
     });
+
+    auth?.onAuthStateChanged(async (user) => {
+      await hydrateAuthenticatedSession(user);
+    });
   </script>
 </body>
 </html>
+
