@@ -83,6 +83,11 @@ try {
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .chart-container { position: relative; }
+    @media (max-width: 639px) {
+      .mobile-chart-card { padding: 1rem; }
+      .mobile-chart-height-lg { height: 240px !important; }
+      .mobile-chart-height-md { height: 220px !important; }
+    }
   </style>
   <style>body { box-sizing: border-box; }</style>
  </head>
@@ -263,30 +268,27 @@ Primeiro acesso / Cadastre-se
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden"></div><!-- MAIN CONTENT AREA -->
     <main class="flex-1 overflow-y-auto bg-surface"><!-- DASHBOARD PAGE -->
      <div id="page-dashboard" class="page-content p-4 lg:p-6 fade-in"><!-- Page Header with Period Selector -->
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-       <div>
+      <div class="mb-6 flex flex-col gap-4">
+       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
         <h2 class="text-2xl font-bold text-text-primary">Dashboard Operacional</h2>
         <p class="text-text-secondary mt-1">Análise em tempo real de falhas e manutenção</p>
+        </div>
+        <button id="toggleDashboardFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+         </svg><span>Filtros</span> </button>
        </div>
-       <button id="openDashboardFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors self-start sm:self-auto">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-        <span>Filtros</span>
-       </button>
-     </div>
-     <div id="dashboardFiltersPanel" class="hidden bg-card rounded-2xl border border-border p-4 mb-6">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-       <div><label class="block text-sm font-medium text-text-primary mb-2">Data</label> <input type="date" id="dashboardDateFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+       <div id="dashboardFiltersContainer" class="hidden bg-card rounded-2xl border border-border p-4 fade-in">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+         <div><label class="block text-sm font-medium text-text-primary mb-2">Data</label> <input type="date" id="dashboardDateFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+         </div>
+         <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="dashboardEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> </select>
+         </div>
+         <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="dashboardStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+         </div>
+        </div>
        </div>
-       <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="dashboardEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> </select>
-       </div>
-       <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="dashboardStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
-       </div>
-      </div>
-      <div class="mt-4 flex flex-col sm:flex-row gap-3">
-       <button id="applyDashboardFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">Aplicar filtros</button>
-       <button id="clearDashboardFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">Limpar filtros</button>
-      </div>
-     </div><!-- Stats Cards -->
+      </div><!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
        <div class="bg-card rounded-2xl p-5 border border-border card-hover">
         <div class="flex items-center justify-between mb-3">
@@ -331,24 +333,24 @@ Primeiro acesso / Cadastre-se
       </div><!-- Analytics Grid - Part 1 -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
        <!-- Chart 1: Evolution of Failures Over Time -->
-       <div id="dashboardFailureAnalysisCard" class="bg-card rounded-2xl border border-border p-6">
+       <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-4">
-         <h3 class="font-semibold text-text-primary text-lg mb-1">Evolução de Falhas</h3>
+         <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Evolução de Falhas</h3>
          <p class="text-sm text-text-secondary">Taxa de falhas detectadas por dia</p>
         </div>
-        <div class="chart-container" style="height: 300px;">
+        <div class="chart-container mobile-chart-height-lg" style="height: 300px;">
          <canvas id="failureTrendChart"></canvas>
         </div>
         <div class="mt-4 pt-4 border-t border-border">
          <p class="text-xs text-text-secondary text-center">📊 Dados sincronizados com Firestore em tempo real</p>
         </div>
        </div><!-- Chart 2: Equipment with Most Failures -->
-       <div class="bg-card rounded-2xl border border-border p-6">
+       <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-4">
-         <h3 class="font-semibold text-text-primary text-lg mb-1">Falhas Marcadas por Equipamento</h3>
-         <p class="text-sm text-text-secondary">Soma das falhas dos checklists do mês atual</p>
+         <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Falhas Marcadas por Equipamento</h3>
+<p class="text-sm text-text-secondary">Quantidade de itens marcados na emissão do checklist</p>
         </div>
-        <div class="chart-container" style="height: 300px;">
+        <div class="chart-container mobile-chart-height-lg" style="height: 300px;">
          <canvas id="equipmentFailuresChart"></canvas>
         </div>
         <div class="mt-4 pt-4 border-t border-border">
@@ -358,31 +360,30 @@ Primeiro acesso / Cadastre-se
       </div><!-- Analytics Grid - Part 2 -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
        <!-- Chart 3: Failure Rate per Checklist -->
-       <div class="bg-card rounded-2xl border border-border p-6">
+       <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-4">
-         <h3 class="font-semibold text-text-primary text-lg mb-1">Taxa de Falha por Checklist</h3>
+         <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Taxa de Falha por Checklist</h3>
          <p class="text-sm text-text-secondary">Falhas encontradas em cada execução</p>
         </div>
-        <div class="chart-container" style="height: 280px;">
+        <div class="chart-container mobile-chart-height-md" style="height: 280px;">
          <canvas id="failureRateChart"></canvas>
         </div>
         <div class="mt-4 pt-4 border-t border-border">
          <p class="text-xs text-text-secondary text-center">📈 Monitoramento contínuo de qualidade operacional</p>
         </div>
        </div><!-- Chart 4: Advanced Failure Analysis by System -->
-       <div class="bg-card rounded-2xl border border-border p-6">
+       <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-6">
-         <h3 class="font-semibold text-text-primary text-lg mb-4">Análise de Falhas por Sistema</h3><!-- Interactive Filters -->
-         <div id="dashboardFiltersContainer" class="mb-6 p-4 bg-surface-dark rounded-xl border border-border space-y-4">
-         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><!-- Equipment Filter -->
-          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Maquinário</label> <select id="equipmentSystemFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"><option value="">Selecione</option></select>
+         <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-4">Análise de Falhas por Sistema</h3><!-- Interactive Filters -->
+         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6"><!-- Equipment Filter -->
+          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Maquinário</label> <select id="equipmentSystemFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="veiculo_leve">Veículos Leves</option> <option value="caminhao_basculante">Caminhão Basculante</option> <option value="caminhao_carroceria">Caminhão Carroceria</option> <option value="caminhao_comboio">Caminhão Comboio</option> <option value="caminhao_munck">Caminhão Munck</option> <option value="caminhao_pipa">Caminhão Pipa</option> <option value="carregadeira">Carregadeira</option> <option value="cavalo_mecanico">Cavalo Mecânico</option> <option value="compressor">Compressor</option> <option value="escavadeira">Escavadeira</option> <option value="gerador_energia">Gerador de Energia</option> <option value="mini_carregadeira">Mini Carregadeira</option> <option value="motoniveladora">Motoniveladora</option> <option value="onibus">Ônibus</option> <option value="perfuratriz">Perfuratriz</option> <option value="prancha">Prancha</option> <option value="retroescavadeira">Retroescavadeira</option> <option value="rompedor">Rompedor</option> <option value="trator_esteira">Trator de Esteira</option> </select>
           </div><!-- System/Sector Filter -->
-          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Sistema</label> <select id="systemTypeFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="todos">Todos</option> <option value="motor">Motor</option> <option value="hidraulico">Sistema Hidráulico</option> <option value="eletrico">Sistema Elétrico</option> <option value="arrefecimento">Sistema de Arrefecimento</option> <option value="combustivel">Sistema de Combustível</option> <option value="transmissao">Sistema de Transmissão</option> <option value="freios">Sistema de Freios</option> <option value="pneus">Pneus e Rodas</option> <option value="iluminacao">Iluminação e Sinalização</option> <option value="cabine">Cabine e Segurança</option> <option value="estrutura">Estrutura e Chassi</option> <option value="pneumatico">Sistema Pneumático</option> <option value="operacional">Componentes Operacionais</option> </select>
+          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Sistema</label> <select id="systemTypeFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="motor">Motor</option> <option value="hidraulico">Sistema Hidráulico</option> <option value="eletrico">Sistema Elétrico</option> <option value="arrefecimento">Sistema de Arrefecimento</option> <option value="combustivel">Sistema de Combustível</option> <option value="transmissao">Sistema de Transmissão</option> <option value="freios">Sistema de Freios</option> <option value="pneus">Pneus e Rodas</option> <option value="iluminacao">Iluminação e Sinalização</option> <option value="cabine">Cabine e Segurança</option> <option value="estrutura">Estrutura e Chassi</option> <option value="pneumatico">Sistema Pneumático</option> <option value="operacional">Componentes Operacionais</option> </select>
           </div><!-- Period Filter -->
           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label> <select id="failureAnalysisPeriod" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="7">Últimos 7 dias</option> <option value="30">Últimos 30 dias</option> <option value="90">Últimos 90 dias</option> <option value="custom">Personalizado</option> </select>
           </div>
          </div><!-- Custom Period Filter Section (Hidden by default) -->
-         <div id="customPeriodSection" class="hidden p-4 bg-white rounded-lg border border-border">
+         <div id="customPeriodSection" class="hidden mb-6 p-4 bg-surface-dark rounded-lg border border-border">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
            <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Tipo de Filtro</label> <select id="customFilterType" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="day">Dia Específico</option> <option value="range">Período (Data Inicial - Final)</option> </select>
            </div><!-- Day-specific filter -->
@@ -397,17 +398,16 @@ Primeiro acesso / Cadastre-se
            <button id="applyCustomFilter" class="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors">Aplicar Filtro</button> <button id="clearCustomFilter" class="flex-1 px-4 py-2 bg-surface border border-border hover:bg-surface-dark text-text-primary rounded-lg text-sm font-medium transition-colors">Limpar</button>
           </div>
          </div>
-         </div>
         </div><!-- Analysis Chart -->
-        <div class="chart-container mb-6" style="height: 280px;">
+        <div class="chart-container mb-6 mobile-chart-height-md" style="height: 280px;">
          <canvas id="failureAnalysisChart"></canvas>
         </div><!-- Firebase Integration Note -->
         <div class="mt-4 pt-4 border-t border-border">
          <p class="text-xs text-text-secondary text-center">🔧 Análise em tempo real de checklists realizados</p>
         </div>
        </div>
-     </div><!-- Recent Activity and Pending Maintenance -->
-     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      </div><!-- Recent Activity and Pending Maintenance -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
        <!-- Recent Activity -->
        <div class="lg:col-span-2 bg-card rounded-2xl border border-border overflow-hidden max-h-[420px] flex flex-col">
         <div class="px-5 py-4 border-b border-border flex items-center justify-between bg-surface-dark">
@@ -440,8 +440,8 @@ Primeiro acesso / Cadastre-se
         <div class="px-4 py-3 border-t border-border">
          <p id="criticalMaintenanceFooter" class="text-xs text-text-secondary text-center">🔧 0 manutenções na fila</p>
         </div>
+       </div>
       </div>
-     </div>
      </div><!-- CHECKLISTS PAGE -->
      <div id="page-checklists" class="page-content hidden p-4 lg:p-6 fade-in">
       <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -680,74 +680,177 @@ Primeiro acesso / Cadastre-se
 <div id="page-configuracoes" class="page-content hidden p-4 lg:p-6 fade-in">
   <div class="mb-6">
     <h2 class="text-2xl font-bold text-text-primary">Configurações</h2>
-    <p class="text-text-secondary mt-1">Módulo reservado para ajustes avançados do sistema</p>
+    <p class="text-text-secondary mt-1">Conta, preferências operacionais e segurança do acesso</p>
   </div>
 
-  <div class="relative overflow-hidden rounded-[2rem]">
-    <div class="pointer-events-none select-none blur-sm opacity-40">
-      <div class="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6">
+  <div class="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-6">
+    <div class="space-y-6">
+      <form id="settingsForm" class="bg-card rounded-2xl border border-border p-6">
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 class="font-semibold text-text-primary text-lg">Conta e Preferências</h3>
+            <p class="text-sm text-text-secondary mt-1">Atualize os dados do perfil e os padrões usados no sistema.</p>
+          </div>
+          <div id="settingsStatus" class="hidden text-sm px-3 py-2 rounded-xl"></div>
+        </div>
+
         <div class="space-y-6">
-          <div class="bg-card rounded-2xl border border-border p-6">
-            <div class="mb-5">
-              <h3 class="font-semibold text-text-primary mb-2">Perfil do Usuário</h3>
-              <p class="text-sm text-text-secondary">Atualize nome, e-mail, turno padrão e permissões da conta.</p>
-            </div>
+          <div>
+            <h4 class="text-sm font-semibold uppercase tracking-wide text-text-secondary mb-4">Conta</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="h-11 rounded-xl bg-surface border border-border"></div>
-              <div class="h-11 rounded-xl bg-surface border border-border"></div>
-              <div class="h-11 rounded-xl bg-surface border border-border"></div>
-              <div class="h-11 rounded-xl bg-surface border border-border"></div>
-              <div class="h-11 rounded-xl bg-surface border border-border"></div>
-              <div class="h-11 rounded-xl bg-surface border border-border"></div>
+              <div>
+                <label for="settingsName" class="block text-sm font-medium text-text-primary mb-2">Nome</label>
+                <input type="text" id="settingsName" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+              </div>
+              <div>
+                <label for="settingsRole" class="block text-sm font-medium text-text-primary mb-2">Função</label>
+                <input type="text" id="settingsRole" readonly class="w-full px-4 py-3 border border-border rounded-xl bg-surface text-text-secondary outline-none">
+              </div>
+              <div>
+                <label for="settingsCpf" class="block text-sm font-medium text-text-primary mb-2">CPF</label>
+                <input type="text" id="settingsCpf" readonly class="w-full px-4 py-3 border border-border rounded-xl bg-surface text-text-secondary outline-none">
+              </div>
+              <div>
+                <label for="settingsEmail" class="block text-sm font-medium text-text-primary mb-2">E-mail interno</label>
+                <input type="text" id="settingsEmail" readonly class="w-full px-4 py-3 border border-border rounded-xl bg-surface text-text-secondary outline-none">
+              </div>
             </div>
           </div>
 
-          <div class="bg-card rounded-2xl border border-border p-6">
-            <h3 class="font-semibold text-text-primary mb-4">Preferências</h3>
-            <div class="space-y-4">
-              <div class="h-16 rounded-xl bg-surface border border-border"></div>
-              <div class="h-16 rounded-xl bg-surface border border-border"></div>
-              <div class="h-16 rounded-xl bg-surface border border-border"></div>
+          <div>
+            <h4 class="text-sm font-semibold uppercase tracking-wide text-text-secondary mb-4">Preferências</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="settingsShift" class="block text-sm font-medium text-text-primary mb-2">Turno padrão</label>
+                <select id="settingsShift" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                  <option value="">Não definido</option>
+                  <option value="1º TURNO">1º TURNO</option>
+                  <option value="2º TURNO">2º TURNO</option>
+                  <option value="3º TURNO">3º TURNO</option>
+                </select>
+              </div>
+              <div>
+                <label for="settingsUnit" class="block text-sm font-medium text-text-primary mb-2">Unidade padrão</label>
+                <input type="text" id="settingsUnit" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Ex: Unidade Serra Sul">
+              </div>
+              <div>
+                <label for="settingsLandingPage" class="block text-sm font-medium text-text-primary mb-2">Página inicial</label>
+                <select id="settingsLandingPage" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                  <option value="dashboard">Dashboard</option>
+                  <option value="checklists">Checklists</option>
+                  <option value="historico">Histórico</option>
+                  <option value="relatorios">Relatórios</option>
+                  <option value="configuracoes">Configurações</option>
+                </select>
+              </div>
+              <div>
+                <label for="settingsSignature" class="block text-sm font-medium text-text-primary mb-2">Assinatura padrão</label>
+                <input type="text" id="settingsSignature" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Nome exibido nos registros">
+              </div>
+              <div class="sm:col-span-2">
+                <label for="settingsDefaultObservation" class="block text-sm font-medium text-text-primary mb-2">Observação padrão</label>
+                <textarea id="settingsDefaultObservation" rows="4" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-y" placeholder="Texto opcional para pré-preencher observações"></textarea>
+              </div>
             </div>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-semibold uppercase tracking-wide text-text-secondary mb-4">Notificações</h4>
+            <div class="space-y-3">
+              <label class="flex items-start gap-3 rounded-xl border border-border bg-surface px-4 py-3">
+                <input type="checkbox" id="settingsMaintenanceAlerts" class="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                <span>
+                  <span class="block text-sm font-medium text-text-primary">Alertas de manutenção</span>
+                  <span class="block text-xs text-text-secondary mt-1">Receber destaques de checklists não conformes.</span>
+                </span>
+              </label>
+              <label class="flex items-start gap-3 rounded-xl border border-border bg-surface px-4 py-3">
+                <input type="checkbox" id="settingsChecklistReminder" class="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                <span>
+                  <span class="block text-sm font-medium text-text-primary">Lembrete de checklist</span>
+                  <span class="block text-xs text-text-secondary mt-1">Manter avisos operacionais na abertura do sistema.</span>
+                </span>
+              </label>
+              <label class="flex items-start gap-3 rounded-xl border border-border bg-surface px-4 py-3">
+                <input type="checkbox" id="settingsDailyReport" class="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary">
+                <span>
+                  <span class="block text-sm font-medium text-text-primary">Resumo diário</span>
+                  <span class="block text-xs text-text-secondary mt-1">Habilitar visão consolidada para acompanhamento diário.</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pt-2 flex flex-col sm:flex-row gap-3">
+            <button id="saveSettingsBtn" type="submit" class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">
+              Salvar Alterações
+            </button>
+            <button id="resetSettingsBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">
+              Restaurar
+            </button>
           </div>
         </div>
+      </form>
 
-        <div class="space-y-6">
-          <div class="bg-card rounded-2xl border border-border p-6">
-            <h3 class="font-semibold text-text-primary mb-4">Resumo da Conta</h3>
-            <div class="space-y-4">
-              <div class="h-20 rounded-xl bg-surface border border-border"></div>
-              <div class="h-20 rounded-xl bg-surface border border-border"></div>
-              <div class="h-20 rounded-xl bg-surface border border-border"></div>
-            </div>
-          </div>
-
-          <div class="bg-card rounded-2xl border border-border p-6">
-            <h3 class="font-semibold text-text-primary mb-4">Sincronização</h3>
-            <div class="h-24 rounded-xl bg-surface border border-border"></div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <div class="absolute inset-0 flex items-center justify-center p-6">
-      <div class="w-full max-w-2xl bg-white/92 backdrop-blur-md rounded-3xl border border-white/70 shadow-2xl p-8 text-center">
-        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold text-text-primary">Futura Implementação</h3>
-        <p class="text-text-secondary mt-3">A área de configurações está reservada para a próxima etapa do sistema. Aqui ficarão perfil do usuário, permissões, preferências e parâmetros operacionais.</p>
-        <div class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning/10 text-warning text-sm font-semibold">
-          <span class="w-2.5 h-2.5 rounded-full bg-warning pulse-dot"></span>
-          Em preparação
+    <div class="space-y-6">
+      <div class="bg-card rounded-2xl border border-border p-6">
+        <h3 class="font-semibold text-text-primary text-lg mb-4">Resumo da Conta</h3>
+        <div class="space-y-4">
+          <div class="rounded-xl border border-border bg-surface px-4 py-4">
+            <p class="text-xs uppercase tracking-wide text-text-secondary font-semibold">Usuário</p>
+            <p id="settingsSummaryName" class="text-base font-semibold text-text-primary mt-2">Usuário</p>
+            <p id="settingsSummaryRole" class="text-sm text-text-secondary mt-1">Operador</p>
+          </div>
+          <div class="rounded-xl border border-border bg-surface px-4 py-4">
+            <p class="text-xs uppercase tracking-wide text-text-secondary font-semibold">Turno padrão</p>
+            <p id="settingsSummaryShift" class="text-base font-semibold text-text-primary mt-2">Não definido</p>
+          </div>
+          <div class="rounded-xl border border-border bg-surface px-4 py-4">
+            <p class="text-xs uppercase tracking-wide text-text-secondary font-semibold">Unidade padrão</p>
+            <p id="settingsSummaryUnit" class="text-base font-semibold text-text-primary mt-2">Não definida</p>
+          </div>
+          <div class="rounded-xl border border-border bg-surface px-4 py-4">
+            <p class="text-xs uppercase tracking-wide text-text-secondary font-semibold">Página inicial</p>
+            <p id="settingsSummaryLandingPage" class="text-base font-semibold text-text-primary mt-2">Dashboard</p>
+          </div>
         </div>
       </div>
+
+      <form id="passwordSettingsForm" class="bg-card rounded-2xl border border-border p-6">
+        <div class="mb-5 flex flex-col gap-3">
+          <div>
+            <h3 class="font-semibold text-text-primary text-lg">Segurança</h3>
+            <p class="text-sm text-text-secondary mt-1">Altere sua senha usando a senha atual para confirmar a identidade.</p>
+          </div>
+          <div id="settingsPasswordStatus" class="hidden text-sm px-3 py-2 rounded-xl"></div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label for="settingsCurrentPassword" class="block text-sm font-medium text-text-primary mb-2">Senha atual</label>
+            <input type="password" id="settingsCurrentPassword" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Digite sua senha atual">
+          </div>
+          <div>
+            <label for="settingsNewPassword" class="block text-sm font-medium text-text-primary mb-2">Nova senha</label>
+            <input type="password" id="settingsNewPassword" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div>
+            <label for="settingsConfirmPassword" class="block text-sm font-medium text-text-primary mb-2">Confirmar nova senha</label>
+            <input type="password" id="settingsConfirmPassword" class="w-full px-4 py-3 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Repita a nova senha">
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <button id="changePasswordBtn" type="submit" class="inline-flex w-full items-center justify-center px-5 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">
+            Atualizar Senha
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
-     </div>
     </main>
    </div>
    <!-- MACHINE SELECTION MODAL -->
@@ -978,11 +1081,6 @@ Primeiro acesso / Cadastre-se
     let currentPage = 'dashboard';
     let isLoggedIn = false;
     let chartInstances = {};
-    let appliedDashboardFilters = {
-      date: '',
-      equipment: '',
-      status: ''
-    };
     let appliedChecklistFilters = {
       date: '',
       equipment: '',
@@ -999,6 +1097,7 @@ let currentUserData = null;
 let notificationsOpen = false;
 let notificationsDismissed = false;
 let notificationsClearedAt = 0;
+let notificationsReadMap = {};
 let reportActivityHistory = [];
 
 function onlyNumbers(value = '') {
@@ -1040,7 +1139,7 @@ function getStatusPresentation(status) {
   }
 
   if (value === 'nao-conforme') {
-    return { value, label: 'Não Conforme', color: 'warning' };
+    return { value, label: 'Não Conforme', color: 'danger' };
   }
 
   if (value === 'concluido') {
@@ -1129,7 +1228,10 @@ function getNotificationStateFromUserData() {
     dismissed: !!state.dismissed,
     clearedAt: state.clearedAt
       ? new Date(state.clearedAt).getTime() || 0
-      : 0
+      : 0,
+    readMap: state.readMap && typeof state.readMap === 'object'
+      ? state.readMap
+      : {}
   };
 }
 
@@ -1137,6 +1239,7 @@ function applyNotificationStateFromUserData() {
   const state = getNotificationStateFromUserData();
   notificationsDismissed = state.dismissed;
   notificationsClearedAt = state.clearedAt;
+  notificationsReadMap = { ...state.readMap };
 }
 
 async function persistNotificationState(partialState = {}) {
@@ -1147,6 +1250,7 @@ async function persistNotificationState(partialState = {}) {
   const nextState = {
     dismissed: notificationsDismissed,
     clearedAt: notificationsClearedAt ? new Date(notificationsClearedAt).toISOString() : null,
+    readMap: notificationsReadMap,
     ...partialState
   };
 
@@ -1281,7 +1385,7 @@ async function loadReportActivityHistory() {
   try {
     const snapshot = await db
       .collection('reportActivityLogs')
-      .orderBy('createdAtMs', 'desc')
+      .orderBy('createdAt', 'desc')
       .limit(100)
       .get();
 
@@ -1311,26 +1415,6 @@ async function appendReportActivityLog({
     return;
   }
 
-  const now = new Date();
-  const optimisticEntry = {
-    id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    kind,
-    title,
-    checklistId,
-    checklistLabel,
-    targetLabel,
-    fileName,
-    details,
-    sourcePage,
-    emittedByUid: currentUser.uid,
-    emittedByName: currentUserData?.name || currentUserData?.nome || currentUser?.displayName || 'Usuário',
-    createdAt: now.toISOString(),
-    createdAtMs: now.getTime()
-  };
-
-  reportActivityHistory = [optimisticEntry, ...reportActivityHistory].slice(0, 100);
-  renderReportActivityHistory();
-
   await db.collection('reportActivityLogs').add({
     kind,
     title,
@@ -1342,9 +1426,7 @@ async function appendReportActivityLog({
     sourcePage,
     emittedByUid: currentUser.uid,
     emittedByName: currentUserData?.name || currentUserData?.nome || currentUser?.displayName || 'Usuário',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    createdAtIso: now.toISOString(),
-    createdAtMs: now.getTime()
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
   await loadReportActivityHistory();
@@ -1353,7 +1435,6 @@ async function appendReportActivityLog({
 function queueReportActivityLog(payload) {
   appendReportActivityLog(payload).catch((error) => {
     console.error('Erro ao registrar histórico de emissão:', error);
-    alert('Não foi possível salvar o registro de emissão no Firebase. Verifique as regras da coleção reportActivityLogs.');
   });
 }
 
@@ -1383,6 +1464,16 @@ function formatNotificationTime(timestamp) {
     day: '2-digit',
     month: '2-digit'
   });
+}
+
+function getNotificationItemKey(item = {}) {
+  return [
+    item.type || '',
+    item.title || '',
+    item.rawTimestamp || 0,
+    item.meta || '',
+    item.description || ''
+  ].join('|');
 }
 
 function getNotificationsData() {
@@ -1432,6 +1523,14 @@ function getNotificationsData() {
   }] : [];
 
   return [...nonConformes, ...pendentes, ...resumoHoje]
+    .map(item => {
+      const key = getNotificationItemKey(item);
+      return {
+        ...item,
+        key,
+        isRead: !!notificationsReadMap[key]
+      };
+    })
     .filter(item => !notificationsClearedAt || (item.rawTimestamp || 0) > notificationsClearedAt)
     .slice(0, 8);
 }
@@ -1442,7 +1541,7 @@ function renderNotifications() {
   const items = getNotificationsData();
 
   if (badge) {
-    const visibleCount = notificationsDismissed ? 0 : items.length;
+    const visibleCount = items.filter(item => !item.isRead).length;
     badge.textContent = String(visibleCount);
     badge.classList.toggle('hidden', visibleCount === 0);
     badge.classList.toggle('flex', visibleCount > 0);
@@ -1484,9 +1583,12 @@ function renderNotifications() {
     const accent = accentMap[item.type] || accentMap.info;
 
     return `
-      <article class="px-4 py-4 border-b border-border last:border-b-0 hover:bg-surface transition-colors">
+      <article
+        class="px-4 py-4 border-b border-border last:border-b-0 transition-colors cursor-pointer ${item.isRead ? 'bg-slate-50/80 opacity-70' : 'hover:bg-surface'}"
+        data-notification-key="${escapeHtml(item.key)}"
+      >
         <div class="flex items-start gap-3">
-          <span class="mt-1 w-2.5 h-2.5 rounded-full ${accent.dot} shrink-0"></span>
+          <span class="mt-1 w-2.5 h-2.5 rounded-full ${item.isRead ? 'bg-slate-300' : accent.dot} shrink-0"></span>
           <div class="min-w-0 flex-1">
             <div class="flex items-start justify-between gap-3">
               <p class="text-sm font-semibold text-text-primary">${escapeHtml(item.title)}</p>
@@ -1501,6 +1603,30 @@ function renderNotifications() {
       </article>
     `;
   }).join('');
+
+  list.querySelectorAll('[data-notification-key]').forEach((itemEl) => {
+    if (itemEl.dataset.bound === 'true') {
+      return;
+    }
+
+    itemEl.addEventListener('click', async (event) => {
+      event.stopPropagation();
+
+      const key = itemEl.getAttribute('data-notification-key');
+      if (!key || notificationsReadMap[key]) {
+        return;
+      }
+
+      notificationsReadMap[key] = true;
+      renderNotifications();
+      await persistNotificationState({
+        dismissed: false,
+        readMap: notificationsReadMap
+      });
+    });
+
+    itemEl.dataset.bound = 'true';
+  });
 }
 
 function setNotificationsOpen(isOpen) {
@@ -1700,13 +1826,24 @@ function populateSettingsPage() {
   const userEmail = currentUserData?.email || currentUser?.email || '';
   const userRole = currentUserData?.role || currentUserData?.funcao || 'Operador';
   const userShift = currentUserData?.shift || currentUserData?.turno || '';
+  const userUnit = currentUserData?.unit || currentUserData?.unidade || '';
+  const landingPage = currentUserData?.landingPage || 'dashboard';
+  const signature = currentUserData?.signature || userName;
+  const defaultObservation = currentUserData?.defaultObservation || '';
 
   document.getElementById('settingsName').value = userName;
   document.getElementById('settingsCpf').value = userCpf;
   document.getElementById('settingsEmail').value = userEmail;
   document.getElementById('settingsRole').value = userRole;
   document.getElementById('settingsShift').value = userShift;
-  document.getElementById('settingsUpdatedAt').value = formatDateTimePtBr(currentUserData?.updatedAt || currentUserData?.createdAt);
+  document.getElementById('settingsUnit').value = userUnit;
+  document.getElementById('settingsLandingPage').value = landingPage;
+  document.getElementById('settingsSignature').value = signature;
+  document.getElementById('settingsDefaultObservation').value = defaultObservation;
+  const updatedAtInput = document.getElementById('settingsUpdatedAt');
+  if (updatedAtInput) {
+    updatedAtInput.value = formatDateTimePtBr(currentUserData?.updatedAt || currentUserData?.createdAt);
+  }
   document.getElementById('settingsMaintenanceAlerts').checked = preferences.maintenanceAlerts;
   document.getElementById('settingsChecklistReminder').checked = preferences.checklistReminder;
   document.getElementById('settingsDailyReport').checked = preferences.dailyReport;
@@ -1714,11 +1851,30 @@ function populateSettingsPage() {
   document.getElementById('settingsSummaryName').textContent = userName || 'Usuário';
   document.getElementById('settingsSummaryRole').textContent = userRole;
   document.getElementById('settingsSummaryShift').textContent = userShift || 'Não definido';
+  document.getElementById('settingsSummaryUnit').textContent = userUnit || 'Não definida';
+  document.getElementById('settingsSummaryLandingPage').textContent = ({
+    dashboard: 'Dashboard',
+    checklists: 'Checklists',
+    historico: 'Histórico',
+    relatorios: 'Relatórios',
+    configuracoes: 'Configurações'
+  })[landingPage] || 'Dashboard';
 
   const statusEl = document.getElementById('settingsStatus');
   if (statusEl) {
     statusEl.classList.add('hidden');
     statusEl.textContent = '';
+  }
+
+  const passwordForm = document.getElementById('passwordSettingsForm');
+  if (passwordForm) {
+    passwordForm.reset();
+  }
+
+  const passwordStatusEl = document.getElementById('settingsPasswordStatus');
+  if (passwordStatusEl) {
+    passwordStatusEl.classList.add('hidden');
+    passwordStatusEl.textContent = '';
   }
 }
 
@@ -1741,6 +1897,10 @@ async function saveSettings(event) {
     const payload = {
       name: document.getElementById('settingsName').value.trim(),
       shift: document.getElementById('settingsShift').value,
+      unit: document.getElementById('settingsUnit').value.trim(),
+      landingPage: document.getElementById('settingsLandingPage').value,
+      signature: document.getElementById('settingsSignature').value.trim(),
+      defaultObservation: document.getElementById('settingsDefaultObservation').value.trim(),
       preferences: {
         maintenanceAlerts: document.getElementById('settingsMaintenanceAlerts').checked,
         checklistReminder: document.getElementById('settingsChecklistReminder').checked,
@@ -2527,155 +2687,195 @@ async function saveSettings(event) {
       }
     };
 
-    const failureSystemKeywords = {
-      motor: ['motor'],
-      hidraulico: ['hidraul'],
-      eletrico: ['eletric'],
-      arrefecimento: ['arrefec'],
-      combustivel: ['combust'],
-      transmissao: ['transmiss', 'cambio', 'diferencial'],
-      freios: ['freio'],
-      pneus: ['pneu', 'roda', 'rodante'],
-      iluminacao: ['ilumin', 'sinaliza', 'farol', 'lanterna', 'giroflex'],
-      cabine: ['cabine', 'seguranca', 'cinto', 'extintor'],
-      estrutura: ['estrutura', 'chassi'],
-      pneumatico: ['pneumatic', 'cuica', 'compressor'],
-      operacional: ['operacion', 'lanca', 'bascul', 'carroceria', 'munck', 'tanque', 'perfura', 'impacto', 'esteira', 'cacamba', 'garfo']
+    // Gerar dados de falhas simulados baseado em componentes
+    const generateFailureData = (equipment, system) => {
+      const equipData = systemComponentsDatabase[equipment];
+      if (!equipData || !equipData[system]) {
+        return { componentes: [], falhas: [] };
+      }
+      
+      const componentes = equipData[system].componentes;
+      // Gerar dados de falhas aleatórios (será substituído por dados do Firestore)
+      const falhas = componentes.map((_, idx) => Math.floor(Math.random() * 15) + (idx === 0 ? 3 : 0));
+      
+      return { componentes, falhas };
     };
-
-    function matchesFailureAnalysisPeriod(item, period, customPeriod) {
-      const timestamp = getChecklistHistoryTimestamp(item);
-      if (!timestamp) return false;
-
-      const itemDate = new Date(timestamp);
-      if (Number.isNaN(itemDate.getTime())) return false;
-
-      if (period === 'custom' && customPeriod) {
-        const itemDateOnly = itemDate.toISOString().slice(0, 10);
-
-        if (customPeriod.type === 'day') {
-          return itemDateOnly === customPeriod.value;
-        }
-
-        if (customPeriod.type === 'range') {
-          return itemDateOnly >= customPeriod.start && itemDateOnly <= customPeriod.end;
-        }
-      }
-
-      const periodDays = Number(period);
-      if (!periodDays) {
-        return true;
-      }
-
-      const now = new Date();
-      const startDate = new Date(now);
-      startDate.setHours(0, 0, 0, 0);
-      startDate.setDate(startDate.getDate() - (periodDays - 1));
-
-      return itemDate >= startDate && itemDate <= now;
-    }
-
-    function matchesFailureAnalysisOccurrence(occurrence, system, equipment) {
-      if (!occurrence) {
-        return false;
-      }
-
-      if (!system || system === 'todos') {
-        const rawText = String(occurrence?.text || occurrence?.descricao || '').trim();
-        return Boolean(rawText);
-      }
-
-      const normalizedSection = normalizeString(occurrence?.section || '');
-      const normalizedText = normalizeString(occurrence?.text || '');
-      const keywords = failureSystemKeywords[system] || [];
-      const systemComponents = systemComponentsDatabase?.[equipment]?.[system]?.componentes || [];
-      const componentKeywords = systemComponents.map(component => normalizeString(component));
-
-      return keywords.some(keyword =>
-        normalizedSection.includes(keyword) || normalizedText.includes(keyword)
-      ) || componentKeywords.some(keyword => normalizedText.includes(keyword));
-    }
-
-    // Gerar dados de falhas reais baseado nos checklists emitidos no sistema
-    const generateFailureData = (equipment, system, period, customPeriod) => {
-      const relevantChecklists = getDashboardFilteredChecklists().filter(item => {
-        const itemEquipment = getDashboardFailureEquipmentKey(item.checklistKey || item.equipmentKey || item.equipment || '');
-        const matchesEquipment = !equipment || equipment === 'todos' || itemEquipment === equipment;
-        return matchesEquipment && matchesFailureAnalysisPeriod(item, period, customPeriod);
-      });
-
-      const failuresByItem = new Map();
-
-      relevantChecklists.forEach((item) => {
-        const ocorrencias = Array.isArray(item.ocorrencias) ? item.ocorrencias : [];
-
-        ocorrencias.forEach((occurrence) => {
-          if (!matchesFailureAnalysisOccurrence(occurrence, system, equipment)) {
-            return;
-          }
-
-          const label = String(occurrence?.text || occurrence?.descricao || '').trim();
-          if (!label) {
-            return;
-          }
-
-          failuresByItem.set(label, (failuresByItem.get(label) || 0) + 1);
-        });
-      });
-
-      const ordered = Array.from(failuresByItem.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 8);
-
-      return {
-        componentes: ordered.map(([label]) => label),
-        falhas: ordered.map(([, total]) => total)
-      };
-    };
-
-    function wrapChartLabel(text, maxCharsPerLine = 28) {
-      const words = String(text || '').split(/\s+/).filter(Boolean);
-      const lines = [];
-      let currentLine = '';
-
-      words.forEach((word) => {
-        const nextLine = currentLine ? `${currentLine} ${word}` : word;
-
-        if (nextLine.length <= maxCharsPerLine) {
-          currentLine = nextLine;
-          return;
-        }
-
-        if (currentLine) {
-          lines.push(currentLine);
-        }
-
-        currentLine = word;
-      });
-
-      if (currentLine) {
-        lines.push(currentLine);
-      }
-
-      return lines.length ? lines : ['-'];
-    }
-
-    function truncateChartLabel(text, maxChars = 34) {
-      const value = String(text || '').trim();
-
-      if (!value) {
-        return '-';
-      }
-
-      if (value.length <= maxChars) {
-        return value;
-      }
-
-      return `${value.slice(0, maxChars).trim()}...`;
-    }
 
     // Store checklists data - starts empty
     let allChecklists = [];
+
+    function isMobileChartViewport() {
+      return window.innerWidth < 640;
+    }
+
+    function truncateChartLabel(value, maxLength = 16) {
+      const text = String(value || '');
+      return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+    }
+
+    function getChartTickFont() {
+      return { size: isMobileChartViewport() ? 10 : 12, family: 'Inter, sans-serif' };
+    }
+
+    function getChartGridColor() {
+      return '#e2e8f0';
+    }
+
+    function getDynamicChartMax(values = [], fallback = 10) {
+      const numericValues = values
+        .map(value => Number(value) || 0)
+        .filter(value => Number.isFinite(value));
+
+      if (!numericValues.length) {
+        return fallback;
+      }
+
+      const maxValue = Math.max(...numericValues);
+
+      if (maxValue <= 0) {
+        return fallback;
+      }
+
+      if (maxValue <= fallback) {
+        return fallback;
+      }
+
+      const step = maxValue <= 20 ? 2 : maxValue <= 50 ? 5 : 10;
+      return Math.ceil((maxValue + step) / step) * step;
+    }
+
+    function renderDashboardSummary(checklists = []) {
+      const totalChecklists = checklists.length;
+      const conformes = checklists.filter(item => normalizeStatus(item.status) === 'conforme').length;
+      const naoConformes = checklists.filter(item => normalizeStatus(item.status) === 'nao-conforme').length;
+      const pendentes = checklists.filter(item => normalizeStatus(item.status) === 'pendente').length;
+
+      const elTotal = document.getElementById('dashChecklistsRealizados');
+      const elConformes = document.getElementById('dashEquipamentosConformes');
+      const elFalhas = document.getElementById('dashFalhasDetectadas');
+      const elPendentes = document.getElementById('dashManutencoesPendentes');
+
+      if (elTotal) elTotal.textContent = totalChecklists;
+      if (elConformes) elConformes.textContent = conformes;
+      if (elFalhas) elFalhas.textContent = naoConformes;
+      if (elPendentes) elPendentes.textContent = pendentes;
+
+      const recentActivityContainer = document.getElementById('recentActivityContainer');
+      if (recentActivityContainer) {
+        if (checklists.length === 0) {
+          recentActivityContainer.innerHTML = `
+            <div class="px-5 py-8 text-center text-text-secondary">
+              <p class="text-sm">📊 Nenhuma atividade registrada ainda</p>
+              <p class="text-xs mt-1">Inicie um novo checklist para começar</p>
+            </div>
+          `;
+        } else {
+          const ordered = [...checklists]
+            .sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a))
+            .slice(0, 5);
+
+          recentActivityContainer.innerHTML = ordered.map(item => {
+            const statusMeta = getStatusPresentation(item.status);
+            const timestamp = getChecklistHistoryTimestamp(item);
+            const dateTimeLabel = timestamp
+              ? new Date(timestamp).toLocaleString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : (item.data || '-');
+            const totalOcorrencias = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
+
+            return `
+              <div class="px-5 py-4 hover:bg-surface/60 transition-colors">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <p class="text-sm font-semibold text-text-primary">${escapeHtml(getChecklistHistoryEquipmentName(item))}</p>
+                      <span class="text-[11px] px-2.5 py-1 rounded-full font-semibold ${
+                        statusMeta.value === 'conforme'
+                          ? 'bg-green-100 text-green-700'
+                          : statusMeta.value === 'nao-conforme'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }">${statusMeta.label}</span>
+                    </div>
+                    <p class="text-xs text-text-secondary mt-1">
+                      ${escapeHtml(item.operador || '-')} • ${escapeHtml(item.unidade || '-')} • ${escapeHtml(dateTimeLabel)}
+                    </p>
+                    <p class="text-xs text-text-secondary mt-2">
+                      ${escapeHtml(normalizeTurno(item.turno) || 'Turno não informado')} • ${totalOcorrencias} ocorrência(s)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      const maintenanceBox = document.getElementById('criticalMaintenanceContainer');
+      const maintenanceFooter = document.getElementById('criticalMaintenanceFooter');
+
+      if (maintenanceBox) {
+        if (naoConformes === 0) {
+          maintenanceBox.innerHTML = `
+            <div class="text-center py-8 text-text-secondary">
+              <p class="text-sm">✅ Nenhuma manutenção pendente</p>
+              <p class="text-xs mt-1">Bom trabalho! Tudo em dia</p>
+            </div>
+          `;
+        } else {
+          const lista = checklists
+            .filter(item => normalizeStatus(item.status) === 'nao-conforme')
+            .sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a))
+            .slice(0, 5);
+
+          maintenanceBox.innerHTML = lista.map(item => {
+            const totalOcorrencias = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
+            const timestamp = getChecklistHistoryTimestamp(item);
+            const dateLabel = timestamp
+              ? new Date(timestamp).toLocaleString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : (item.data || '-');
+
+            return `
+              <div class="p-3 rounded-xl border border-warning/30 bg-warning/5">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <p class="text-sm font-semibold text-text-primary">${escapeHtml(getChecklistHistoryEquipmentName(item))}</p>
+                      <span class="text-[11px] px-2 py-1 rounded-full font-semibold bg-red-100 text-red-700">Não Conforme</span>
+                    </div>
+                    <p class="text-xs text-text-secondary mt-1">${escapeHtml(item.unidade || '-')} • ${escapeHtml(item.operador || '-')}</p>
+                    <p class="text-xs text-text-secondary mt-1">${escapeHtml(normalizeTurno(item.turno) || 'Turno não informado')} • ${escapeHtml(dateLabel)}</p>
+                    <p class="text-xs text-warning font-medium mt-2">${totalOcorrencias} ocorrência(s) registrada(s)</p>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="openChecklistDetailsModal('${item.id}')"
+                    class="shrink-0 px-3 py-2 rounded-lg bg-white border border-warning/30 text-warning text-xs font-semibold hover:bg-warning/10 transition-colors"
+                  >
+                    Ver
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      if (maintenanceFooter) {
+        maintenanceFooter.textContent = naoConformes === 1
+          ? '🔧 1 manutenção crítica na fila'
+          : `🔧 ${naoConformes} manutenções críticas na fila`;
+      }
+    }
 
     window.getAllChecklists = () => allChecklists;
 window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
@@ -2689,13 +2889,20 @@ window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
         }
       });
       chartInstances = {};
-      const dashboardChecklists = getDashboardFilteredChecklists();
+      const filteredChecklists = getDashboardFilteredChecklists();
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const currentMonthChecklists = (allChecklists || []).filter(item => getChecklistHistoryMonthValue(item) === currentMonth);
+      const chartChecklists = filteredChecklists.length
+        ? filteredChecklists
+        : (currentMonthChecklists.length ? currentMonthChecklists : (allChecklists || []));
+      renderDashboardSummary(chartChecklists);
 
       const data = (() => {
   const days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
   const failures = [0, 0, 0, 0, 0, 0, 0];
 
-  (dashboardChecklists || []).forEach(item => {
+  chartChecklists.forEach(item => {
     const totalFalhas = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
     if (!totalFalhas) return;
 
@@ -2722,6 +2929,9 @@ window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
 
   return { days, failures };
 })();
+      const isMobileChart = isMobileChartViewport();
+      const tickFont = getChartTickFont();
+      const failureTrendMax = getDynamicChartMax(data.failures, 10);
 
       // Chart 1: Failure Trend (Line Chart)
       const failureTrendCtx = document.getElementById('failureTrendChart');
@@ -2755,12 +2965,21 @@ window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
             scales: {
               y: {
                 beginAtZero: true,
-                max: 10,
-                ticks: { color: '#64748b' },
-                grid: { color: '#e2e8f0' }
+                max: failureTrendMax,
+                ticks: {
+                  color: '#64748b',
+                  font: tickFont,
+                  maxTicksLimit: isMobileChart ? 5 : 7
+                },
+                grid: { color: getChartGridColor() }
               },
               x: {
-                ticks: { color: '#64748b' },
+                ticks: {
+                  color: '#64748b',
+                  font: tickFont,
+                  maxRotation: 0,
+                  autoSkip: false
+                },
                 grid: { display: false }
               }
             }
@@ -2769,40 +2988,15 @@ window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
       }
 
       // Chart 2: Equipment Failures (Horizontal Bar Chart)
-const falhasPorEquipamento = {};
-const equipmentLabelMap = Object.fromEntries(
-  checklistEquipmentCatalog.map(item => [item.value, item.label])
-);
-const now = new Date();
-const currentMonth = now.getMonth();
-const currentYear = now.getFullYear();
+      const falhasPorEquipamento = {};
 
-const currentMonthChecklists = (dashboardChecklists || []).filter(item => {
-  let dateObj = null;
-
-  if (item.data) {
-    const parts = String(item.data).split('-');
-    if (parts.length === 3) {
-      dateObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    } else {
-      dateObj = new Date(item.data);
-    }
-  } else if (item.createdAt) {
-    dateObj = new Date(item.createdAt);
-  }
-
-  return dateObj && !Number.isNaN(dateObj.getTime()) && dateObj.getMonth() === currentMonth && dateObj.getFullYear() === currentYear;
-});
-
-currentMonthChecklists.forEach(item => {
-  const equipmentKey = normalizeEquipmentKey(item.checklistKey || item.equipmentId || item.equipment || '');
+chartChecklists.forEach(item => {
+  const equipamento = item.equipment || 'Não informado';
   const totalFalhas = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
 
-  if (!equipmentKey || totalFalhas <= 0) {
-    return;
+  if (totalFalhas > 0) {
+    falhasPorEquipamento[equipamento] = (falhasPorEquipamento[equipamento] || 0) + totalFalhas;
   }
-
-  falhasPorEquipamento[equipmentKey] = (falhasPorEquipamento[equipmentKey] || 0) + totalFalhas;
 });
 
 const rankingEquipamentos = Object.entries(falhasPorEquipamento)
@@ -2810,19 +3004,19 @@ const rankingEquipamentos = Object.entries(falhasPorEquipamento)
   .slice(0, 5);
 
 const equipmentLabels = rankingEquipamentos.length
-  ? rankingEquipamentos.map(([key]) => equipmentLabelMap[key] || key)
+  ? rankingEquipamentos.map(([nome]) => nome)
   : ['Sem falhas registradas'];
 
 const equipmentData = rankingEquipamentos.length
   ? rankingEquipamentos.map(([, total]) => total)
   : [0];
+      const equipmentFailuresMax = getDynamicChartMax(equipmentData, 14);
       const equipmentCtx = document.getElementById('equipmentFailuresChart');
       if (equipmentCtx) {
         chartInstances.equipment = new Chart(equipmentCtx, {
           type: 'bar',
           data: {
   labels: equipmentLabels,
-  fullLabels: equipmentLabels,
   datasets: [{
     label: 'Número de Falhas',
     data: equipmentData,
@@ -2836,27 +3030,28 @@ const equipmentData = rankingEquipamentos.length
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  title(context) {
-                    const item = context?.[0];
-                    const index = item?.dataIndex ?? 0;
-                    const fullLabels = item?.chart?.data?.fullLabels || [];
-                    return fullLabels[index] || item?.label || '';
-                  }
-                }
-              }
+              legend: { display: false }
             },
             scales: {
               x: {
                 beginAtZero: true,
-                max: 14,
-                ticks: { color: '#64748b' },
-                grid: { color: '#e2e8f0' }
+                max: equipmentFailuresMax,
+                ticks: {
+                  color: '#64748b',
+                  font: tickFont,
+                  maxTicksLimit: isMobileChart ? 4 : 6
+                },
+                grid: { color: getChartGridColor() }
               },
               y: {
-                ticks: { color: '#64748b' },
+                ticks: {
+                  color: '#64748b',
+                  font: tickFont,
+                  callback: function(value) {
+                    const label = this.getLabelForValue(value);
+                    return truncateChartLabel(label, isMobileChart ? 12 : 20);
+                  }
+                },
                 grid: { display: false }
               }
             }
@@ -2898,12 +3093,23 @@ const equipmentData = rankingEquipamentos.length
                 max: 20,
                 ticks: { 
                   color: '#64748b',
+                  font: tickFont,
+                  maxTicksLimit: isMobileChart ? 5 : 6,
                   callback: function(value) { return value + '%'; }
                 },
-                grid: { color: '#e2e8f0' }
+                grid: { color: getChartGridColor() }
               },
               x: {
-                ticks: { color: '#64748b' },
+                ticks: {
+                  color: '#64748b',
+                  font: tickFont,
+                  maxRotation: 0,
+                  autoSkip: true,
+                  maxTicksLimit: isMobileChart ? 4 : 8,
+                  callback: function(value, index) {
+                    return truncateChartLabel(this.getLabelForValue(index), isMobileChart ? 8 : 14);
+                  }
+                },
                 grid: { display: false }
               }
             }
@@ -2914,19 +3120,17 @@ const equipmentData = rankingEquipamentos.length
       // Chart 4: Advanced Failure Analysis by System
       const failureAnalysisCtx = document.getElementById('failureAnalysisChart');
       if (failureAnalysisCtx) {
+        // Sample data for selected equipment and system
         chartInstances.failureAnalysis = new Chart(failureAnalysisCtx, {
           type: 'bar',
           data: {
-            labels: [],
+            labels: ['Faróis', 'Bateria', 'Fiação Elétrica', 'Buzina', 'Painel de Instrumentos'],
             datasets: [{
               label: 'Ocorrências',
-              data: [],
+              data: [6, 4, 3, 2, 1],
               backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'],
               borderRadius: 4,
               borderSkipped: false,
-              maxBarThickness: 48,
-              categoryPercentage: 0.7,
-              barPercentage: 0.75
             }]
           },
           options: {
@@ -2939,13 +3143,22 @@ const equipmentData = rankingEquipamentos.length
             scales: {
               x: {
                 beginAtZero: true,
-                max: 1,
-                ticks: { color: '#64748b' },
-                grid: { color: '#e2e8f0' }
+                max: 8,
+                ticks: {
+                  color: '#64748b',
+                  font: tickFont,
+                  maxTicksLimit: isMobileChart ? 4 : 6
+                },
+                grid: { color: getChartGridColor() }
               },
               y: {
                 ticks: {
-                  display: false
+                  color: '#64748b',
+                  font: tickFont,
+                  callback: function(value) {
+                    const label = this.getLabelForValue(value);
+                    return truncateChartLabel(label, isMobileChart ? 12 : 20);
+                  }
                 },
                 grid: { display: false }
               }
@@ -2961,8 +3174,30 @@ const equipmentData = rankingEquipamentos.length
     const updateFailureComponentsList = () => {
       const listContainer = document.getElementById('failureComponentsList');
       if (!listContainer) return;
+      
+      const components = [
+        { name: 'Faróis', failures: 6, lastDate: '17/01/2024 08:30', isHighest: true },
+        { name: 'Bateria', failures: 4, lastDate: '15/01/2024 14:20' },
+        { name: 'Fiação Elétrica', failures: 3, lastDate: '14/01/2024 10:15' },
+        { name: 'Buzina', failures: 2, lastDate: '12/01/2024 16:45' },
+        { name: 'Painel de Instrumentos', failures: 1, lastDate: '10/01/2024 09:00' }
+      ];
 
-      listContainer.innerHTML = '';
+      listContainer.innerHTML = components.map(comp => `
+        <div class="flex items-center justify-between p-3 rounded-lg ${comp.isHighest ? 'bg-danger/5 border border-danger/20' : 'bg-surface'}">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-medium text-text-primary">${comp.name}</p>
+              ${comp.isHighest ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-danger bg-danger/10 px-2 py-0.5 rounded">🔴 CRÍTICO</span>' : ''}
+            </div>
+            <p class="text-xs text-text-secondary mt-1">Última ocorrência: ${comp.lastDate}</p>
+          </div>
+          <div class="ml-3 text-right shrink-0">
+            <span class="block text-lg font-bold text-text-primary">${comp.failures}</span>
+            <span class="text-xs text-text-secondary">falhas</span>
+          </div>
+        </div>
+      `).join('');
     };
 
     // Update failure analysis components function
@@ -3000,6 +3235,11 @@ const equipmentData = rankingEquipamentos.length
     const clearNotificationsListBtn = document.getElementById('clearNotificationsListBtn');
     const sidebarLinks = document.querySelectorAll('.sidebar-link');
     const pageContents = document.querySelectorAll('.page-content');
+    const toggleDashboardFiltersBtn = document.getElementById('toggleDashboardFiltersBtn');
+    const dashboardFiltersContainer = document.getElementById('dashboardFiltersContainer');
+    const dashboardDateFilter = document.getElementById('dashboardDateFilter');
+    const dashboardEquipmentFilter = document.getElementById('dashboardEquipmentFilter');
+    const dashboardStatusFilter = document.getElementById('dashboardStatusFilter');
     const settingsForm = document.getElementById('settingsForm');
     const resetSettingsBtn = document.getElementById('resetSettingsBtn');
     let authMode = 'login';
@@ -3042,12 +3282,15 @@ const equipmentData = rankingEquipamentos.length
 
     if (clearNotificationsBtn) {
       clearNotificationsBtn.addEventListener('click', async () => {
-        notificationsDismissed = true;
+        notificationsClearedAt = Date.now();
+        notificationsDismissed = false;
+        notificationsReadMap = {};
         renderNotifications();
         setNotificationsOpen(false);
         await persistNotificationState({
-          dismissed: true,
-          clearedAt: notificationsClearedAt ? new Date(notificationsClearedAt).toISOString() : null
+          dismissed: false,
+          clearedAt: new Date(notificationsClearedAt).toISOString(),
+          readMap: {}
         });
       });
     }
@@ -3056,10 +3299,12 @@ const equipmentData = rankingEquipamentos.length
       clearNotificationsListBtn.addEventListener('click', async () => {
         notificationsClearedAt = Date.now();
         notificationsDismissed = false;
+        notificationsReadMap = {};
         renderNotifications();
         await persistNotificationState({
           dismissed: false,
-          clearedAt: new Date(notificationsClearedAt).toISOString()
+          clearedAt: new Date(notificationsClearedAt).toISOString(),
+          readMap: {}
         });
       });
     }
@@ -3182,6 +3427,7 @@ logoutBtn.addEventListener('click', async (e) => {
   closeSidebarMenu();
   notificationsDismissed = false;
   notificationsClearedAt = 0;
+  notificationsReadMap = {};
   reportActivityHistory = [];
   renderNotifications();
   renderReportActivityHistory();
@@ -3196,34 +3442,16 @@ logoutBtn.addEventListener('click', async (e) => {
 
   chartInstances = {};
 });
-    const openDashboardFiltersBtn = document.getElementById('openDashboardFiltersBtn');
-    const dashboardFiltersPanel = document.getElementById('dashboardFiltersPanel');
-    const applyDashboardFiltersBtn = document.getElementById('applyDashboardFiltersBtn');
-    const clearDashboardFiltersBtn = document.getElementById('clearDashboardFiltersBtn');
-
-    if (openDashboardFiltersBtn) {
-      openDashboardFiltersBtn.addEventListener('click', () => {
-        if (!dashboardFiltersPanel) return;
-
-        const willOpen = dashboardFiltersPanel.classList.contains('hidden');
-
-        if (willOpen) {
-          openDashboardFiltersModal();
-        } else {
-          closeDashboardFiltersModal();
-        }
-
-        openDashboardFiltersBtn.classList.toggle('bg-primary/10', willOpen);
-        openDashboardFiltersBtn.classList.toggle('border-primary/30', willOpen);
-      });
+    if (dashboardDateFilter) {
+      dashboardDateFilter.addEventListener('change', applyDashboardFilters);
     }
 
-    if (applyDashboardFiltersBtn) {
-      applyDashboardFiltersBtn.addEventListener('click', applyDashboardFilters);
+    if (dashboardEquipmentFilter) {
+      dashboardEquipmentFilter.addEventListener('change', applyDashboardFilters);
     }
 
-    if (clearDashboardFiltersBtn) {
-      clearDashboardFiltersBtn.addEventListener('click', clearDashboardFilters);
+    if (dashboardStatusFilter) {
+      dashboardStatusFilter.addEventListener('change', applyDashboardFilters);
     }
 
     // Failure Analysis Filters
@@ -3304,29 +3532,23 @@ logoutBtn.addEventListener('click', async (e) => {
     });
 
     const updateFailureAnalysis = () => {
-      const equipment = getDashboardFailureEquipmentKey(equipmentSystemFilter.value);
+      const equipment = equipmentSystemFilter.value;
       const system = systemTypeFilter.value;
       const period = failureAnalysisPeriod.value;
 
-      // Usa apenas ocorrências reais registradas nos checklists emitidos
-      const data = generateFailureData(equipment, system, period, activeCustomPeriod);
+      // Get components from database based on equipment and system
+      const data = generateFailureData(equipment, system);
       const components = data.componentes;
       const failures = data.falhas;
-      const truncatedComponents = components.map(component => truncateChartLabel(component, 34));
 
       // Update chart
       if (chartInstances.failureAnalysis) {
-        chartInstances.failureAnalysis.data.labels = truncatedComponents;
-        chartInstances.failureAnalysis.data.fullLabels = components;
+        chartInstances.failureAnalysis.data.labels = components;
         chartInstances.failureAnalysis.data.datasets[0].data = failures;
         
         // Generate gradient colors from red (highest) to yellow (lowest)
         const colors = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'];
         chartInstances.failureAnalysis.data.datasets[0].backgroundColor = colors.slice(0, Math.min(components.length, 5)).concat(Array(Math.max(0, components.length - 5)).fill('#fcd34d'));
-        chartInstances.failureAnalysis.data.datasets[0].maxBarThickness = failures.length <= 1 ? 22 : 48;
-        chartInstances.failureAnalysis.data.datasets[0].categoryPercentage = failures.length <= 1 ? 0.35 : 0.7;
-        chartInstances.failureAnalysis.data.datasets[0].barPercentage = failures.length <= 1 ? 0.45 : 0.75;
-        chartInstances.failureAnalysis.options.scales.x.max = failures.length ? Math.max(...failures, 1) + 1 : 1;
         
         chartInstances.failureAnalysis.update();
       }
@@ -3334,8 +3556,6 @@ logoutBtn.addEventListener('click', async (e) => {
       // Update components list
       updateFailureAnalysisComponents(components, failures);
     };
-
-    updateDashboardEquipmentFilterOptions();
 
     // Add event listeners to filters
     equipmentSystemFilter.addEventListener('change', updateFailureAnalysis);
@@ -3362,20 +3582,105 @@ function updateChecklistEquipmentFilterOptions() {
   }
 }
 
-function updateDashboardFilterOptions() {
+function setSettingsPasswordStatus(message, type = 'neutral') {
+  const statusEl = document.getElementById('settingsPasswordStatus');
+  if (!statusEl) return;
+
+  const colorMap = {
+    success: 'bg-success/10 text-success',
+    error: 'bg-danger/10 text-danger',
+    neutral: 'bg-surface text-text-secondary'
+  };
+
+  statusEl.className = `text-sm px-3 py-2 rounded-xl ${colorMap[type] || colorMap.neutral}`;
+  statusEl.textContent = message;
+  statusEl.classList.remove('hidden');
+}
+
+async function changePassword(event) {
+  event.preventDefault();
+
+  if (!auth || !currentUser || !currentUser.email) {
+    setSettingsPasswordStatus('Usuário sem credenciais compatíveis para alterar a senha.', 'error');
+    return;
+  }
+
+  const currentPassword = document.getElementById('settingsCurrentPassword')?.value || '';
+  const newPassword = document.getElementById('settingsNewPassword')?.value || '';
+  const confirmPassword = document.getElementById('settingsConfirmPassword')?.value || '';
+  const changePasswordBtn = document.getElementById('changePasswordBtn');
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    setSettingsPasswordStatus('Preencha todos os campos de senha.', 'error');
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    setSettingsPasswordStatus('A nova senha deve ter pelo menos 6 caracteres.', 'error');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setSettingsPasswordStatus('A confirmação da nova senha não confere.', 'error');
+    return;
+  }
+
+  try {
+    if (changePasswordBtn) {
+      changePasswordBtn.disabled = true;
+      changePasswordBtn.textContent = 'Atualizando...';
+    }
+
+    const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPassword);
+    await currentUser.reauthenticateWithCredential(credential);
+    await currentUser.updatePassword(newPassword);
+
+    const passwordForm = document.getElementById('passwordSettingsForm');
+    if (passwordForm) {
+      passwordForm.reset();
+    }
+
+    setSettingsPasswordStatus('Senha atualizada com sucesso.', 'success');
+  } catch (error) {
+    console.error('Erro ao atualizar senha:', error);
+
+    let message = 'Não foi possível atualizar a senha.';
+    if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      message = 'Senha atual incorreta.';
+    } else if (error.code === 'auth/too-many-requests') {
+      message = 'Muitas tentativas. Tente novamente em alguns minutos.';
+    } else if (error.message) {
+      message = error.message;
+    }
+
+    setSettingsPasswordStatus(message, 'error');
+  } finally {
+    if (changePasswordBtn) {
+      changePasswordBtn.disabled = false;
+      changePasswordBtn.textContent = 'Atualizar Senha';
+    }
+  }
+}
+
+function updateDashboardEquipmentFilterOptions() {
   const select = document.getElementById('dashboardEquipmentFilter');
 
   if (!select) {
     return;
   }
 
-  const currentValue = normalizeEquipmentKey(select.value);
+  const currentValue = select.value || '';
+  const equipmentNames = Array.from(new Set(
+    (allChecklists || [])
+      .map(item => getChecklistHistoryEquipmentName(item))
+      .filter(Boolean)
+  )).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
-  select.innerHTML = '<option value="">Todos</option>' + checklistEquipmentCatalog
-    .map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`)
+  select.innerHTML = '<option value="">Todos</option>' + equipmentNames
+    .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
     .join('');
 
-  if (checklistEquipmentCatalog.some(item => item.value === currentValue)) {
+  if (equipmentNames.includes(currentValue)) {
     select.value = currentValue;
   }
 }
@@ -3391,153 +3696,54 @@ function readDashboardFilterForm() {
 }
 
 function getDashboardFilteredChecklists() {
-  const dateFilter = appliedDashboardFilters.date || '';
-  const equipmentFilter = appliedDashboardFilters.equipment || '';
-  const statusFilter = appliedDashboardFilters.status || '';
+  const filters = readDashboardFilterForm();
+  const hasActiveFilters = Boolean(filters.date || filters.equipment || filters.status);
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-  let filtered = [...allChecklists];
+  const baseItems = (allChecklists || []).filter(item => {
+    const matchesCurrentMonth = !hasActiveFilters
+      ? getChecklistHistoryMonthValue(item) === currentMonth
+      : true;
+    const matchesDate = !filters.date || getChecklistHistoryDateValue(item) === filters.date;
+    const matchesEquipment = !filters.equipment || getChecklistHistoryEquipmentName(item) === filters.equipment;
+    const matchesStatus = !filters.status || normalizeStatus(item.status) === filters.status;
+    return matchesCurrentMonth && matchesDate && matchesEquipment && matchesStatus;
+  });
 
-  if (dateFilter) {
-    filtered = filtered.filter(item => (item.data || item.date || '') === dateFilter);
+  if (!hasActiveFilters && baseItems.length === 0) {
+    return [...(allChecklists || [])];
   }
 
-  if (equipmentFilter) {
-    filtered = filtered.filter(item => {
-      const key = normalizeEquipmentKey(item.checklistKey || item.equipmentId || '');
-      return key === normalizeEquipmentKey(equipmentFilter);
-    });
-  }
-
-  if (statusFilter) {
-    filtered = filtered.filter(item => normalizeStatus(item.status) === statusFilter);
-  }
-
-  return filtered;
+  return baseItems;
 }
 
-function openDashboardFiltersModal() {
-  const modal = document.getElementById('dashboardFiltersPanel');
-
-  if (!modal) {
+function applyDashboardFilters() {
+  if (currentPage !== 'dashboard') {
     return;
   }
 
-  updateDashboardFilterOptions();
-
-  const dateField = document.getElementById('dashboardDateFilter');
-  const equipmentField = document.getElementById('dashboardEquipmentFilter');
-  const statusField = document.getElementById('dashboardStatusFilter');
-
-  if (dateField) dateField.value = appliedDashboardFilters.date || '';
-  if (equipmentField) equipmentField.value = appliedDashboardFilters.equipment || '';
-  if (statusField) statusField.value = appliedDashboardFilters.status || '';
-
-  modal.classList.remove('hidden');
-}
-
-function closeDashboardFiltersModal() {
-  const modal = document.getElementById('dashboardFiltersPanel');
-
-  if (!modal) {
-    return;
-  }
-
-  modal.classList.add('hidden');
-}
-
-async function applyDashboardFilters() {
-  appliedDashboardFilters = readDashboardFilterForm();
-  closeDashboardFiltersModal();
-  const openBtn = document.getElementById('openDashboardFiltersBtn');
-  if (openBtn) {
-    openBtn.classList.remove('bg-primary/10', 'border-primary/30');
-  }
   initializeCharts();
-  await loadDashboardData();
+  loadDashboardData();
 }
 
-async function clearDashboardFilters() {
-  const dateField = document.getElementById('dashboardDateFilter');
-  const equipmentField = document.getElementById('dashboardEquipmentFilter');
-  const statusField = document.getElementById('dashboardStatusFilter');
-
-  if (dateField) dateField.value = '';
-  if (equipmentField) equipmentField.value = '';
-  if (statusField) statusField.value = '';
-
-  appliedDashboardFilters = {
-    date: '',
-    equipment: '',
-    status: ''
-  };
-
-  closeDashboardFiltersModal();
-  const openBtn = document.getElementById('openDashboardFiltersBtn');
-  if (openBtn) {
-    openBtn.classList.remove('bg-primary/10', 'border-primary/30');
-  }
-  initializeCharts();
-  await loadDashboardData();
-}
-
-function getDashboardFailureEquipmentKey(value = '') {
-  const normalized = normalizeEquipmentKey(value);
-
-  const keyMap = {
-    'veiculos-leves': 'veiculo_leve',
-    'caminhao-basculante': 'caminhao_basculante',
-    'caminhao-carroceria': 'caminhao_carroceria',
-    'caminhao-comboio': 'caminhao_comboio',
-    'caminhao-munck': 'caminhao_munck',
-    'caminhao-pipa': 'caminhao_pipa',
-    'carregadeira': 'carregadeira',
-    'cavalo-mecanico': 'cavalo_mecanico',
-    'compressor': 'compressor',
-    'empilhadeira': 'empilhadeira',
-    'escavadeira': 'escavadeira',
-    'gerador-energia': 'gerador_energia',
-    'mini-carregadeira': 'mini_carregadeira',
-    'motoniveladora': 'motoniveladora',
-    'onibus': 'onibus',
-    'perfuratriz': 'perfuratriz',
-    'prancha': 'prancha',
-    'retroescavadeira': 'retroescavadeira',
-    'rompedor': 'rompedor',
-    'trator-esteira': 'trator_esteira'
-  };
-
-  return keyMap[normalized] || normalized || '';
-}
-
-function updateDashboardEquipmentFilterOptions() {
-  const select = document.getElementById('equipmentSystemFilter');
-
-  if (!select) {
+function attachDashboardFilters() {
+  if (!toggleDashboardFiltersBtn || !dashboardFiltersContainer || toggleDashboardFiltersBtn.dataset.bound) {
     return;
   }
 
-  const currentValue = normalizeEquipmentKey(select.value) || '';
+  toggleDashboardFiltersBtn.addEventListener('click', () => {
+    dashboardFiltersContainer.classList.toggle('hidden');
+  });
 
-  select.innerHTML = '<option value="">Todos</option>' + checklistEquipmentCatalog
-    .map(item => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`)
-    .join('');
-
-  if (!currentValue) {
-    select.value = '';
-  } else if (checklistEquipmentCatalog.some(item => item.value === currentValue)) {
-    select.value = currentValue;
-  } else {
-    select.value = '';
-  }
+  toggleDashboardFiltersBtn.dataset.bound = 'true';
 }
 
 function readChecklistFilterForm() {
-  const rawStatus = document.getElementById('checklistStatusFilter')?.value || '';
-
   return {
     date: document.getElementById('checklistDateFilter')?.value || '',
     equipment: document.getElementById('checklistEquipmentFilter')?.value || '',
-    status: rawStatus ? normalizeStatus(rawStatus) : ''
+    status: normalizeStatus(document.getElementById('checklistStatusFilter')?.value || '')
   };
 }
 
@@ -3699,6 +3905,8 @@ async function loadChecklistsFromFirestore() {
       return dataB - dataA;
     });
 
+    updateDashboardEquipmentFilterOptions();
+
     if (currentPage === 'checklists') {
       renderChecklists();
     }
@@ -3719,145 +3927,7 @@ async function loadDashboardData() {
 
   try {
     const checklists = getDashboardFilteredChecklists();
-
-    const totalChecklists = checklists.length;
-    const conformes = checklists.filter(item => normalizeStatus(item.status) === 'conforme').length;
-    const naoConformes = checklists.filter(item => normalizeStatus(item.status) === 'nao-conforme').length;
-    const pendentes = checklists.filter(item => normalizeStatus(item.status) === 'pendente').length;
-
-    const elTotal = document.getElementById('dashChecklistsRealizados');
-    const elConformes = document.getElementById('dashEquipamentosConformes');
-    const elFalhas = document.getElementById('dashFalhasDetectadas');
-    const elPendentes = document.getElementById('dashManutencoesPendentes');
-
-    if (elTotal) elTotal.textContent = totalChecklists;
-    if (elConformes) elConformes.textContent = conformes;
-    if (elFalhas) elFalhas.textContent = naoConformes;
-    if (elPendentes) elPendentes.textContent = pendentes;
-
-    const recentActivityContainer = document.getElementById('recentActivityContainer');
-    if (recentActivityContainer) {
-      if (checklists.length === 0) {
-        recentActivityContainer.innerHTML = `
-          <div class="px-5 py-8 text-center text-text-secondary">
-            <p class="text-sm">📊 Nenhuma atividade registrada ainda</p>
-            <p class="text-xs mt-1">Inicie um novo checklist para começar</p>
-          </div>
-        `;
-      } else {
-        const ordered = [...checklists]
-          .sort((a, b) => {
-            const aTime = a.createdAt?.toDate
-              ? a.createdAt.toDate().getTime()
-              : new Date(a.createdAt || a.data || 0).getTime() || 0;
-            const bTime = b.createdAt?.toDate
-              ? b.createdAt.toDate().getTime()
-              : new Date(b.createdAt || b.data || 0).getTime() || 0;
-            return bTime - aTime;
-          })
-          .slice(0, 5);
-
-        recentActivityContainer.innerHTML = ordered.map(item => {
-          const statusMeta = getStatusPresentation(item.status);
-          const timestamp = getChecklistHistoryTimestamp(item);
-          const dateTimeLabel = timestamp
-            ? new Date(timestamp).toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            : (item.data || '-');
-          const totalOcorrencias = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
-
-          return `
-            <div class="px-5 py-4 hover:bg-surface/60 transition-colors">
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <p class="text-sm font-semibold text-text-primary">${escapeHtml(getChecklistHistoryEquipmentName(item))}</p>
-                    <span class="text-[11px] px-2.5 py-1 rounded-full font-semibold ${
-                      statusMeta.value === 'conforme'
-                        ? 'bg-green-100 text-green-700'
-                        : statusMeta.value === 'nao-conforme'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                    }">${statusMeta.label}</span>
-                  </div>
-                  <p class="text-xs text-text-secondary mt-1">
-                    ${escapeHtml(item.operador || '-')} • ${escapeHtml(item.unidade || '-')} • ${escapeHtml(dateTimeLabel)}
-                  </p>
-                  <p class="text-xs text-text-secondary mt-2">
-                    ${escapeHtml(normalizeTurno(item.turno) || 'Turno não informado')} • ${totalOcorrencias} ocorrência(s)
-                  </p>
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    const maintenanceBox = document.getElementById('criticalMaintenanceContainer');
-    const maintenanceFooter = document.getElementById('criticalMaintenanceFooter');
-
-    if (maintenanceBox) {
-      if (naoConformes === 0) {
-        maintenanceBox.innerHTML = `
-          <div class="text-center py-8 text-text-secondary">
-            <p class="text-sm">✅ Nenhuma manutenção pendente</p>
-            <p class="text-xs mt-1">Bom trabalho! Tudo em dia</p>
-          </div>
-        `;
-      } else {
-        const lista = checklists
-          .filter(item => normalizeStatus(item.status) === 'nao-conforme')
-          .sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a))
-          .slice(0, 5);
-
-        maintenanceBox.innerHTML = lista.map(item => {
-          const totalOcorrencias = Array.isArray(item.ocorrencias) ? item.ocorrencias.length : 0;
-          const timestamp = getChecklistHistoryTimestamp(item);
-          const dateLabel = timestamp
-            ? new Date(timestamp).toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            : (item.data || '-');
-
-          return `
-            <div class="p-3 rounded-xl border border-warning/30 bg-warning/5">
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <p class="text-sm font-semibold text-text-primary">${escapeHtml(getChecklistHistoryEquipmentName(item))}</p>
-                    <span class="text-[11px] px-2 py-1 rounded-full font-semibold bg-red-100 text-red-700">Não Conforme</span>
-                  </div>
-                  <p class="text-xs text-text-secondary mt-1">${escapeHtml(item.unidade || '-')} • ${escapeHtml(item.operador || '-')}</p>
-                  <p class="text-xs text-text-secondary mt-1">${escapeHtml(normalizeTurno(item.turno) || 'Turno não informado')} • ${escapeHtml(dateLabel)}</p>
-                  <p class="text-xs text-warning font-medium mt-2">${totalOcorrencias} ocorrência(s) registrada(s)</p>
-                </div>
-                <button
-                  type="button"
-                  onclick="openChecklistDetailsModal('${item.id}')"
-                  class="shrink-0 px-3 py-2 rounded-lg bg-white border border-warning/30 text-warning text-xs font-semibold hover:bg-warning/10 transition-colors"
-                >
-                  Ver
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    if (maintenanceFooter) {
-      maintenanceFooter.textContent = naoConformes === 1
-        ? '🔧 1 manutenção crítica na fila'
-        : `🔧 ${naoConformes} manutenções críticas na fila`;
-    }
+    renderDashboardSummary(checklists);
 
   } catch (error) {
     console.error('Erro ao carregar dados do dashboard:', error);
@@ -3961,6 +4031,11 @@ async function loadDashboardData() {
 
     if (settingsForm) {
       settingsForm.addEventListener('submit', saveSettings);
+    }
+
+    const passwordSettingsForm = document.getElementById('passwordSettingsForm');
+    if (passwordSettingsForm) {
+      passwordSettingsForm.addEventListener('submit', changePassword);
     }
 
     if (resetSettingsBtn) {
@@ -4152,7 +4227,21 @@ function clearHistoricoFilters() {
 
 function getChecklistHistoryMonthValue(checklist) {
   const dateValue = getChecklistHistoryDateValue(checklist);
-  return /^\d{4}-\d{2}-\d{2}$/.test(dateValue) ? dateValue.slice(0, 7) : '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return dateValue.slice(0, 7);
+  }
+
+  const timestamp = getChecklistHistoryTimestamp(checklist);
+  if (!timestamp) {
+    return '';
+  }
+
+  const dateObj = new Date(timestamp);
+  if (Number.isNaN(dateObj.getTime())) {
+    return '';
+  }
+
+  return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
 }
 
 function matchesHistoricoMonthFilter(checklist, monthFilter, useDefaultCurrentMonth = false) {
@@ -6202,13 +6291,10 @@ async function updateChecklistStatus(status) {
     }
 
     renderChecklists();
+    renderHistorico();
     await loadDashboardData();
-
-    const checklistAtualizado = allChecklists.find(item => item.id === selectedChecklistDetailsId);
-
-    if (checklistAtualizado) {
-      openChecklistDetailsModal(checklistAtualizado.id);
-    }
+    renderNotifications();
+    closeChecklistDetailsModalFn();
   } catch (error) {
     console.error('Erro ao atualizar status do checklist:', error);
     alert('Erro ao salvar alterações.');
@@ -6539,6 +6625,7 @@ initializeCharts();
 
     // Initial setup
     renderNotifications();
+    attachDashboardFilters();
     attachChecklistFilters();
     attachHistoricoFilters();
 
