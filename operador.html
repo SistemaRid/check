@@ -58,6 +58,7 @@
     };
   </script>
   <style>
+    * { box-sizing: border-box; }
     * { font-family: "Inter", sans-serif; }
     body {
       background:
@@ -68,6 +69,42 @@
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #edf2f7; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+
+    #checklistModal,
+    #checklistModal > div,
+    #operatorChecklistForm {
+      overflow-x: hidden;
+    }
+
+    #operatorChecklistForm input,
+    #operatorChecklistForm select,
+    #operatorChecklistForm textarea {
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    #operatorChecklistForm input[type="date"],
+    #operatorChecklistForm input[type="time"] {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    #operatorChecklistForm input[type="date"]::-webkit-date-and-time-value,
+    #operatorChecklistForm input[type="time"]::-webkit-date-and-time-value {
+      min-width: 0;
+      width: 100%;
+    }
+
+    @media (max-width: 640px) {
+      #checklistModal {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+
+      #operatorChecklistForm {
+        -webkit-overflow-scrolling: touch;
+      }
+    }
   </style>
 </head>
 <body class="h-full bg-surface text-text-primary">
@@ -1946,4 +1983,3 @@
   </script>
 </body>
 </html>
-
