@@ -2993,19 +2993,105 @@ async function saveSettings(event) {
       }
     };
 
-    // Gerar dados de falhas simulados baseado em componentes
-    const generateFailureData = (equipment, system) => {
-      const equipData = systemComponentsDatabase[equipment];
-      if (!equipData || !equipData[system]) {
-        return { componentes: [], falhas: [] };
+    function getFailureAnalysisChecklistDate(checklist) {
+      const dateValue = getChecklistHistoryDateValue(checklist);
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+        const [year, month, day] = dateValue.split('-').map(Number);
+        return new Date(year, month - 1, day);
       }
-      
-      const componentes = equipData[system].componentes;
-      // Gerar dados de falhas aleatórios (será substituído por dados do Firestore)
-      const falhas = componentes.map((_, idx) => Math.floor(Math.random() * 15) + (idx === 0 ? 3 : 0));
-      
-      return { componentes, falhas };
-    };
+
+      const timestamp = getChecklistHistoryTimestamp(checklist);
+      if (!timestamp) {
+        return null;
+      }
+
+      const fallbackDate = new Date(timestamp);
+      return Number.isNaN(fallbackDate.getTime()) ? null : fallbackDate;
+    }
+
+    function matchesFailureAnalysisPeriod(checklist) {
+      const checklistDate = getFailureAnalysisChecklistDate(checklist);
+
+      if (!checklistDate) {
+        return false;
+      }
+
+      checklistDate.setHours(0, 0, 0, 0);
+
+      if (!periodFilterTouched && !activeCustomPeriod) {
+        return true;
+      }
+
+      if (activeCustomPeriod?.type === 'day' && activeCustomPeriod.value) {
+        return getChecklistHistoryDateValue(checklist) === activeCustomPeriod.value;
+      }
+
+      if (activeCustomPeriod?.type === 'range' && activeCustomPeriod.start && activeCustomPeriod.end) {
+        const checklistDateValue = getChecklistHistoryDateValue(checklist);
+        return checklistDateValue >= activeCustomPeriod.start && checklistDateValue <= activeCustomPeriod.end;
+      }
+
+      const days = Number(failureAnalysisPeriod?.value || 7);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const startDate = new Date(today);
+      startDate.setDate(startDate.getDate() - (Math.max(days, 1) - 1));
+
+      return checklistDate >= startDate && checklistDate <= today;
+    }
+
+    function getFailureAnalysisData(equipment, system) {
+      const normalizedEquipment = normalizeEquipmentKey(String(equipment || '').replace(/_/g, '-'));
+      const normalizedSystem = normalizeString(system).replace(/_/g, '-');
+      const selectedSystemTitle = String(systemComponentsDatabase[equipment]?.[system]?.nome || '').trim();
+      const normalizedSystemTitle = normalizeString(selectedSystemTitle).replace(/_/g, '-');
+      const failuresByComponent = new Map();
+
+      (allChecklists || []).forEach((checklist) => {
+        const checklistEquipment = normalizeEquipmentKey(checklist.checklistKey || checklist.equipmentId || checklist.equipment || '');
+
+        if (checklistEquipment !== normalizedEquipment) {
+          return;
+        }
+
+        if (!matchesFailureAnalysisPeriod(checklist)) {
+          return;
+        }
+
+        const ocorrencias = Array.isArray(checklist.ocorrencias) ? checklist.ocorrencias : [];
+
+        ocorrencias.forEach((ocorrencia) => {
+          const occurrenceSystem = normalizeString(ocorrencia?.section || '').replace(/_/g, '-');
+
+          if (systemFilterTouched && occurrenceSystem !== normalizedSystem && occurrenceSystem !== normalizedSystemTitle) {
+            return;
+          }
+
+          const componentLabel = String(ocorrencia?.text || ocorrencia?.id || '').trim();
+          if (!componentLabel) {
+            return;
+          }
+
+          failuresByComponent.set(componentLabel, (failuresByComponent.get(componentLabel) || 0) + 1);
+        });
+      });
+
+      const ranking = Array.from(failuresByComponent.entries())
+        .sort((a, b) => {
+          if (b[1] !== a[1]) {
+            return b[1] - a[1];
+          }
+
+          return a[0].localeCompare(b[0], 'pt-BR');
+        });
+
+      return {
+        componentes: ranking.map(([label]) => label),
+        falhas: ranking.map(([, total]) => total)
+      };
+    }
 
     // Store checklists data - starts empty
     let allChecklists = [];
@@ -3426,15 +3512,14 @@ const equipmentData = rankingEquipamentos.length
       // Chart 4: Advanced Failure Analysis by System
       const failureAnalysisCtx = document.getElementById('failureAnalysisChart');
       if (failureAnalysisCtx) {
-        // Sample data for selected equipment and system
         chartInstances.failureAnalysis = new Chart(failureAnalysisCtx, {
           type: 'bar',
           data: {
-            labels: ['Faróis', 'Bateria', 'Fiação Elétrica', 'Buzina', 'Painel de Instrumentos'],
+            labels: [],
             datasets: [{
               label: 'Ocorrências',
-              data: [6, 4, 3, 2, 1],
-              backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'],
+              data: [],
+              backgroundColor: [],
               borderRadius: 4,
               borderSkipped: false,
             }]
@@ -3449,7 +3534,7 @@ const equipmentData = rankingEquipamentos.length
             scales: {
               x: {
                 beginAtZero: true,
-                max: 8,
+                max: 10,
                 ticks: {
                   color: '#64748b',
                   font: tickFont,
@@ -3473,37 +3558,14 @@ const equipmentData = rankingEquipamentos.length
         });
       }
 
-      updateFailureComponentsList();
+      updateFailureAnalysis();
     };
 
     // Update failure components summary list
     const updateFailureComponentsList = () => {
       const listContainer = document.getElementById('failureComponentsList');
       if (!listContainer) return;
-      
-      const components = [
-        { name: 'Faróis', failures: 6, lastDate: '17/01/2024 08:30', isHighest: true },
-        { name: 'Bateria', failures: 4, lastDate: '15/01/2024 14:20' },
-        { name: 'Fiação Elétrica', failures: 3, lastDate: '14/01/2024 10:15' },
-        { name: 'Buzina', failures: 2, lastDate: '12/01/2024 16:45' },
-        { name: 'Painel de Instrumentos', failures: 1, lastDate: '10/01/2024 09:00' }
-      ];
-
-      listContainer.innerHTML = components.map(comp => `
-        <div class="flex items-center justify-between p-3 rounded-lg ${comp.isHighest ? 'bg-danger/5 border border-danger/20' : 'bg-surface'}">
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <p class="text-sm font-medium text-text-primary">${comp.name}</p>
-              ${comp.isHighest ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-danger bg-danger/10 px-2 py-0.5 rounded">🔴 CRÍTICO</span>' : ''}
-            </div>
-            <p class="text-xs text-text-secondary mt-1">Última ocorrência: ${comp.lastDate}</p>
-          </div>
-          <div class="ml-3 text-right shrink-0">
-            <span class="block text-lg font-bold text-text-primary">${comp.failures}</span>
-            <span class="text-xs text-text-secondary">falhas</span>
-          </div>
-        </div>
-      `).join('');
+      listContainer.innerHTML = '';
     };
 
     // Update failure analysis components function
@@ -3826,9 +3888,12 @@ logoutBtn.addEventListener('click', async (e) => {
     const clearCustomFilter = document.getElementById('clearCustomFilter');
 
     let activeCustomPeriod = null;
+    let systemFilterTouched = false;
+    let periodFilterTouched = false;
 
     // Handle custom period section visibility
     failureAnalysisPeriod.addEventListener('change', () => {
+      periodFilterTouched = true;
       if (failureAnalysisPeriod.value === 'custom') {
         customPeriodSection.classList.remove('hidden');
       } else {
@@ -3853,6 +3918,7 @@ logoutBtn.addEventListener('click', async (e) => {
 
     // Apply custom filter
     applyCustomFilter.addEventListener('click', () => {
+      periodFilterTouched = true;
       if (customFilterType.value === 'day') {
         if (customDay.value) {
           activeCustomPeriod = { type: 'day', value: customDay.value };
@@ -3882,6 +3948,7 @@ logoutBtn.addEventListener('click', async (e) => {
       customStartDate.value = '';
       customEndDate.value = '';
       activeCustomPeriod = null;
+      periodFilterTouched = false;
       failureAnalysisPeriod.value = '7';
       customPeriodSection.classList.add('hidden');
       updateFailureAnalysis();
@@ -3890,10 +3957,8 @@ logoutBtn.addEventListener('click', async (e) => {
     const updateFailureAnalysis = () => {
       const equipment = equipmentSystemFilter.value;
       const system = systemTypeFilter.value;
-      const period = failureAnalysisPeriod.value;
 
-      // Get components from database based on equipment and system
-      const data = generateFailureData(equipment, system);
+      const data = getFailureAnalysisData(equipment, system);
       const components = data.componentes;
       const failures = data.falhas;
 
@@ -3905,6 +3970,7 @@ logoutBtn.addEventListener('click', async (e) => {
         // Generate gradient colors from red (highest) to yellow (lowest)
         const colors = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'];
         chartInstances.failureAnalysis.data.datasets[0].backgroundColor = colors.slice(0, Math.min(components.length, 5)).concat(Array(Math.max(0, components.length - 5)).fill('#fcd34d'));
+        chartInstances.failureAnalysis.options.scales.x.max = getDynamicChartMax(failures, 10);
         
         chartInstances.failureAnalysis.update();
       }
@@ -3915,7 +3981,10 @@ logoutBtn.addEventListener('click', async (e) => {
 
     // Add event listeners to filters
     equipmentSystemFilter.addEventListener('change', updateFailureAnalysis);
-    systemTypeFilter.addEventListener('change', updateFailureAnalysis);
+    systemTypeFilter.addEventListener('change', () => {
+      systemFilterTouched = true;
+      updateFailureAnalysis();
+    });
 
     // Update failure analysis on dashboard load
     updateFailureAnalysis();
