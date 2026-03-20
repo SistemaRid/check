@@ -5767,21 +5767,25 @@ function getChecklistObservationParts(checklist) {
 
 function getChecklistObservationText(checklist) {
   const parts = getChecklistObservationParts(checklist);
-  if (parts.initial || parts.endOfShift) {
-    return [
-      parts.initial ? `Observacoes iniciais: ${parts.initial}` : '',
-      parts.endOfShift ? `Observacoes ao final do turno: ${parts.endOfShift}` : ''
-    ].filter(Boolean).join('\n\n');
-  }
-
   const rawObservations = String(checklist?.observacoes || '').trim();
-  if (rawObservations) {
-    return rawObservations;
+  const baseObservationText = [
+    parts.initial ? `Observacoes iniciais: ${parts.initial}` : '',
+    parts.endOfShift ? `Observacoes ao final do turno: ${parts.endOfShift}` : ''
+  ].filter(Boolean).join('\n\n');
+
+  const fallbackObservationText = rawObservations || baseObservationText;
+  const failureNotesText = getChecklistItemsForPrint(checklist)
+    .filter(item => !item.ok && item.failureNote)
+    .map(item => `- ${item.text}: ${item.failureNote}`)
+    .join('\n');
+
+  if (!failureNotesText) {
+    return fallbackObservationText;
   }
 
   return [
-    parts.initial ? `Observacoes iniciais: ${parts.initial}` : '',
-    parts.endOfShift ? `Observacoes ao final do turno: ${parts.endOfShift}` : ''
+    fallbackObservationText,
+    `Falhas registradas:\n${failureNotesText}`
   ].filter(Boolean).join('\n\n');
 }
 
@@ -5958,6 +5962,136 @@ function getExcelColumnLetter(columnNumber) {
   }
 
   return letter;
+}
+
+function getColumnNumberFromLetter(letter) {
+  return String(letter || "")
+    .toUpperCase()
+    .split("")
+    .reduce((total, char) => {
+      const code = char.charCodeAt(0);
+
+      if (code < 65 || code > 90) {
+        return total;
+      }
+
+      return total * 26 + (code - 64);
+    }, 0);
+}
+
+function parseWorksheetRangeAddress(rangeAddress) {
+  const match = String(rangeAddress || "").match(/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/i);
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    startCol: getColumnNumberFromLetter(match[1]),
+    startRow: Number(match[2]),
+    endCol: getColumnNumberFromLetter(match[3]),
+    endRow: Number(match[4])
+  };
+}
+
+function getMergedRangeForCell(worksheet, rowNumber, columnNumber) {
+  const mergeRanges = worksheet?.model?.merges || [];
+
+  for (const rangeAddress of mergeRanges) {
+    const range = parseWorksheetRangeAddress(rangeAddress);
+
+    if (!range) {
+      continue;
+    }
+
+    if (
+      rowNumber >= range.startRow &&
+      rowNumber <= range.endRow &&
+      columnNumber >= range.startCol &&
+      columnNumber <= range.endCol
+    ) {
+      return range;
+    }
+  }
+
+  return {
+    startRow: rowNumber,
+    endRow: rowNumber,
+    startCol: columnNumber,
+    endCol: columnNumber
+  };
+}
+
+function getMergedRangeWidthCharacters(worksheet, range) {
+  let totalWidth = 0;
+
+  for (let columnNumber = range.startCol; columnNumber <= range.endCol; columnNumber += 1) {
+    totalWidth += Number(worksheet.getColumn(columnNumber)?.width || 8.43);
+  }
+
+  return Math.max(8, totalWidth);
+}
+
+function estimateWrappedLineCount(text, maxCharactersPerLine) {
+  const safeText = String(text || "").replace(/\r/g, "");
+  const safeLineWidth = Math.max(8, Math.floor(maxCharactersPerLine));
+
+  return safeText
+    .split("\n")
+    .reduce((totalLines, paragraph) => {
+      const trimmedParagraph = paragraph.trim();
+
+      if (!trimmedParagraph) {
+        return totalLines + 1;
+      }
+
+      const words = trimmedParagraph.split(/\s+/);
+      let currentLineLength = 0;
+      let paragraphLines = 1;
+
+      words.forEach((word) => {
+        const wordLength = word.length;
+
+        if (!currentLineLength) {
+          paragraphLines += Math.max(0, Math.ceil(wordLength / safeLineWidth) - 1);
+          currentLineLength = wordLength % safeLineWidth || Math.min(wordLength, safeLineWidth);
+          return;
+        }
+
+        const nextLineLength = currentLineLength + 1 + wordLength;
+
+        if (nextLineLength <= safeLineWidth) {
+          currentLineLength = nextLineLength;
+          return;
+        }
+
+        paragraphLines += 1;
+        paragraphLines += Math.max(0, Math.ceil(wordLength / safeLineWidth) - 1);
+        currentLineLength = wordLength % safeLineWidth || Math.min(wordLength, safeLineWidth);
+      });
+
+      return totalLines + paragraphLines;
+    }, 0);
+}
+
+function adjustChecklistFailureObservationRowHeight(worksheet, rowNumber, columnNumber, observation) {
+  if (!rowNumber || !columnNumber) {
+    return;
+  }
+
+  const note = String(observation || "").trim();
+
+  if (!note) {
+    return;
+  }
+
+  const range = getMergedRangeForCell(worksheet, rowNumber, columnNumber);
+  const widthCharacters = getMergedRangeWidthCharacters(worksheet, range) * 0.9;
+  const estimatedLines = estimateWrappedLineCount(note, widthCharacters);
+  const row = worksheet.getRow(rowNumber);
+  const baseHeight = Number(row.height || worksheet.properties?.defaultRowHeight || 15);
+
+  row.height = Math.max(baseHeight, Math.ceil(baseHeight * estimatedLines * 1.15));
 }
 
 function getChecklistTurnAnchors(worksheet) {
@@ -6173,8 +6307,9 @@ function setChecklistItemFailureObservation(worksheet, rowNumber, columnNumber, 
     return;
   }
 
-  const cell = worksheet.getRow(rowNumber).getCell(columnNumber);
   const note = String(observation || "").trim();
+  const range = getMergedRangeForCell(worksheet, rowNumber, columnNumber);
+  const cell = worksheet.getRow(range.startRow).getCell(range.startCol);
 
   cell.value = note;
   cell.alignment = {
@@ -6183,6 +6318,8 @@ function setChecklistItemFailureObservation(worksheet, rowNumber, columnNumber, 
     vertical: "middle",
     wrapText: true
   };
+
+  adjustChecklistFailureObservationRowHeight(worksheet, rowNumber, columnNumber, note);
 }
 
 function getChecklistObservationAnchorCell(worksheet) {
