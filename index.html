@@ -6713,14 +6713,24 @@ async function buildChecklistExcelBytes(checklist) {
 
   fillChecklistObservationArea(worksheet, getChecklistObservationText(checklist));
 
+  const logoAnchorCell = worksheet.getCell("M1");
+  if (logoAnchorCell) {
+    logoAnchorCell.value = null;
+  }
+
+  const logoSecondaryCell = worksheet.getCell("N1");
+  if (logoSecondaryCell) {
+    logoSecondaryCell.value = null;
+  }
+
   const worksheetIndex = Math.max(1, workbook.worksheets.indexOf(worksheet) + 1);
   const drawingPath = await getWorksheetDrawingPath(buffer, worksheetIndex);
 
   const caltinsLogoBytes = await getCaltinsLogoImageBytes();
   const caltinsLogoId = workbook.addImage({ buffer: caltinsLogoBytes, extension: "png" });
   worksheet.addImage(caltinsLogoId, {
-    tl: { col: 12.05, row: 0.1 },
-    br: { col: 14, row: 2.9 },
+    tl: { col: 12.12, row: 0.08 },
+    br: { col: 13.88, row: 0.92 },
     editAs: "oneCell"
   });
 
