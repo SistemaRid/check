@@ -4332,14 +4332,8 @@ async function loadChecklistsFromFirestore() {
 
     updateDashboardEquipmentFilterOptions();
 
-    if (currentPage === 'checklists') {
-      renderChecklists();
-    }
-
-    if (currentPage === 'historico') {
-      renderHistorico();
-    }
-
+    renderChecklists();
+    renderHistorico();
     renderNotifications();
 
   } catch (error) {
@@ -4392,14 +4386,8 @@ function subscribeChecklistsRealtime() {
 
     updateDashboardEquipmentFilterOptions();
 
-    if (currentPage === 'checklists') {
-      renderChecklists();
-    }
-
-    if (currentPage === 'historico') {
-      renderHistorico();
-    }
-
+    renderChecklists();
+    renderHistorico();
     renderNotifications();
     loadDashboardData();
 
@@ -7518,9 +7506,8 @@ createdAt: firebase.firestore.FieldValue.serverTimestamp(),
 
     closeChecklistFormModal();
 
-if (currentPage === 'historico') {
-  renderHistorico();
-}
+renderChecklists();
+renderHistorico();
 
 if (typeof loadDashboardData === 'function') {
   await loadDashboardData();
