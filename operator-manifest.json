@@ -1,0 +1,25 @@
+{
+  "name": "CheckMaint",
+  "short_name": "CheckMaint",
+  "description": "Aplicativo do operador para emissao e sincronizacao de checklists.",
+  "start_url": "./operador.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./assets/pwa/checkmaint-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/pwa/checkmaint-icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
