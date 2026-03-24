@@ -1387,8 +1387,9 @@
         payload,
         savedAt: getLocalTimestampIso()
       });
+      lastSyncMessage = "Checklist salvo localmente e aguardando sincronizacao.";
       refreshOperatorChecklistList();
-      updateSyncStatus("Checklist salvo localmente e aguardando sincronizacao.");
+      updateSyncStatus(lastSyncMessage);
       return localId;
     }
 
@@ -1398,8 +1399,9 @@
         payload,
         savedAt: getLocalTimestampIso()
       });
+      lastSyncMessage = "Checklist salvo localmente e aguardando sincronizacao.";
       refreshOperatorChecklistList();
-      updateSyncStatus("Checklist salvo localmente e aguardando sincronizacao.");
+      updateSyncStatus(lastSyncMessage);
       return localId;
     }
 
@@ -1409,8 +1411,9 @@
         payload,
         savedAt: getLocalTimestampIso()
       });
+      lastSyncMessage = "Atualizacao salva localmente e aguardando sincronizacao.";
       refreshOperatorChecklistList();
-      updateSyncStatus("Atualizacao salva localmente e aguardando sincronizacao.");
+      updateSyncStatus(lastSyncMessage);
     }
 
     function updatePendingCreatePayload(localId, payload) {
@@ -1427,6 +1430,7 @@
         savedAt: getLocalTimestampIso()
       });
 
+      lastSyncMessage = "Checklist atualizado localmente e aguardando sincronizacao.";
       refreshOperatorChecklistList();
     }
 
@@ -2078,23 +2082,23 @@
       submitOperatorChecklistBtn.disabled = true;
       submitOperatorChecklistBtn.textContent = "Enviando...";
 
+      const selectedFailuresPayload = editingChecklistId
+        ? []
+        : Array.from(
+            document.querySelectorAll('#operatorChecklistItems input[type="radio"][value="falha"]:checked')
+          ).map((input) => {
+            const itemCard = input.closest("[data-checklist-item]");
+            const failureNote = itemCard?.querySelector("[data-failure-note-input]")?.value.trim() || "";
+
+            return {
+              id: input.dataset.itemId,
+              section: input.dataset.section,
+              text: input.dataset.text,
+              failureNote
+            };
+          });
+
       try {
-        const selectedFailuresPayload = editingChecklistId
-          ? []
-          : Array.from(
-              document.querySelectorAll('#operatorChecklistItems input[type="radio"][value="falha"]:checked')
-            ).map((input) => {
-              const itemCard = input.closest("[data-checklist-item]");
-              const failureNote = itemCard?.querySelector("[data-failure-note-input]")?.value.trim() || "";
-
-              return {
-                id: input.dataset.itemId,
-                section: input.dataset.section,
-                text: input.dataset.text,
-                failureNote
-              };
-            });
-
         if (editingChecklistId) {
           const currentChecklist = getRenderedChecklistById(editingChecklistId);
           const currentObservationParts = getObservationPartsFromChecklist(currentChecklist);
@@ -2121,12 +2125,6 @@
 
           resetOperatorForm(false);
           closeChecklistModal();
-          showFeedbackModal(
-            isLocalOnlyChecklistId(editingChecklistId)
-              ? "Checklist local atualizado e mantido como pendente."
-              : "Checklist atualizado e marcado como pendente para envio.",
-            "success"
-          );
           return;
         }
 
@@ -2149,13 +2147,29 @@
 
         resetOperatorForm(false);
         closeChecklistModal();
-        showFeedbackModal(
-          `Checklist de ${selectedEquipmentName} salvo como pendente. Use "Sincronizar pendentes" para enviar ao Firebase.`,
-          "success"
-        );
       } catch (error) {
         console.error("Erro ao emitir checklist:", error);
-        showFeedbackModal(`Nao foi possivel emitir o checklist: ${error.message}`, "error");
+        if (isLikelyOfflineError(error)) {
+          const createPayload = buildChecklistCreatePayload({
+            operador,
+            turno,
+            data,
+            modelo,
+            tagPlaca,
+            unidade,
+            horaInicial,
+            horaFinal,
+            hrKmInicial,
+            hrKmFinal,
+            observacoes,
+            selectedFailuresPayload
+          });
+          savePendingChecklistCreate(createPayload);
+          resetOperatorForm(false);
+          closeChecklistModal();
+        } else {
+          showFeedbackModal(`Nao foi possivel emitir o checklist: ${error.message}`, "error");
+        }
       } finally {
         submitOperatorChecklistBtn.disabled = false;
         submitOperatorChecklistBtn.textContent = "Emitir checklist";
@@ -2197,15 +2211,24 @@
         }
 
         closeFinalizeChecklistModal();
-        showFeedbackModal(
-          isLocalOnlyChecklistId(selectedChecklistToFinalize.id)
-            ? "Checklist local finalizado e mantido como pendente."
-            : "Finalizacao salva como pendente. Use \"Sincronizar pendentes\" para enviar.",
-          "success"
-        );
       } catch (error) {
         console.error("Erro ao finalizar checklist:", error);
-        showFeedbackModal(`Nao foi possivel finalizar o checklist: ${error.message}`, "error");
+        if (isLikelyOfflineError(error)) {
+          const finalizePayload = buildChecklistFinalizePayload(
+            selectedChecklistToFinalize,
+            horaFinal,
+            hrKmFinal,
+            observacaoFinal
+          );
+          if (isLocalOnlyChecklistId(selectedChecklistToFinalize.id)) {
+            updatePendingCreatePayload(selectedChecklistToFinalize.id, finalizePayload);
+          } else {
+            savePendingChecklistUpdate(selectedChecklistToFinalize.id, finalizePayload);
+          }
+          closeFinalizeChecklistModal();
+        } else {
+          showFeedbackModal(`Nao foi possivel finalizar o checklist: ${error.message}`, "error");
+        }
       } finally {
         submitFinalizeChecklistBtn.disabled = false;
         submitFinalizeChecklistBtn.textContent = "Salvar finalização";
