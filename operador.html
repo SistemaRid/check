@@ -32,6 +32,7 @@
     let auth = null;
     let firestorePersistenceEnabled = false;
     let firestorePersistenceError = null;
+    let authPersistenceEnabled = false;
 
     try {
       if (!firebase.apps.length) {
@@ -40,6 +41,14 @@
 
       db = firebase.firestore();
       auth = firebase.auth();
+
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+          authPersistenceEnabled = true;
+        })
+        .catch((error) => {
+          console.warn("Persistencia local do Firebase Auth nao ativada:", error);
+        });
 
       db.enablePersistence({ synchronizeTabs: true })
         .then(() => {
@@ -1059,6 +1068,31 @@
       return currentUserData?.name || currentUserData?.nome || currentUser?.displayName || "";
     }
 
+    function restoreOfflineTrustedSession() {
+      const lastUser = readLastAuthenticatedUser();
+      if (!lastUser?.uid) return false;
+
+      currentUser = {
+        uid: lastUser.uid,
+        displayName: lastUser.name || "Operador",
+        isOfflineTrusted: true
+      };
+
+      currentUserData = {
+        id: lastUser.uid,
+        cpf: lastUser.cpf || null,
+        name: lastUser.name || "Operador",
+        role: lastUser.role || "Operador"
+      };
+
+      applyAuthenticatedUserToForm();
+      setAuthenticatedView(true);
+      refreshOperatorChecklistList([]);
+      lastSyncMessage = "Sessao offline restaurada neste dispositivo.";
+      updateSyncStatus(lastSyncMessage);
+      return true;
+    }
+
     function getOperatorRoleLabel() {
       return currentUserData?.role || currentUserData?.funcao || "Operador";
     }
@@ -1453,6 +1487,12 @@
 
     async function syncPendingChecklists(options = {}) {
       if (isSyncingPending || !db || !currentUser?.uid || !navigator.onLine) {
+        updateSyncStatus(lastSyncMessage);
+        return;
+      }
+
+      if (!auth?.currentUser) {
+        lastSyncMessage = "Conecte-se novamente para enviar os checklists pendentes.";
         updateSyncStatus(lastSyncMessage);
         return;
       }
@@ -2320,6 +2360,9 @@
 
     async function hydrateAuthenticatedSession(user) {
       if (!user || user.isAnonymous) {
+        if (!navigator.onLine && restoreOfflineTrustedSession()) {
+          return;
+        }
         clearOperatorSessionState();
         return;
       }
