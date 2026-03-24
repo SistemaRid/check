@@ -136,7 +136,20 @@
 </head>
 <body class="h-full bg-surface text-text-primary">
   <main class="mx-auto min-h-screen w-full max-w-6xl p-4 sm:p-6">
-    <section id="loginView" class="min-h-screen flex items-center justify-center p-4">
+    <section id="loadingView" class="min-h-screen flex items-center justify-center p-4">
+      <div class="w-full max-w-sm rounded-[2rem] border border-border bg-white/90 px-8 py-10 text-center shadow-soft backdrop-blur">
+        <div class="mx-auto flex h-24 w-24 items-center justify-center">
+          <img src="xl_media_image4.png" alt="Grupo J. Demito" class="h-full w-full object-contain">
+        </div>
+        <h1 class="mt-6 text-2xl font-bold text-text-primary">CheckMaint</h1>
+        <p class="mt-2 text-sm text-text-secondary">Carregando informacoes...</p>
+        <div class="mx-auto mt-6 h-1.5 w-32 overflow-hidden rounded-full bg-slate-200">
+          <div class="h-full w-full animate-pulse rounded-full bg-primary"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="loginView" class="hidden min-h-screen flex items-center justify-center p-4">
       <div class="w-full max-w-md">
         <div class="text-center mb-8">
           <div class="inline-flex items-center justify-center w-32 h-32 mb-4">
@@ -675,6 +688,7 @@
       }
     ];
 
+    const loadingView = document.getElementById("loadingView");
     const loginView = document.getElementById("loginView");
     const operatorApp = document.getElementById("operatorApp");
     const operatorLoginForm = document.getElementById("operatorLoginForm");
@@ -757,6 +771,7 @@
     let isOnline = navigator.onLine;
     let isSyncingPending = false;
     let lastSyncMessage = "";
+    let authResolutionFinished = false;
 
     const OFFLINE_QUEUE_KEY = "checkmaint_operator_offline_queue_v1";
     const LAST_USER_KEY = "checkmaint_operator_last_user_v1";
@@ -982,12 +997,44 @@
       });
     }
 
+    function buildChecklistRenderDedupKey(item = {}) {
+      const failures = Array.isArray(item.ocorrencias)
+        ? item.ocorrencias.map((entry) => `${entry?.id || ""}:${normalizeText(entry?.failureNote || "")}`).sort().join("|")
+        : "";
+
+      return [
+        normalizeText(item.checklistKey || item.equipment || ""),
+        normalizeText(item.operador || item.createdByName || ""),
+        normalizeText(item.turno || ""),
+        normalizeText(item.data || ""),
+        normalizeText(item.modelo || ""),
+        normalizeText(item.tagPlaca || ""),
+        normalizeText(item.unidade || ""),
+        normalizeText(item.horaInicial || ""),
+        normalizeText(item.horaFinal || ""),
+        normalizeText(item.hrKmInicial || ""),
+        normalizeText(item.hrKmFinal || ""),
+        normalizeText(item.status || ""),
+        normalizeText(item.activityStatus || ""),
+        failures
+      ].join("::");
+    }
+
     function buildRenderedChecklistItems(remoteItems = []) {
       const queue = readOfflineQueue();
       const mergedRemoteItems = applyPendingUpdatesToItems(remoteItems);
-      const localItems = queue.creates.map(buildPendingCreateView);
+      const remoteKeys = new Set(mergedRemoteItems.map(buildChecklistRenderDedupKey));
+      const localItems = queue.creates
+        .map(buildPendingCreateView)
+        .filter((item) => !remoteKeys.has(buildChecklistRenderDedupKey(item)));
+
       return [...localItems, ...mergedRemoteItems]
         .sort((a, b) => getChecklistTimestamp(b) - getChecklistTimestamp(a));
+    }
+
+    function hasEquivalentRemoteChecklist(payload = {}) {
+      const payloadKey = buildChecklistRenderDedupKey(payload);
+      return operatorChecklists.some((item) => buildChecklistRenderDedupKey(item) === payloadKey);
     }
 
     function getOfflinePendingCount() {
@@ -1058,10 +1105,25 @@
         !navigator.onLine ||
         code.includes("unavailable") ||
         code.includes("network-request-failed") ||
+        code.includes("network-timeout") ||
         message.includes("offline") ||
         message.includes("network") ||
+        message.includes("tempo limite de rede") ||
         message.includes("client is offline")
       );
+    }
+
+    function withNetworkTimeout(task, timeoutMs = 3500) {
+      return Promise.race([
+        task,
+        new Promise((_, reject) => {
+          window.setTimeout(() => {
+            const timeoutError = new Error("Tempo limite de rede excedido.");
+            timeoutError.code = "network-timeout";
+            reject(timeoutError);
+          }, timeoutMs);
+        })
+      ]);
     }
 
     function getOperatorDisplayName() {
@@ -1164,7 +1226,22 @@
       }
     }
 
+    function setAuthResolving(isResolving) {
+      if (loadingView) {
+        loadingView.classList.toggle("hidden", !isResolving);
+      }
+
+      if (isResolving) {
+        loginView.classList.add("hidden");
+        operatorApp.classList.add("hidden");
+      }
+    }
+
     function setAuthenticatedView(isAuthenticated) {
+      if (!authResolutionFinished) {
+        authResolutionFinished = true;
+      }
+      setAuthResolving(false);
       loginView.classList.toggle("hidden", isAuthenticated);
       operatorApp.classList.toggle("hidden", !isAuthenticated);
     }
@@ -1515,6 +1592,11 @@
       try {
         for (const entry of queue.creates) {
           const payload = entry.payload || {};
+          if (hasEquivalentRemoteChecklist(payload)) {
+            removePendingCreate(entry.localId);
+            continue;
+          }
+
           await db.collection("checklists").add({
             ...payload,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2148,6 +2230,31 @@
             };
           });
 
+      const shouldUseOfflineQueue = !isOnline || !navigator.onLine;
+      const createPayload = !editingChecklistId ? buildChecklistCreatePayload({
+        operador,
+        turno,
+        data,
+        modelo,
+        tagPlaca,
+        unidade,
+        horaInicial,
+        horaFinal,
+        hrKmInicial,
+        hrKmFinal,
+        observacoes,
+        selectedFailuresPayload
+      }) : null;
+
+      if (!editingChecklistId && shouldUseOfflineQueue) {
+        savePendingChecklistCreate(createPayload);
+        resetOperatorForm(false);
+        closeChecklistModal();
+        submitOperatorChecklistBtn.disabled = false;
+        submitOperatorChecklistBtn.textContent = "Emitir checklist";
+        return;
+      }
+
       try {
         if (editingChecklistId) {
           const currentChecklist = getRenderedChecklistById(editingChecklistId);
@@ -2173,7 +2280,20 @@
           if (isLocalOnlyChecklistId(editingChecklistId)) {
             updatePendingCreatePayload(editingChecklistId, finalizePayload);
           } else {
-            savePendingChecklistUpdate(editingChecklistId, finalizePayload);
+            if (!shouldUseOfflineQueue) {
+              await withNetworkTimeout(
+                db.collection("checklists").doc(editingChecklistId).update({
+                  ...finalizePayload,
+                  finalizedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+              );
+              removePendingUpdate(editingChecklistId);
+              lastSyncMessage = "Checklist atualizado com sucesso.";
+              refreshOperatorChecklistList();
+            } else {
+              savePendingChecklistUpdate(editingChecklistId, finalizePayload);
+            }
           }
 
           resetOperatorForm(false);
@@ -2181,42 +2301,27 @@
           return;
         }
 
-        const createPayload = buildChecklistCreatePayload({
-          operador,
-          turno,
-          data,
-          modelo,
-          tagPlaca,
-          unidade,
-          horaInicial,
-          horaFinal,
-          hrKmInicial,
-          hrKmFinal,
-          observacoes,
-          selectedFailuresPayload
-        });
-
-        savePendingChecklistCreate(createPayload);
+        if (!shouldUseOfflineQueue) {
+          await withNetworkTimeout(
+            db.collection("checklists").add({
+              ...createPayload,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              finalizedAt: createPayload.finalizedAt ? firebase.firestore.FieldValue.serverTimestamp() : null
+            })
+          );
+          lastSyncMessage = `Checklist de ${selectedEquipmentName} emitido com sucesso.`;
+          refreshOperatorChecklistList();
+        } else {
+          savePendingChecklistCreate(createPayload);
+        }
 
         resetOperatorForm(false);
         closeChecklistModal();
       } catch (error) {
         console.error("Erro ao emitir checklist:", error);
         if (isLikelyOfflineError(error)) {
-          const createPayload = buildChecklistCreatePayload({
-            operador,
-            turno,
-            data,
-            modelo,
-            tagPlaca,
-            unidade,
-            horaInicial,
-            horaFinal,
-            hrKmInicial,
-            hrKmFinal,
-            observacoes,
-            selectedFailuresPayload
-          });
+          isOnline = false;
           savePendingChecklistCreate(createPayload);
           resetOperatorForm(false);
           closeChecklistModal();
@@ -2249,24 +2354,51 @@
       submitFinalizeChecklistBtn.disabled = true;
       submitFinalizeChecklistBtn.textContent = "Salvando...";
 
-      try {
-        const finalizePayload = buildChecklistFinalizePayload(
-          selectedChecklistToFinalize,
-          horaFinal,
-          hrKmFinal,
-          observacaoFinal
-        );
+      const shouldUseOfflineQueue = !isOnline || !navigator.onLine;
+      const finalizePayload = buildChecklistFinalizePayload(
+        selectedChecklistToFinalize,
+        horaFinal,
+        hrKmFinal,
+        observacaoFinal
+      );
 
+      if (shouldUseOfflineQueue) {
         if (isLocalOnlyChecklistId(selectedChecklistToFinalize.id)) {
           updatePendingCreatePayload(selectedChecklistToFinalize.id, finalizePayload);
         } else {
           savePendingChecklistUpdate(selectedChecklistToFinalize.id, finalizePayload);
+        }
+        closeFinalizeChecklistModal();
+        submitFinalizeChecklistBtn.disabled = false;
+        submitFinalizeChecklistBtn.textContent = "Salvar finalização";
+        return;
+      }
+
+      try {
+        if (isLocalOnlyChecklistId(selectedChecklistToFinalize.id)) {
+          updatePendingCreatePayload(selectedChecklistToFinalize.id, finalizePayload);
+        } else {
+          if (!shouldUseOfflineQueue) {
+            await withNetworkTimeout(
+              db.collection("checklists").doc(selectedChecklistToFinalize.id).update({
+                ...finalizePayload,
+                finalizedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              })
+            );
+            removePendingUpdate(selectedChecklistToFinalize.id);
+            lastSyncMessage = "Checklist finalizado com sucesso.";
+            refreshOperatorChecklistList();
+          } else {
+            savePendingChecklistUpdate(selectedChecklistToFinalize.id, finalizePayload);
+          }
         }
 
         closeFinalizeChecklistModal();
       } catch (error) {
         console.error("Erro ao finalizar checklist:", error);
         if (isLikelyOfflineError(error)) {
+          isOnline = false;
           const finalizePayload = buildChecklistFinalizePayload(
             selectedChecklistToFinalize,
             horaFinal,
@@ -2449,6 +2581,7 @@
     bindMyChecklistActions();
     bindChecklistFailureInteractions();
     updateSyncStatus("");
+    setAuthResolving(true);
 
     operatorModelSelect?.addEventListener("change", () => {
       populateOperatorTagOptions(operatorModelSelect.value, "");

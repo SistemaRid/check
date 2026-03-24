@@ -1212,6 +1212,7 @@ let reportActivityHistory = [];
 let checklistsUnsubscribe = null;
 let operatorsUnsubscribe = null;
 let allOperators = [];
+let authStateInitialized = false;
 
 function onlyNumbers(value = '') {
   return String(value).replace(/\D/g, '');
@@ -1855,6 +1856,18 @@ async function findUserByCpf(cpfLimpo) {
   };
 }
 
+async function findUserByUid(uid) {
+  if (!uid || !db) return null;
+
+  const doc = await db.collection('users').doc(uid).get();
+  if (!doc.exists) return null;
+
+  return {
+    id: doc.id,
+    ...doc.data()
+  };
+}
+
 async function loginWithCpfAndPassword(cpf, password) {
   if (!db || !auth) {
     throw new Error('Firebase não foi inicializado corretamente.');
@@ -1887,6 +1900,71 @@ async function loginWithCpfAndPassword(cpf, password) {
   applyNotificationStateFromUserData();
 
   return { cred, userData };
+}
+
+async function activateAuthenticatedApp(user, userData = null) {
+  currentUser = user;
+  currentUserData = userData || await findUserByUid(user.uid);
+  applyNotificationStateFromUserData();
+
+  isLoggedIn = true;
+  loginScreen.classList.add('hidden');
+  appScreen.classList.remove('hidden');
+
+  applyLoggedUserToHeader();
+  populateSettingsPage();
+  renderNotifications();
+  subscribeChecklistsRealtime();
+  subscribeOperatorsRealtime();
+  await loadReportActivityHistory();
+  await loadDashboardData();
+
+  setTimeout(() => {
+    initializeCharts();
+  }, 100);
+}
+
+function resetAuthenticatedApp() {
+  if (typeof checklistsUnsubscribe === 'function') {
+    checklistsUnsubscribe();
+    checklistsUnsubscribe = null;
+  }
+
+  if (typeof operatorsUnsubscribe === 'function') {
+    operatorsUnsubscribe();
+    operatorsUnsubscribe = null;
+  }
+
+  isLoggedIn = false;
+  currentUser = null;
+  currentUserData = null;
+  allChecklists = [];
+  allOperators = [];
+
+  appScreen.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+
+  loginForm.reset();
+  hideLoginError();
+  closeSidebarMenu();
+  notificationsDismissed = false;
+  notificationsClearedAt = 0;
+  notificationsReadMap = {};
+  reportActivityHistory = [];
+
+  renderNotifications();
+  renderReportActivityHistory();
+  renderOperatorsPage();
+  setNotificationsOpen(false);
+  populateSettingsPage();
+
+  Object.values(chartInstances).forEach(chart => {
+    if (chart && typeof chart.destroy === 'function') {
+      chart.destroy();
+    }
+  });
+
+  chartInstances = {};
 }
 
 function applyLoggedUserToHeader() {
@@ -3742,23 +3820,6 @@ loginForm.addEventListener('submit', async (e) => {
 
     await loginWithCpfAndPassword(cpf, password);
 
-    isLoggedIn = true;
-    loginScreen.classList.add('hidden');
-    appScreen.classList.remove('hidden');
-
-           applyLoggedUserToHeader();
-           populateSettingsPage();
-           renderNotifications();
-
-    subscribeChecklistsRealtime();
-    subscribeOperatorsRealtime();
-    await loadReportActivityHistory();
-    await loadDashboardData();
-
-    setTimeout(() => {
-      initializeCharts();
-    }, 100);
-
 
   } catch (error) {
     console.error('Erro no login:', error);
@@ -3788,51 +3849,31 @@ logoutBtn.addEventListener('click', async (e) => {
   e.preventDefault();
 
   try {
-    if (typeof checklistsUnsubscribe === 'function') {
-      checklistsUnsubscribe();
-      checklistsUnsubscribe = null;
-    }
-
-    if (typeof operatorsUnsubscribe === 'function') {
-      operatorsUnsubscribe();
-      operatorsUnsubscribe = null;
-    }
-
     if (auth) {
       await auth.signOut();
     }
   } catch (error) {
     console.error('Erro ao sair:', error);
   }
+});
 
-  isLoggedIn = false;
-  currentUser = null;
-  currentUserData = null;
-
-  appScreen.classList.add('hidden');
-  loginScreen.classList.remove('hidden');
-  loginForm.reset();
-  hideLoginError();
-  closeSidebarMenu();
-  notificationsDismissed = false;
-  notificationsClearedAt = 0;
-  notificationsReadMap = {};
-  reportActivityHistory = [];
-  allOperators = [];
-  renderNotifications();
-  renderReportActivityHistory();
-  renderOperatorsPage();
-  setNotificationsOpen(false);
-  populateSettingsPage();
-
-  Object.values(chartInstances).forEach(chart => {
-    if (chart && typeof chart.destroy === 'function') {
-      chart.destroy();
+if (auth?.onAuthStateChanged) {
+  auth.onAuthStateChanged(async (user) => {
+    try {
+      if (user) {
+        await activateAuthenticatedApp(user);
+      } else if (authStateInitialized) {
+        resetAuthenticatedApp();
+      }
+    } catch (error) {
+      console.error('Erro ao restaurar sessão autenticada:', error);
+      resetAuthenticatedApp();
+    } finally {
+      authStateInitialized = true;
     }
   });
+}
 
-  chartInstances = {};
-});
     if (dashboardDateFilter) {
       dashboardDateFilter.addEventListener('change', applyDashboardFilters);
     }

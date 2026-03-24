@@ -90,6 +90,12 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isCachedExternalAsset = EXTERNAL_ASSETS.includes(url.href);
+
+  if (!isSameOrigin && !isCachedExternalAsset) {
+    return;
+  }
 
   const isNavigation = event.request.mode === "navigate";
 
