@@ -1408,6 +1408,8 @@
       const existingInitialObservation = existingObservationParts.initial;
       const finalObservation = observacaoFinal || existingObservationParts.endOfShift;
       const localTimestamp = getLocalTimestampIso();
+      const hasRecordedFailures = Array.isArray(checklist?.ocorrencias) && checklist.ocorrencias.length > 0;
+      const hasEndOfShiftFailure = String(finalObservation || "").trim() !== "";
 
       return {
         horaFinal,
@@ -1415,6 +1417,7 @@
         observacoesIniciais: existingInitialObservation,
         observacoesFinalTurno: finalObservation,
         observacoes: buildCombinedObservationText(existingInitialObservation, finalObservation),
+        status: hasRecordedFailures || hasEndOfShiftFailure ? "nao-conforme" : "conforme",
         activityStatus: "finalizado",
         finalizedAt: localTimestamp,
         updatedAt: localTimestamp
@@ -2158,7 +2161,10 @@
             observacoesIniciais: initialObservations,
             observacoesFinalTurno: endOfShiftObservations,
             observacoes: mergedObservation,
-            status: failureCommunication ? "nao-conforme" : "conforme",
+            status: (
+              (Array.isArray(currentChecklist?.ocorrencias) && currentChecklist.ocorrencias.length > 0) ||
+              String(endOfShiftObservations || "").trim() !== ""
+            ) ? "nao-conforme" : "conforme",
             activityStatus: "finalizado",
             finalizedAt: getLocalTimestampIso(),
             updatedAt: getLocalTimestampIso()

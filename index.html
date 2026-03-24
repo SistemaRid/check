@@ -1270,6 +1270,16 @@ function getStatusPresentation(status) {
   return { value: 'pendente', label: 'Pendente', color: 'warning' };
 }
 
+function getActivityStatusPresentation(activityStatus) {
+  const normalized = normalizeString(activityStatus || '');
+
+  if (normalized === 'finalizado') {
+    return { value: 'finalizado', label: 'Finalizado', color: 'success' };
+  }
+
+  return { value: 'aberto', label: 'Aberto', color: 'warning' };
+}
+
 function normalizeTurno(value) {
   const match = String(value ?? '').match(/[123]/);
   return match ? `${match[0]}º TURNO` : String(value ?? '').trim();
@@ -4241,6 +4251,7 @@ function clearChecklistFilters() {
     const card = document.createElement('div');
     card.className = 'bg-card rounded-2xl border border-border p-5 card-hover';
     const statusMeta = getStatusPresentation(checklist.status);
+    const activityStatusMeta = getActivityStatusPresentation(checklist.activityStatus);
 
     const dataExibicao = checklist.data || checklist.date || '-';
     const operadorExibicao = checklist.operador || checklist.operator || '-';
@@ -4259,6 +4270,7 @@ function clearChecklistFilters() {
             <div class="flex items-center gap-2 flex-wrap mb-1">
               <h3 class="font-semibold text-text-primary">${escapeHtml(checklist.equipment || '-')}</h3>
               <span class="text-xs font-medium text-${statusMeta.color} bg-${statusMeta.color}/10 px-2 py-1 rounded-full">${statusMeta.label}</span>
+              <span class="text-xs font-medium text-${activityStatusMeta.color} bg-${activityStatusMeta.color}/10 px-2 py-1 rounded-full">${activityStatusMeta.label}</span>
             </div>
 
             <div class="flex flex-wrap gap-4 text-sm text-text-secondary">
