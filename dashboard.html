@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CheckMaint Pro - Sistema de Manutenção</title>
+  <title>CheckMaint Pro - Dashboard</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
@@ -91,8 +91,20 @@ try {
   </style>
   <style>body { box-sizing: border-box; }</style>
  </head>
- <body class="h-full bg-surface"><!-- LOGIN SCREEN -->
-  <div id="loginScreen" class="h-full flex items-center justify-center p-4">
+ <body class="h-full bg-surface">
+  <div id="authLoadingScreen" class="h-full flex items-center justify-center p-4">
+   <div class="w-full max-w-sm bg-card rounded-2xl border border-border shadow-xl p-8 text-center">
+    <div class="inline-flex items-center justify-center w-24 h-24 mb-4">
+     <img src="xl_media_image4.png" alt="Grupo J. Demito" class="w-full h-full object-contain scale-110">
+    </div>
+    <h1 class="text-2xl font-bold text-text-primary">CheckMaint Pro</h1>
+    <p class="text-text-secondary mt-2">Verificando sua sessão...</p>
+    <div class="mt-6 h-2 rounded-full bg-surface-dark overflow-hidden">
+     <div class="h-full w-full bg-primary pulse-dot"></div>
+    </div>
+   </div>
+  </div>
+  <div id="loginScreen" class="hidden h-full items-center justify-center p-4">
    <div class="w-full max-w-md"><!-- Logo -->
     <div class="text-center mb-8">
      <div class="inline-flex items-center justify-center w-32 h-32 mb-4">
@@ -273,24 +285,33 @@ Primeiro acesso / Cadastre-se
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden"></div><!-- MAIN CONTENT AREA -->
     <main class="flex-1 overflow-y-auto bg-surface"><!-- DASHBOARD PAGE -->
      <div id="page-dashboard" class="page-content p-4 lg:p-6 fade-in"><!-- Page Header with Period Selector -->
-      <div class="mb-6 flex flex-col gap-4">
+      <div class="relative mb-6 flex flex-col gap-4">
        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
         <h2 class="text-2xl font-bold text-text-primary">Dashboard Operacional</h2>
         <p class="text-text-secondary mt-1">Análise em tempo real de falhas e manutenção</p>
         </div>
-        <button id="toggleDashboardFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-         </svg><span>Filtros</span> </button>
+        <button id="toggleDashboardFiltersBtn" class="inline-flex items-center justify-center self-end bg-white hover:bg-surface border border-border text-text-primary font-medium px-6 py-3 rounded-2xl shadow-sm transition-colors">
+         <span>Filtros</span>
+        </button>
        </div>
-       <div id="dashboardFiltersContainer" class="hidden bg-card rounded-2xl border border-border p-4 fade-in">
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-         <div><label class="block text-sm font-medium text-text-primary mb-2">Data</label> <input type="date" id="dashboardDateFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+       <div id="dashboardFiltersContainer" class="hidden absolute right-0 top-full z-20 w-full max-w-md rounded-[2rem] border border-border bg-card p-5 shadow-2xl fade-in">
+        <p class="text-sm font-semibold uppercase tracking-wide text-text-secondary mb-4">Filtros do Dashboard</p>
+        <div class="space-y-3">
+         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label class="block text-sm font-medium text-text-primary mb-2">Mês</label> <select id="dashboardMonthFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os meses</option> <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option> <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option> <option value="07">Julho</option> <option value="08">Agosto</option> <option value="09">Setembro</option> <option value="10">Outubro</option> <option value="11">Novembro</option> <option value="12">Dezembro</option> </select>
+          </div>
+          <div><label class="block text-sm font-medium text-text-primary mb-2">Ano</label> <select id="dashboardYearFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os anos</option> </select>
+          </div>
          </div>
-         <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="dashboardEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> </select>
+         <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="dashboardEquipmentFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os equipamentos</option> </select>
          </div>
-         <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="dashboardStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+         <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="dashboardStatusFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os status</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
          </div>
+        </div>
+        <div class="mt-4 flex items-center justify-end gap-3">
+         <button id="clearDashboardFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl border border-border bg-white hover:bg-surface text-text-secondary font-medium transition-colors">Limpar filtros</button>
+         <button id="applyDashboardFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-black hover:bg-slate-800 text-white font-semibold transition-colors">Filtrar</button>
         </div>
        </div>
       </div><!-- Stats Cards -->
@@ -341,7 +362,32 @@ Primeiro acesso / Cadastre-se
        <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-4">
          <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Evolução de Falhas</h3>
-         <p class="text-sm text-text-secondary">Taxa de falhas detectadas por dia</p>
+         <p class="text-sm text-text-secondary">Falhas detectadas por dia no período selecionado</p>
+         <div class="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+          <div>
+           <label for="failureTrendPeriodPreset" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label>
+           <select id="failureTrendPeriodPreset" class="dashboard-chart-period-select w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" data-chart-key="failureTrend">
+            <option value="7">Últimos 7 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+            <option value="month">Mês atual</option>
+            <option value="custom">Personalizado</option>
+           </select>
+          </div>
+          <div id="failureTrendCustomRange" class="hidden sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+           <div>
+            <label for="failureTrendStartDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data inicial</label>
+            <input type="date" id="failureTrendStartDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div>
+           <div>
+            <label for="failureTrendEndDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data final</label>
+            <input type="date" id="failureTrendEndDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div>
+          </div>
+          <button id="applyFailureTrendPeriod" class="dashboard-chart-period-apply inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium transition-colors" data-chart-key="failureTrend">Aplicar</button>
+          <button id="clearFailureTrendPeriod" class="dashboard-chart-period-clear inline-flex items-center justify-center px-4 py-2 rounded-lg border border-border bg-surface hover:bg-surface-dark text-text-primary text-sm font-medium transition-colors" data-chart-key="failureTrend">Limpar</button>
+         </div>
+         <p id="failureTrendPeriodLabel" class="mt-3 text-xs text-text-secondary"></p>
         </div>
         <div class="chart-container mobile-chart-height-lg" style="height: 300px;">
          <canvas id="failureTrendChart"></canvas>
@@ -353,7 +399,32 @@ Primeiro acesso / Cadastre-se
        <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-4">
          <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Falhas Marcadas por Equipamento</h3>
-<p class="text-sm text-text-secondary">Quantidade de itens marcados na emissão do checklist</p>
+<p class="text-sm text-text-secondary">Equipamentos com maior volume de falhas no período</p>
+         <div class="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+          <div>
+           <label for="equipmentFailuresPeriodPreset" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label>
+           <select id="equipmentFailuresPeriodPreset" class="dashboard-chart-period-select w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" data-chart-key="equipmentFailures">
+            <option value="7">Últimos 7 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+            <option value="month">Mês atual</option>
+            <option value="custom">Personalizado</option>
+           </select>
+          </div>
+          <div id="equipmentFailuresCustomRange" class="hidden sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+           <div>
+            <label for="equipmentFailuresStartDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data inicial</label>
+            <input type="date" id="equipmentFailuresStartDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div>
+           <div>
+            <label for="equipmentFailuresEndDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data final</label>
+            <input type="date" id="equipmentFailuresEndDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+           </div>
+          </div>
+          <button id="applyEquipmentFailuresPeriod" class="dashboard-chart-period-apply inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium transition-colors" data-chart-key="equipmentFailures">Aplicar</button>
+          <button id="clearEquipmentFailuresPeriod" class="dashboard-chart-period-clear inline-flex items-center justify-center px-4 py-2 rounded-lg border border-border bg-surface hover:bg-surface-dark text-text-primary text-sm font-medium transition-colors" data-chart-key="equipmentFailures">Limpar</button>
+         </div>
+         <p id="equipmentFailuresPeriodLabel" class="mt-3 text-xs text-text-secondary"></p>
         </div>
         <div class="chart-container mobile-chart-height-lg" style="height: 300px;">
          <canvas id="equipmentFailuresChart"></canvas>
@@ -365,44 +436,72 @@ Primeiro acesso / Cadastre-se
       </div><!-- Analytics Grid - Part 2 -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
        <!-- Chart 3: Failure Rate per Checklist -->
-       <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
-        <div class="mb-4">
-         <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Taxa de Falha por Checklist</h3>
-         <p class="text-sm text-text-secondary">Falhas encontradas em cada execução</p>
+       <div class="relative overflow-hidden bg-card rounded-2xl border border-border p-6 mobile-chart-card">
+        <div class="pointer-events-none select-none blur-sm opacity-50">
+         <div class="mb-4">
+          <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-1">Taxa de Falha por Checklist</h3>
+          <p class="text-sm text-text-secondary">Percentual de falhas por checklist no período</p>
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+           <div>
+            <label for="failureRatePeriodPreset" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label>
+            <select id="failureRatePeriodPreset" class="dashboard-chart-period-select w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" data-chart-key="failureRate">
+             <option value="7">Últimos 7 dias</option>
+             <option value="30" selected>Últimos 30 dias</option>
+             <option value="90">Últimos 90 dias</option>
+             <option value="month">Mês atual</option>
+             <option value="custom">Personalizado</option>
+            </select>
+           </div>
+           <div id="failureRateCustomRange" class="hidden sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+             <label for="failureRateStartDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data inicial</label>
+             <input type="date" id="failureRateStartDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div>
+             <label for="failureRateEndDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data final</label>
+             <input type="date" id="failureRateEndDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+            </div>
+           </div>
+           <button id="applyFailureRatePeriod" class="dashboard-chart-period-apply inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium transition-colors" data-chart-key="failureRate">Aplicar</button>
+           <button id="clearFailureRatePeriod" class="dashboard-chart-period-clear inline-flex items-center justify-center px-4 py-2 rounded-lg border border-border bg-surface hover:bg-surface-dark text-text-primary text-sm font-medium transition-colors" data-chart-key="failureRate">Limpar</button>
+          </div>
+          <p id="failureRatePeriodLabel" class="mt-3 text-xs text-text-secondary"></p>
+         </div>
+         <div class="chart-container mobile-chart-height-md" style="height: 280px;">
+          <canvas id="failureRateChart"></canvas>
+         </div>
+         <div class="mt-4 pt-4 border-t border-border">
+          <p class="text-xs text-text-secondary text-center">📈 Monitoramento contínuo de qualidade operacional</p>
+         </div>
         </div>
-        <div class="chart-container mobile-chart-height-md" style="height: 280px;">
-         <canvas id="failureRateChart"></canvas>
-        </div>
-        <div class="mt-4 pt-4 border-t border-border">
-         <p class="text-xs text-text-secondary text-center">📈 Monitoramento contínuo de qualidade operacional</p>
+        <div class="absolute inset-0 flex items-center justify-center p-6">
+         <div class="max-w-sm rounded-2xl border border-border bg-white/90 backdrop-blur-sm shadow-xl px-6 py-5 text-center">
+          <span class="inline-flex items-center px-3 py-1 rounded-full bg-warning/10 text-warning text-xs font-semibold uppercase tracking-wide">Em revisão</span>
+          <h4 class="mt-3 text-lg font-bold text-text-primary">Gráfico temporariamente desativado</h4>
+          <p class="mt-2 text-sm text-text-secondary">Esse espaço foi mantido no dashboard, mas o indicador será redefinido antes de voltar ao uso.</p>
+         </div>
         </div>
        </div><!-- Chart 4: Advanced Failure Analysis by System -->
        <div class="bg-card rounded-2xl border border-border p-6 mobile-chart-card">
         <div class="mb-6">
          <h3 class="font-semibold text-text-primary text-base sm:text-lg mb-4">Análise de Falhas por Sistema</h3><!-- Interactive Filters -->
-         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6"><!-- Equipment Filter -->
+         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-4"><!-- Equipment Filter -->
           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Maquinário</label> <select id="equipmentSystemFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="veiculo_leve">Veículos Leves</option> <option value="caminhao_basculante">Caminhão Basculante</option> <option value="caminhao_carroceria">Caminhão Carroceria</option> <option value="caminhao_comboio">Caminhão Comboio</option> <option value="caminhao_munck">Caminhão Munck</option> <option value="caminhao_pipa">Caminhão Pipa</option> <option value="carregadeira">Carregadeira</option> <option value="cavalo_mecanico">Cavalo Mecânico</option> <option value="compressor">Compressor</option> <option value="escavadeira">Escavadeira</option> <option value="gerador_energia">Gerador de Energia</option> <option value="mini_carregadeira">Mini Carregadeira</option> <option value="motoniveladora">Motoniveladora</option> <option value="onibus">Ônibus</option> <option value="perfuratriz">Perfuratriz</option> <option value="prancha">Prancha</option> <option value="retroescavadeira">Retroescavadeira</option> <option value="rompedor">Rompedor</option> <option value="trator_esteira">Trator de Esteira</option> </select>
           </div><!-- System/Sector Filter -->
           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Sistema</label> <select id="systemTypeFilter" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="motor">Motor</option> <option value="hidraulico">Sistema Hidráulico</option> <option value="eletrico">Sistema Elétrico</option> <option value="arrefecimento">Sistema de Arrefecimento</option> <option value="combustivel">Sistema de Combustível</option> <option value="transmissao">Sistema de Transmissão</option> <option value="freios">Sistema de Freios</option> <option value="pneus">Pneus e Rodas</option> <option value="iluminacao">Iluminação e Sinalização</option> <option value="cabine">Cabine e Segurança</option> <option value="estrutura">Estrutura e Chassi</option> <option value="pneumatico">Sistema Pneumático</option> <option value="operacional">Componentes Operacionais</option> </select>
-          </div><!-- Period Filter -->
-          <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label> <select id="failureAnalysisPeriod" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="7">Últimos 7 dias</option> <option value="30">Últimos 30 dias</option> <option value="90">Últimos 90 dias</option> <option value="custom">Personalizado</option> </select>
           </div>
-         </div><!-- Custom Period Filter Section (Hidden by default) -->
-         <div id="customPeriodSection" class="hidden mb-6 p-4 bg-surface-dark rounded-lg border border-border">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-           <div><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Tipo de Filtro</label> <select id="customFilterType" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="day">Dia Específico</option> <option value="range">Período (Data Inicial - Final)</option> </select>
-           </div><!-- Day-specific filter -->
-           <div id="dayFilterWrapper"><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Selecionar Dia</label> <input type="date" id="customDay" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
-           </div><!-- Range filter (hidden by default) -->
-           <div id="rangeFilterWrapper" class="hidden"><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data Inicial</label> <input type="date" id="customStartDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
-           </div>
-           <div id="rangeEndWrapper" class="hidden"><label class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data Final</label> <input type="date" id="customEndDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
-           </div>
-          </div>
-          <div class="flex gap-2">
-           <button id="applyCustomFilter" class="flex-1 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors">Aplicar Filtro</button> <button id="clearCustomFilter" class="flex-1 px-4 py-2 bg-surface border border-border hover:bg-surface-dark text-text-primary rounded-lg text-sm font-medium transition-colors">Limpar</button>
+          <div><label for="failureAnalysisPeriodPreset" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Período</label> <select id="failureAnalysisPeriodPreset" class="dashboard-chart-period-select w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none" data-chart-key="failureAnalysis"> <option value="7">Últimos 7 dias</option> <option value="30" selected>Últimos 30 dias</option> <option value="90">Últimos 90 dias</option> <option value="month">Mês atual</option> <option value="custom">Personalizado</option> </select>
           </div>
          </div>
+         <div id="failureAnalysisCustomRange" class="hidden mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><label for="failureAnalysisStartDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data Inicial</label> <input type="date" id="failureAnalysisStartDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"></div>
+          <div><label for="failureAnalysisEndDate" class="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">Data Final</label> <input type="date" id="failureAnalysisEndDate" class="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"></div>
+         </div>
+         <div class="mb-4 flex flex-col sm:flex-row gap-3">
+          <button id="applyFailureAnalysisPeriod" class="dashboard-chart-period-apply inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium transition-colors" data-chart-key="failureAnalysis">Aplicar filtro</button>
+          <button id="clearFailureAnalysisPeriod" class="dashboard-chart-period-clear inline-flex items-center justify-center px-4 py-2 rounded-lg border border-border bg-surface hover:bg-surface-dark text-text-primary text-sm font-medium transition-colors" data-chart-key="failureAnalysis">Limpar</button>
+         </div>
+         <p id="failureAnalysisPeriodLabel" class="mb-2 text-xs text-text-secondary"></p>
         </div><!-- Analysis Chart -->
         <div class="chart-container mb-6 mobile-chart-height-md" style="height: 280px;">
          <canvas id="failureAnalysisChart"></canvas>
@@ -449,31 +548,37 @@ Primeiro acesso / Cadastre-se
       </div>
      </div><!-- CHECKLISTS PAGE -->
      <div id="page-checklists" class="page-content hidden p-4 lg:p-6 fade-in">
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="relative mb-6 flex flex-col gap-4">
+       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
        <div>
         <h2 class="text-2xl font-bold text-text-primary">Checklists</h2>
         <p class="text-text-secondary mt-1">Gerencie os checklists de equipamentos</p>
        </div>
        <div class="flex items-center gap-3">
-        <button id="toggleFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors">
+        <button id="toggleFiltersBtn" class="inline-flex items-center justify-center bg-white hover:bg-surface border border-border text-text-primary font-medium px-6 py-3 rounded-2xl shadow-sm transition-colors">
          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
          </svg><span>Filtros</span> </button> <button id="newChecklistBtn" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-primary/25">
          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
          </svg><span>Novo Checklist</span> </button>
        </div>
-      </div><!-- Filters Section (Hidden by default) -->
-      <div id="checklistFiltersContainer" class="hidden bg-card rounded-2xl border border-border p-4 mb-6 fade-in">
-       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Data</label> <input type="date" id="checklistDateFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+       </div>
+      <div id="checklistFiltersContainer" class="hidden absolute right-0 top-full z-20 w-full max-w-2xl rounded-[2rem] border border-border bg-card p-5 shadow-2xl fade-in">
+       <p class="text-sm font-semibold uppercase tracking-wide text-text-secondary mb-4">Filtros dos Checklists</p>
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Mês</label> <select id="checklistMonthFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os meses</option> <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option> <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option> <option value="07">Julho</option> <option value="08">Agosto</option> <option value="09">Setembro</option> <option value="10">Outubro</option> <option value="11">Novembro</option> <option value="12">Dezembro</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="checklistEquipmentFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Ano</label> <select id="checklistYearFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os anos</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="checklistStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Equipamento</label> <select id="checklistEquipmentFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os equipamentos</option> </select>
+        </div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="checklistStatusFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os status</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+        </div>
+        <div class="sm:col-span-2"><label class="block text-sm font-medium text-text-primary mb-2">Operador</label> <input type="text" id="checklistOperatorFilter" placeholder="Digite o nome do operador" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
         </div>
        </div>
-       <div class="mt-4 flex flex-col sm:flex-row gap-3">
-        <button id="applyChecklistFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">Aplicar filtros</button>
-        <button id="clearChecklistFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">Limpar filtros</button>
+       <div class="mt-4 flex items-center justify-end gap-3">
+        <button id="clearChecklistFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl border border-border bg-white hover:bg-surface text-text-secondary font-medium transition-colors">Limpar filtros</button>
+        <button id="applyChecklistFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-black hover:bg-slate-800 text-white font-semibold transition-colors">Filtrar</button>
        </div>
       </div>
 <!-- ESTADO VAZIO -->
@@ -548,29 +653,34 @@ Primeiro acesso / Cadastre-se
       </div>
      </div><!-- HISTORICO PAGE -->
      <div id="page-historico" class="page-content hidden p-4 lg:p-6 fade-in">
-     <div class="mb-6">
-       <h2 class="text-2xl font-bold text-text-primary">Histórico de Checklists</h2>
-       <p class="text-text-secondary mt-1">Visualize todos os checklists realizados</p>
-      </div>
-      <div class="mb-6">
-       <button id="toggleHistoryFiltersBtn" class="inline-flex items-center gap-2 bg-surface hover:bg-surface-dark border border-border text-text-primary font-medium px-5 py-2.5 rounded-xl transition-colors">
+     <div class="relative mb-6 flex flex-col gap-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+       <div>
+        <h2 class="text-2xl font-bold text-text-primary">Histórico de Checklists</h2>
+        <p class="text-text-secondary mt-1">Visualize todos os checklists realizados</p>
+       </div>
+       <button id="toggleHistoryFiltersBtn" class="inline-flex items-center justify-center self-end bg-white hover:bg-surface border border-border text-text-primary font-medium px-6 py-3 rounded-2xl shadow-sm transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
         <span>Filtros</span>
        </button>
-      </div><!-- Filters -->
-      <div id="historyFiltersContainer" class="hidden bg-card rounded-2xl border border-border p-4 mb-6">
-       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Operador</label> <input type="text" id="historyOperatorFilter" placeholder="Buscar por nome" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+      </div>
+      <div id="historyFiltersContainer" class="hidden absolute right-0 top-full z-20 w-full max-w-2xl rounded-[2rem] border border-border bg-card p-5 shadow-2xl fade-in">
+       <p class="text-sm font-semibold uppercase tracking-wide text-text-secondary mb-4">Filtros do Histórico</p>
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Mês</label> <select id="historyMonthFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os meses</option> <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option> <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option> <option value="07">Julho</option> <option value="08">Agosto</option> <option value="09">Setembro</option> <option value="10">Outubro</option> <option value="11">Novembro</option> <option value="12">Dezembro</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Período</label> <select id="historyMonthFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Mês atual</option> <option value="all">Todos os meses</option> <option value="01">Janeiro</option> <option value="02">Fevereiro</option> <option value="03">Março</option> <option value="04">Abril</option> <option value="05">Maio</option> <option value="06">Junho</option> <option value="07">Julho</option> <option value="08">Agosto</option> <option value="09">Setembro</option> <option value="10">Outubro</option> <option value="11">Novembro</option> <option value="12">Dezembro</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Ano</label> <select id="historyYearFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os anos</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="historyStatusFilter" class="w-full px-4 py-2.5 border border-border rounded-xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Operador</label> <input type="text" id="historyOperatorFilter" placeholder="Buscar por nome" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+        </div>
+        <div><label class="block text-sm font-medium text-text-primary mb-2">Status</label> <select id="historyStatusFilter" class="w-full px-4 py-3 border border-border rounded-2xl bg-white text-text-primary focus:ring-2 focus:ring-primary focus:border-primary outline-none"> <option value="">Todos os status</option> <option value="conforme">Conforme</option> <option value="nao-conforme">Não Conforme</option> <option value="pendente">Pendente</option> </select>
         </div>
        </div>
-       <div class="mt-4 flex flex-col sm:flex-row gap-3">
-        <button id="applyHistoryFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium transition-colors">Aplicar filtros</button>
-        <button id="clearHistoryFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-dark text-text-primary font-medium transition-colors">Limpar filtros</button>
+       <div class="mt-4 flex items-center justify-end gap-3">
+        <button id="clearHistoryFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl border border-border bg-white hover:bg-surface text-text-secondary font-medium transition-colors">Limpar filtros</button>
+        <button id="applyHistoryFiltersBtn" type="button" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-black hover:bg-slate-800 text-white font-semibold transition-colors">Filtrar</button>
        </div>
+      </div>
       </div><!-- History Table -->
       <div class="bg-card rounded-2xl border border-border overflow-hidden">
        <div class="overflow-x-auto">
@@ -1193,12 +1303,15 @@ Primeiro acesso / Cadastre-se
     let authStateInitialized = false;
     let chartInstances = {};
     let appliedChecklistFilters = {
-      date: '',
+      month: '',
+      year: '',
       equipment: '',
-      status: ''
+      status: '',
+      operator: ''
     };
     let appliedHistoryFilters = {
       month: '',
+      year: '',
       operator: '',
       status: ''
     };
@@ -1983,6 +2096,7 @@ async function activateAuthenticatedApp(user, userData = null) {
   applyNotificationStateFromUserData();
 
   isLoggedIn = true;
+  if (authLoadingScreen) authLoadingScreen.classList.add('hidden');
   loginScreen.classList.add('hidden');
   appScreen.classList.remove('hidden');
 
@@ -2020,8 +2134,9 @@ function resetAuthenticatedApp() {
   allChecklists = [];
   allOperators = [];
 
+  if (authLoadingScreen) authLoadingScreen.classList.remove('hidden');
   appScreen.classList.add('hidden');
-  loginScreen.classList.remove('hidden');
+  loginScreen.classList.add('hidden');
 
   loginForm.reset();
   hideLoginError();
@@ -2044,6 +2159,10 @@ function resetAuthenticatedApp() {
   });
 
   chartInstances = {};
+
+  if (getCurrentFileName() !== 'index.html') {
+    window.location.replace(`login.html?next=${encodeURIComponent(getCurrentFileName())}`);
+  }
 }
 
 function formatDateTimePtBr(value) {
@@ -3282,7 +3401,7 @@ async function saveSettings(event) {
       return Math.ceil((maxValue + step) / step) * step;
     }
 
-    function renderDashboardSummary(checklists = []) {
+    function legacyRenderDashboardSummary(checklists = []) {
       const totalChecklists = checklists.length;
       const conformes = checklists.filter(item => normalizeStatus(item.status) === 'conforme').length;
       const naoConformes = checklists.filter(item => normalizeStatus(item.status) === 'nao-conforme').length;
@@ -3419,7 +3538,7 @@ async function saveSettings(event) {
 window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
   
 
-    const initializeCharts = () => {
+    const legacyInitializeCharts = () => {
       // Destroy existing charts
       Object.values(chartInstances).forEach(chart => {
         if (chart && typeof chart.destroy === 'function') {
@@ -3721,6 +3840,7 @@ const equipmentData = rankingEquipamentos.length
     };
 
     // DOM Elements
+    const authLoadingScreen = document.getElementById('authLoadingScreen');
     const loginScreen = document.getElementById('loginScreen');
     const appScreen = document.getElementById('appScreen');
     const loginForm = document.getElementById('loginForm');
@@ -3751,9 +3871,12 @@ const equipmentData = rankingEquipamentos.length
     const pageContents = document.querySelectorAll('.page-content');
     const toggleDashboardFiltersBtn = document.getElementById('toggleDashboardFiltersBtn');
     const dashboardFiltersContainer = document.getElementById('dashboardFiltersContainer');
-    const dashboardDateFilter = document.getElementById('dashboardDateFilter');
+    const dashboardMonthFilter = document.getElementById('dashboardMonthFilter');
+    const dashboardYearFilter = document.getElementById('dashboardYearFilter');
     const dashboardEquipmentFilter = document.getElementById('dashboardEquipmentFilter');
     const dashboardStatusFilter = document.getElementById('dashboardStatusFilter');
+    const clearDashboardFiltersBtn = document.getElementById('clearDashboardFiltersBtn');
+    const applyDashboardFiltersBtn = document.getElementById('applyDashboardFiltersBtn');
     const settingsForm = document.getElementById('settingsForm');
     const resetSettingsBtn = document.getElementById('resetSettingsBtn');
     let authMode = 'login';
@@ -3931,7 +4054,7 @@ if (auth?.onAuthStateChanged) {
     try {
       if (user) {
         await activateAuthenticatedApp(user);
-      } else if (authStateInitialized) {
+      } else {
         resetAuthenticatedApp();
       }
     } catch (error) {
@@ -3942,18 +4065,6 @@ if (auth?.onAuthStateChanged) {
     }
   });
 }
-    if (dashboardDateFilter) {
-      dashboardDateFilter.addEventListener('change', applyDashboardFilters);
-    }
-
-    if (dashboardEquipmentFilter) {
-      dashboardEquipmentFilter.addEventListener('change', applyDashboardFilters);
-    }
-
-    if (dashboardStatusFilter) {
-      dashboardStatusFilter.addEventListener('change', applyDashboardFilters);
-    }
-
     const newOperatorBtn = document.getElementById('newOperatorBtn');
     const newOperatorForm = document.getElementById('newOperatorForm');
     const closeNewOperatorModalBtn = document.getElementById('closeNewOperatorModalBtn');
@@ -3991,122 +4102,577 @@ if (auth?.onAuthStateChanged) {
       });
     }
 
-    // Failure Analysis Filters
     const equipmentSystemFilter = document.getElementById('equipmentSystemFilter');
     const systemTypeFilter = document.getElementById('systemTypeFilter');
-    const failureAnalysisPeriod = document.getElementById('failureAnalysisPeriod');
-    const customPeriodSection = document.getElementById('customPeriodSection');
-    const customFilterType = document.getElementById('customFilterType');
-    const dayFilterWrapper = document.getElementById('dayFilterWrapper');
-    const rangeFilterWrapper = document.getElementById('rangeFilterWrapper');
-    const rangeEndWrapper = document.getElementById('rangeEndWrapper');
-    const customDay = document.getElementById('customDay');
-    const customStartDate = document.getElementById('customStartDate');
-    const customEndDate = document.getElementById('customEndDate');
-    const applyCustomFilter = document.getElementById('applyCustomFilter');
-    const clearCustomFilter = document.getElementById('clearCustomFilter');
 
-    let activeCustomPeriod = null;
-    let systemFilterTouched = false;
-    let periodFilterTouched = false;
-
-    // Handle custom period section visibility
-    failureAnalysisPeriod.addEventListener('change', () => {
-      periodFilterTouched = true;
-      if (failureAnalysisPeriod.value === 'custom') {
-        customPeriodSection.classList.remove('hidden');
-      } else {
-        customPeriodSection.classList.add('hidden');
-        activeCustomPeriod = null;
-      }
-      updateFailureAnalysis();
-    });
-
-    // Handle filter type change
-    customFilterType.addEventListener('change', () => {
-      if (customFilterType.value === 'day') {
-        dayFilterWrapper.classList.remove('hidden');
-        rangeFilterWrapper.classList.add('hidden');
-        rangeEndWrapper.classList.add('hidden');
-      } else {
-        dayFilterWrapper.classList.add('hidden');
-        rangeFilterWrapper.classList.remove('hidden');
-        rangeEndWrapper.classList.remove('hidden');
-      }
-    });
-
-    // Apply custom filter
-    applyCustomFilter.addEventListener('click', () => {
-      periodFilterTouched = true;
-      if (customFilterType.value === 'day') {
-        if (customDay.value) {
-          activeCustomPeriod = { type: 'day', value: customDay.value };
-          updateFailureAnalysis();
-        } else {
-          alert('Por favor, selecione um dia');
+    if (equipmentSystemFilter) {
+      equipmentSystemFilter.addEventListener('change', () => {
+        if (currentPage === 'dashboard' && typeof initializeCharts === 'function') {
+          initializeCharts();
         }
-      } else {
-        if (customStartDate.value && customEndDate.value) {
-          const start = new Date(customStartDate.value);
-          const end = new Date(customEndDate.value);
-          if (start > end) {
-            alert('A data inicial deve ser anterior à data final');
+      });
+    }
+
+    if (systemTypeFilter) {
+      systemTypeFilter.addEventListener('change', () => {
+        if (currentPage === 'dashboard' && typeof initializeCharts === 'function') {
+          initializeCharts();
+        }
+      });
+    }
+
+const dashboardChartKeys = ['failureTrend', 'equipmentFailures', 'failureRate', 'failureAnalysis'];
+const dashboardChartPeriods = Object.fromEntries(dashboardChartKeys.map((chartKey) => [chartKey, { preset: '30', start: '', end: '' }]));
+
+function getChecklistDateObject(checklist) {
+  const dateValue = getChecklistHistoryDateValue(checklist);
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    const [year, month, day] = dateValue.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  const timestamp = getChecklistHistoryTimestamp(checklist);
+  if (!timestamp) {
+    return null;
+  }
+
+  const fallbackDate = new Date(timestamp);
+  if (Number.isNaN(fallbackDate.getTime())) {
+    return null;
+  }
+
+  fallbackDate.setHours(0, 0, 0, 0);
+  return fallbackDate;
+}
+
+function getChecklistOccurrences(checklist) {
+  return Array.isArray(checklist?.ocorrencias) ? checklist.ocorrencias.filter(Boolean) : [];
+}
+
+function getChecklistOccurrenceCount(checklist) {
+  return getChecklistOccurrences(checklist).length;
+}
+
+function getChecklistDefinitionKey(checklist) {
+  const normalizedKey = normalizeEquipmentKey(checklist?.checklistKey || checklist?.equipmentId || checklist?.equipment || '');
+  const keyMap = {
+    'veiculos-leves': 'veiculo_leve',
+    'caminhao-basculante': 'caminhao_basculante',
+    'caminhao-carroceria': 'caminhao_carroceria',
+    'caminhao-comboio': 'caminhao_comboio',
+    'caminhao-munck': 'caminhao_munck',
+    'caminhao-pipa': 'caminhao_pipa',
+    'cavalo-mecanico': 'cavalo_mecanico',
+    'gerador-energia': 'gerador_energia',
+    'mini-carregadeira': 'mini_carregadeira',
+    'trator-esteira': 'trator_esteira'
+  };
+
+  return keyMap[normalizedKey] || normalizedKey.replace(/-/g, '_');
+}
+
+function getChecklistInspectionItemCount(checklist) {
+  const definition = systemComponentsDatabase[getChecklistDefinitionKey(checklist)];
+  if (!definition) {
+    return 0;
+  }
+
+  return Object.values(definition).reduce((total, section) => {
+    return total + (Array.isArray(section?.componentes) ? section.componentes.length : 0);
+  }, 0);
+}
+
+function isChecklistConforme(checklist) {
+  const status = normalizeStatus(checklist?.status);
+  if (status === 'conforme') return true;
+  if (status === 'nao-conforme' || status === 'pendente') return false;
+  return getChecklistOccurrenceCount(checklist) === 0;
+}
+
+function requiresMaintenance(checklist) {
+  return !isChecklistConforme(checklist) || normalizeStatus(checklist?.status) === 'pendente';
+}
+
+function getPeriodRangeFromPreset(preset) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (preset === 'month') {
+    return { start: new Date(today.getFullYear(), today.getMonth(), 1), end: today };
+  }
+
+  const days = Number(preset || 30);
+  const start = new Date(today);
+  start.setDate(start.getDate() - (Math.max(days, 1) - 1));
+  return { start, end: today };
+}
+
+function getDashboardChartElements(chartKey) {
+  return {
+    preset: document.getElementById(`${chartKey}PeriodPreset`),
+    customRange: document.getElementById(`${chartKey}CustomRange`),
+    startDate: document.getElementById(`${chartKey}StartDate`),
+    endDate: document.getElementById(`${chartKey}EndDate`),
+    periodLabel: document.getElementById(`${chartKey}PeriodLabel`)
+  };
+}
+
+function syncDashboardChartPeriodUi(chartKey) {
+  const state = dashboardChartPeriods[chartKey];
+  const elements = getDashboardChartElements(chartKey);
+  if (!state || !elements.preset) return;
+
+  elements.preset.value = state.preset;
+  if (elements.customRange) {
+    elements.customRange.classList.toggle('hidden', state.preset !== 'custom');
+  }
+  if (elements.startDate) elements.startDate.value = state.start || '';
+  if (elements.endDate) elements.endDate.value = state.end || '';
+}
+
+function buildPeriodLabel(range, totalChecklists) {
+  if (!range?.start || !range?.end) {
+    return `${totalChecklists} checklist(s) considerados.`;
+  }
+
+  return `${totalChecklists} checklist(s) entre ${formatDateBR(range.start.toISOString().slice(0, 10))} e ${formatDateBR(range.end.toISOString().slice(0, 10))}.`;
+}
+
+function getDashboardChartRange(chartKey) {
+  const state = dashboardChartPeriods[chartKey];
+  if (!state) {
+    return getPeriodRangeFromPreset('30');
+  }
+
+  if (state.preset === 'custom') {
+    if (!state.start || !state.end) {
+      return null;
+    }
+
+    const start = new Date(`${state.start}T00:00:00`);
+    const end = new Date(`${state.end}T00:00:00`);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+      return null;
+    }
+
+    return { start, end };
+  }
+
+  return getPeriodRangeFromPreset(state.preset);
+}
+
+function getDashboardChartChecklists(chartKey, baseItems = getDashboardFilteredChecklists()) {
+  const range = getDashboardChartRange(chartKey);
+  if (!range) {
+    return [];
+  }
+
+  return (baseItems || []).filter((item) => {
+    const checklistDate = getChecklistDateObject(item);
+    return checklistDate && checklistDate >= range.start && checklistDate <= range.end;
+  });
+}
+
+function createDashboardLineChart(chartKey, canvasId, datasetConfig = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || typeof Chart === 'undefined') {
+    return;
+  }
+
+  const labels = Array.isArray(datasetConfig.labels) && datasetConfig.labels.length ? datasetConfig.labels : ['Sem dados'];
+  const values = Array.isArray(datasetConfig.values) && datasetConfig.values.length ? datasetConfig.values : [0];
+  const isMobileChart = isMobileChartViewport();
+  const tickFont = getChartTickFont();
+
+  chartInstances[chartKey] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: datasetConfig.label || 'Indicador',
+        data: values,
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#ef4444',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        filler: { propagate: true },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const parsedValue = Number(context.parsed?.y ?? context.parsed ?? 0);
+              const value = datasetConfig.decimals != null ? parsedValue.toFixed(datasetConfig.decimals) : parsedValue;
+              return `${context.dataset.label}: ${value}${datasetConfig.valueSuffix || ''}`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: getDynamicChartMax(values, datasetConfig.fallbackMax || 10),
+          ticks: {
+            color: '#64748b',
+            font: tickFont,
+            maxTicksLimit: isMobileChart ? 5 : 7,
+            callback: function(value) {
+              return `${value}${datasetConfig.axisSuffix || ''}`;
+            }
+          },
+          grid: { color: getChartGridColor() }
+        },
+        x: {
+          ticks: {
+            color: '#64748b',
+            font: tickFont,
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: datasetConfig.maxTicks || (isMobileChart ? 5 : 8),
+            callback: function(value, index) {
+              const label = this.getLabelForValue(index);
+              return truncateChartLabel(label, datasetConfig.labelMaxLength || (isMobileChart ? 10 : 18));
+            }
+          },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function renderDashboardSummary(checklists = []) {
+  const totalChecklists = checklists.length;
+  const conformes = checklists.filter(isChecklistConforme).length;
+  const falhasDetectadas = checklists.reduce((total, item) => total + getChecklistOccurrenceCount(item), 0);
+  const manutencoesPendentes = checklists.filter(requiresMaintenance).length;
+
+  const elTotal = document.getElementById('dashChecklistsRealizados');
+  const elConformes = document.getElementById('dashEquipamentosConformes');
+  const elFalhas = document.getElementById('dashFalhasDetectadas');
+  const elPendentes = document.getElementById('dashManutencoesPendentes');
+
+  if (elTotal) elTotal.textContent = totalChecklists;
+  if (elConformes) elConformes.textContent = conformes;
+  if (elFalhas) elFalhas.textContent = falhasDetectadas;
+  if (elPendentes) elPendentes.textContent = manutencoesPendentes;
+
+  const recentActivityContainer = document.getElementById('recentActivityContainer');
+  if (recentActivityContainer) {
+    if (!checklists.length) {
+      recentActivityContainer.innerHTML = `
+        <div class="px-5 py-8 text-center text-text-secondary">
+          <p class="text-sm">Nenhuma atividade registrada ainda</p>
+          <p class="text-xs mt-1">Os checklists filtrados vao aparecer aqui.</p>
+        </div>
+      `;
+    } else {
+      const ordered = [...checklists].sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a)).slice(0, 6);
+      recentActivityContainer.innerHTML = ordered.map((item) => {
+        const statusMeta = getStatusPresentation(item.status);
+        const timestamp = getChecklistHistoryTimestamp(item);
+        const dateTimeLabel = timestamp
+          ? new Date(timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+          : (item.data || '-');
+
+        return `
+          <div class="px-5 py-4 hover:bg-surface/60 transition-colors">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="text-sm font-semibold text-text-primary">${escapeHtml(getChecklistHistoryEquipmentName(item))}</p>
+                  <span class="text-[11px] px-2.5 py-1 rounded-full font-semibold ${statusMeta.value === 'conforme' ? 'bg-green-100 text-green-700' : statusMeta.value === 'nao-conforme' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">${statusMeta.label}</span>
+                </div>
+                <p class="text-xs text-text-secondary mt-1">${escapeHtml(item.operador || '-')} • ${escapeHtml(item.unidade || '-')} • ${escapeHtml(dateTimeLabel)}</p>
+                <p class="text-xs text-text-secondary mt-2">${escapeHtml(normalizeTurno(item.turno) || 'Turno nao informado')} • ${getChecklistOccurrenceCount(item)} falha(s)</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  const maintenanceBox = document.getElementById('criticalMaintenanceContainer');
+  const maintenanceFooter = document.getElementById('criticalMaintenanceFooter');
+  const criticalItems = checklists
+    .filter(requiresMaintenance)
+    .sort((a, b) => getChecklistOccurrenceCount(b) - getChecklistOccurrenceCount(a) || getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a))
+    .slice(0, 6);
+
+  if (maintenanceBox) {
+    if (!criticalItems.length) {
+      maintenanceBox.innerHTML = `
+        <div class="text-center py-8 text-text-secondary">
+          <p class="text-sm">Nenhuma manutencao pendente</p>
+          <p class="text-xs mt-1">Tudo em dia no recorte filtrado.</p>
+        </div>
+      `;
+    } else {
+      maintenanceBox.innerHTML = criticalItems.map((item) => {
+        const timestamp = getChecklistHistoryTimestamp(item);
+        const dateLabel = timestamp
+          ? new Date(timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+          : (item.data || '-');
+
+        return `
+          <div class="p-3 rounded-xl border border-warning/30 bg-warning/5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="text-sm font-semibold text-text-primary">${escapeHtml(getChecklistHistoryEquipmentName(item))}</p>
+                  <span class="text-[11px] px-2 py-1 rounded-full font-semibold bg-red-100 text-red-700">${escapeHtml(getStatusPresentation(item.status).label)}</span>
+                </div>
+                <p class="text-xs text-text-secondary mt-1">${escapeHtml(item.unidade || '-')} • ${escapeHtml(item.operador || '-')}</p>
+                <p class="text-xs text-text-secondary mt-1">${escapeHtml(normalizeTurno(item.turno) || 'Turno nao informado')} • ${escapeHtml(dateLabel)}</p>
+                <p class="text-xs text-warning font-medium mt-2">${getChecklistOccurrenceCount(item)} falha(s) registrada(s)</p>
+              </div>
+              <button type="button" onclick="openChecklistDetailsModal('${item.id}')" class="shrink-0 px-3 py-2 rounded-lg bg-white border border-warning/30 text-warning text-xs font-semibold hover:bg-warning/10 transition-colors">Ver</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (maintenanceFooter) {
+    maintenanceFooter.textContent = criticalItems.length === 1
+      ? '1 manutencao critica em destaque'
+      : `${criticalItems.length} manutencoes criticas em destaque`;
+  }
+}
+
+function renderFailureTrendChart(baseItems) {
+  const chartItems = getDashboardChartChecklists('failureTrend', baseItems);
+  const range = getDashboardChartRange('failureTrend');
+  const buckets = new Map();
+
+  if (range?.start && range?.end) {
+    const cursor = new Date(range.start);
+    while (cursor <= range.end) {
+      buckets.set(cursor.toISOString().slice(0, 10), 0);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  }
+
+  chartItems.forEach((item) => {
+    const checklistDate = getChecklistDateObject(item);
+    if (!checklistDate) return;
+    const key = checklistDate.toISOString().slice(0, 10);
+    buckets.set(key, (buckets.get(key) || 0) + getChecklistOccurrenceCount(item));
+  });
+
+  createDashboardLineChart('failureTrend', 'failureTrendChart', {
+    labels: Array.from(buckets.keys()).map((value) => formatDateBR(value)),
+    values: Array.from(buckets.values()),
+    label: 'Falhas detectadas',
+    fallbackMax: 10,
+    labelMaxLength: 10
+  });
+
+  const elements = getDashboardChartElements('failureTrend');
+  if (elements.periodLabel) {
+    elements.periodLabel.textContent = buildPeriodLabel(range, chartItems.length);
+  }
+}
+
+function renderEquipmentFailuresChart(baseItems) {
+  const chartItems = getDashboardChartChecklists('equipmentFailures', baseItems);
+  const totalsByEquipment = new Map();
+
+  chartItems.forEach((item) => {
+    const equipmentName = getChecklistHistoryEquipmentName(item) || 'Nao informado';
+    totalsByEquipment.set(equipmentName, (totalsByEquipment.get(equipmentName) || 0) + getChecklistOccurrenceCount(item));
+  });
+
+  const ranking = Array.from(totalsByEquipment.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR')).slice(0, 8);
+
+  createDashboardLineChart('equipmentFailures', 'equipmentFailuresChart', {
+    labels: ranking.map(([label]) => label),
+    values: ranking.map(([, value]) => value),
+    label: 'Falhas por equipamento',
+    fallbackMax: 10,
+    labelMaxLength: 16
+  });
+
+  const elements = getDashboardChartElements('equipmentFailures');
+  if (elements.periodLabel) {
+    elements.periodLabel.textContent = buildPeriodLabel(getDashboardChartRange('equipmentFailures'), chartItems.length);
+  }
+}
+
+function renderFailureRateChart(baseItems) {
+  const chartItems = getDashboardChartChecklists('failureRate', baseItems).sort((a, b) => getChecklistHistoryTimestamp(a) - getChecklistHistoryTimestamp(b)).slice(-12);
+  const labels = chartItems.map((item) => `${getChecklistHistoryEquipmentName(item)} • ${formatDateBR(getChecklistHistoryDateValue(item))}`);
+  const values = chartItems.map((item) => {
+    const totalItems = getChecklistInspectionItemCount(item);
+    if (!totalItems) return 0;
+    return Number(((getChecklistOccurrenceCount(item) / totalItems) * 100).toFixed(1));
+  });
+
+  createDashboardLineChart('failureRate', 'failureRateChart', {
+    labels,
+    values,
+    label: 'Taxa de falha',
+    fallbackMax: 20,
+    labelMaxLength: 14,
+    valueSuffix: '%',
+    axisSuffix: '%',
+    decimals: 1
+  });
+
+  const elements = getDashboardChartElements('failureRate');
+  if (elements.periodLabel) {
+    elements.periodLabel.textContent = buildPeriodLabel(getDashboardChartRange('failureRate'), chartItems.length);
+  }
+}
+
+function renderFailureAnalysisChart(baseItems) {
+  const chartItems = getDashboardChartChecklists('failureAnalysis', baseItems);
+  const equipmentValue = document.getElementById('equipmentSystemFilter')?.value || 'veiculo_leve';
+  const systemValue = document.getElementById('systemTypeFilter')?.value || 'motor';
+  const normalizedEquipment = normalizeEquipmentKey(String(equipmentValue || '').replace(/_/g, '-'));
+  const normalizedSystem = normalizeString(systemValue).replace(/_/g, '-');
+  const systemTitle = String(systemComponentsDatabase[equipmentValue]?.[systemValue]?.nome || '').trim();
+  const normalizedSystemTitle = normalizeString(systemTitle).replace(/_/g, '-');
+  const failuresByComponent = new Map();
+
+  chartItems.forEach((item) => {
+    const checklistEquipment = normalizeEquipmentKey(item.checklistKey || item.equipmentId || item.equipment || '');
+    if (checklistEquipment !== normalizedEquipment) {
+      return;
+    }
+
+    getChecklistOccurrences(item).forEach((ocorrencia) => {
+      const occurrenceSystem = normalizeString(ocorrencia?.section || '').replace(/_/g, '-');
+      if (occurrenceSystem && occurrenceSystem !== normalizedSystem && occurrenceSystem !== normalizedSystemTitle) {
+        return;
+      }
+
+      const componentLabel = String(ocorrencia?.text || ocorrencia?.id || '').trim();
+      if (!componentLabel) {
+        return;
+      }
+
+      failuresByComponent.set(componentLabel, (failuresByComponent.get(componentLabel) || 0) + 1);
+    });
+  });
+
+  const ranking = Array.from(failuresByComponent.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'pt-BR')).slice(0, 10);
+
+  createDashboardLineChart('failureAnalysis', 'failureAnalysisChart', {
+    labels: ranking.map(([label]) => label),
+    values: ranking.map(([, value]) => value),
+    label: 'Falhas por componente',
+    fallbackMax: 10,
+    labelMaxLength: 18
+  });
+
+  const elements = getDashboardChartElements('failureAnalysis');
+  if (elements.periodLabel) {
+    elements.periodLabel.textContent = buildPeriodLabel(getDashboardChartRange('failureAnalysis'), chartItems.length);
+  }
+}
+
+function refreshDashboardCharts() {
+  const baseItems = getDashboardFilteredChecklists();
+
+  Object.values(chartInstances).forEach((chart) => {
+    if (chart && typeof chart.destroy === 'function') {
+      chart.destroy();
+    }
+  });
+  chartInstances = {};
+
+  renderFailureTrendChart(baseItems);
+  renderEquipmentFailuresChart(baseItems);
+  renderFailureRateChart(baseItems);
+  renderFailureAnalysisChart(baseItems);
+}
+
+function initializeCharts() {
+  renderDashboardSummary(getDashboardFilteredChecklists());
+  refreshDashboardCharts();
+}
+
+function attachDashboardChartPeriodHandlers() {
+  dashboardChartKeys.forEach((chartKey) => {
+    const elements = getDashboardChartElements(chartKey);
+    syncDashboardChartPeriodUi(chartKey);
+
+    if (elements.preset && !elements.preset.dataset.bound) {
+      elements.preset.addEventListener('change', () => {
+        dashboardChartPeriods[chartKey].preset = elements.preset.value;
+        if (elements.preset.value !== 'custom') {
+          dashboardChartPeriods[chartKey].start = '';
+          dashboardChartPeriods[chartKey].end = '';
+          syncDashboardChartPeriodUi(chartKey);
+          if (currentPage === 'dashboard') {
+            initializeCharts();
+          }
+        } else {
+          syncDashboardChartPeriodUi(chartKey);
+        }
+      });
+      elements.preset.dataset.bound = 'true';
+    }
+
+    const applyButton = document.getElementById(`apply${chartKey.charAt(0).toUpperCase()}${chartKey.slice(1)}Period`);
+    if (applyButton && !applyButton.dataset.bound) {
+      applyButton.addEventListener('click', () => {
+        if (dashboardChartPeriods[chartKey].preset === 'custom') {
+          const startValue = elements.startDate?.value || '';
+          const endValue = elements.endDate?.value || '';
+          if (!startValue || !endValue) {
+            alert('Preencha a data inicial e final.');
             return;
           }
-          activeCustomPeriod = { type: 'range', start: customStartDate.value, end: customEndDate.value };
-          updateFailureAnalysis();
-        } else {
-          alert('Por favor, preencha ambas as datas');
+          if (startValue > endValue) {
+            alert('A data inicial deve ser anterior ou igual a data final.');
+            return;
+          }
+          dashboardChartPeriods[chartKey].start = startValue;
+          dashboardChartPeriods[chartKey].end = endValue;
         }
-      }
-    });
 
-    // Clear custom filter
-    clearCustomFilter.addEventListener('click', () => {
-      customDay.value = '';
-      customStartDate.value = '';
-      customEndDate.value = '';
-      activeCustomPeriod = null;
-      periodFilterTouched = false;
-      failureAnalysisPeriod.value = '7';
-      customPeriodSection.classList.add('hidden');
-      updateFailureAnalysis();
-    });
+        if (currentPage === 'dashboard') {
+          initializeCharts();
+        }
+      });
+      applyButton.dataset.bound = 'true';
+    }
 
-    const updateFailureAnalysis = () => {
-      const equipment = equipmentSystemFilter.value;
-      const system = systemTypeFilter.value;
+    const clearButton = document.getElementById(`clear${chartKey.charAt(0).toUpperCase()}${chartKey.slice(1)}Period`);
+    if (clearButton && !clearButton.dataset.bound) {
+      clearButton.addEventListener('click', () => {
+        dashboardChartPeriods[chartKey] = { preset: '30', start: '', end: '' };
+        syncDashboardChartPeriodUi(chartKey);
+        if (currentPage === 'dashboard') {
+          initializeCharts();
+        }
+      });
+      clearButton.dataset.bound = 'true';
+    }
+  });
+}
 
-      const data = getFailureAnalysisData(equipment, system);
-      const components = data.componentes;
-      const failures = data.falhas;
-
-      // Update chart
-      if (chartInstances.failureAnalysis) {
-        chartInstances.failureAnalysis.data.labels = components;
-        chartInstances.failureAnalysis.data.datasets[0].data = failures;
-        
-        // Generate gradient colors from red (highest) to yellow (lowest)
-        const colors = ['#ef4444', '#f97316', '#f59e0b', '#eab308', '#fcd34d'];
-        chartInstances.failureAnalysis.data.datasets[0].backgroundColor = colors.slice(0, Math.min(components.length, 5)).concat(Array(Math.max(0, components.length - 5)).fill('#fcd34d'));
-        chartInstances.failureAnalysis.options.scales.x.max = getDynamicChartMax(failures, 10);
-        
-        chartInstances.failureAnalysis.update();
-      }
-
-      // Update components list
-      updateFailureAnalysisComponents(components, failures);
-    };
-
-    // Add event listeners to filters
-    equipmentSystemFilter.addEventListener('change', updateFailureAnalysis);
-    systemTypeFilter.addEventListener('change', () => {
-      systemFilterTouched = true;
-      updateFailureAnalysis();
-    });
-
-    // Update failure analysis on dashboard load
-    updateFailureAnalysis();
+window.getAllChecklists = () => allChecklists;
+window.getSelectedChecklistDetailsId = () => selectedChecklistDetailsId;
 
 function updateChecklistEquipmentFilterOptions() {
   const select = document.getElementById('checklistEquipmentFilter');
@@ -4229,11 +4795,62 @@ function updateDashboardEquipmentFilterOptions() {
   }
 }
 
+function updateChecklistYearFilterOptions() {
+  const select = document.getElementById('checklistYearFilter');
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value || '';
+  const years = Array.from(new Set(
+    (allChecklists || [])
+      .map(item => getChecklistHistoryDateValue(item))
+      .filter(Boolean)
+      .map(dateValue => String(dateValue).slice(0, 4))
+      .filter(year => /^\d{4}$/.test(year))
+  )).sort((a, b) => Number(b) - Number(a));
+
+  select.innerHTML = '<option value="">Todos os anos</option>' + years
+    .map(year => `<option value="${escapeHtml(year)}">${escapeHtml(year)}</option>`)
+    .join('');
+
+  if (years.includes(currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+function updateDashboardYearFilterOptions() {
+  const select = document.getElementById('dashboardYearFilter');
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value || '';
+  const years = Array.from(new Set(
+    (allChecklists || [])
+      .map(item => getChecklistHistoryDateValue(item))
+      .filter(Boolean)
+      .map(dateValue => String(dateValue).slice(0, 4))
+      .filter(year => /^\d{4}$/.test(year))
+  )).sort((a, b) => Number(b) - Number(a));
+
+  select.innerHTML = '<option value="">Todos os anos</option>' + years
+    .map(year => `<option value="${escapeHtml(year)}">${escapeHtml(year)}</option>`)
+    .join('');
+
+  if (years.includes(currentValue)) {
+    select.value = currentValue;
+  }
+}
+
 function readDashboardFilterForm() {
   const rawStatus = document.getElementById('dashboardStatusFilter')?.value || '';
 
   return {
-    date: document.getElementById('dashboardDateFilter')?.value || '',
+    month: document.getElementById('dashboardMonthFilter')?.value || '',
+    year: document.getElementById('dashboardYearFilter')?.value || '',
     equipment: document.getElementById('dashboardEquipmentFilter')?.value || '',
     status: rawStatus ? normalizeStatus(rawStatus) : ''
   };
@@ -4241,23 +4858,16 @@ function readDashboardFilterForm() {
 
 function getDashboardFilteredChecklists() {
   const filters = readDashboardFilterForm();
-  const hasActiveFilters = Boolean(filters.date || filters.equipment || filters.status);
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
   const baseItems = (allChecklists || []).filter(item => {
-    const matchesCurrentMonth = !hasActiveFilters
-      ? getChecklistHistoryMonthValue(item) === currentMonth
-      : true;
-    const matchesDate = !filters.date || getChecklistHistoryDateValue(item) === filters.date;
+    const dateValue = getChecklistHistoryDateValue(item);
+    const dateYear = String(dateValue).slice(0, 4);
+    const dateMonth = String(dateValue).slice(5, 7);
+    const matchesMonth = !filters.month || dateMonth === filters.month;
+    const matchesYear = !filters.year || dateYear === filters.year;
     const matchesEquipment = !filters.equipment || getChecklistHistoryEquipmentName(item) === filters.equipment;
     const matchesStatus = !filters.status || normalizeStatus(item.status) === filters.status;
-    return matchesCurrentMonth && matchesDate && matchesEquipment && matchesStatus;
+    return matchesMonth && matchesYear && matchesEquipment && matchesStatus;
   });
-
-  if (!hasActiveFilters && baseItems.length === 0) {
-    return [...(allChecklists || [])];
-  }
 
   return baseItems;
 }
@@ -4269,6 +4879,16 @@ function applyDashboardFilters() {
 
   initializeCharts();
   loadDashboardData();
+  dashboardFiltersContainer?.classList.add('hidden');
+}
+
+function clearDashboardFilters() {
+  if (dashboardMonthFilter) dashboardMonthFilter.value = '';
+  if (dashboardYearFilter) dashboardYearFilter.value = '';
+  if (dashboardEquipmentFilter) dashboardEquipmentFilter.value = '';
+  if (dashboardStatusFilter) dashboardStatusFilter.value = '';
+
+  applyDashboardFilters();
 }
 
 function attachDashboardFilters() {
@@ -4280,38 +4900,58 @@ function attachDashboardFilters() {
     dashboardFiltersContainer.classList.toggle('hidden');
   });
 
+  if (applyDashboardFiltersBtn && !applyDashboardFiltersBtn.dataset.bound) {
+    applyDashboardFiltersBtn.addEventListener('click', applyDashboardFilters);
+    applyDashboardFiltersBtn.dataset.bound = 'true';
+  }
+
+  if (clearDashboardFiltersBtn && !clearDashboardFiltersBtn.dataset.bound) {
+    clearDashboardFiltersBtn.addEventListener('click', clearDashboardFilters);
+    clearDashboardFiltersBtn.dataset.bound = 'true';
+  }
+
   toggleDashboardFiltersBtn.dataset.bound = 'true';
 }
 
 function readChecklistFilterForm() {
   return {
-    date: document.getElementById('checklistDateFilter')?.value || '',
+    month: document.getElementById('checklistMonthFilter')?.value || '',
+    year: document.getElementById('checklistYearFilter')?.value || '',
     equipment: document.getElementById('checklistEquipmentFilter')?.value || '',
-    status: normalizeStatus(document.getElementById('checklistStatusFilter')?.value || '')
+    status: normalizeStatus(document.getElementById('checklistStatusFilter')?.value || ''),
+    operator: normalizeString(document.getElementById('checklistOperatorFilter')?.value || '')
   };
 }
 
 function applyChecklistFilters() {
   appliedChecklistFilters = readChecklistFilterForm();
   renderChecklists();
+  document.getElementById('checklistFiltersContainer')?.classList.add('hidden');
 }
 
 function clearChecklistFilters() {
-  const dateFilter = document.getElementById('checklistDateFilter');
+  const monthFilter = document.getElementById('checklistMonthFilter');
+  const yearFilter = document.getElementById('checklistYearFilter');
   const equipmentFilter = document.getElementById('checklistEquipmentFilter');
   const statusFilter = document.getElementById('checklistStatusFilter');
+  const operatorFilter = document.getElementById('checklistOperatorFilter');
 
-  if (dateFilter) dateFilter.value = '';
+  if (monthFilter) monthFilter.value = '';
+  if (yearFilter) yearFilter.value = '';
   if (equipmentFilter) equipmentFilter.value = '';
   if (statusFilter) statusFilter.value = '';
+  if (operatorFilter) operatorFilter.value = '';
 
   appliedChecklistFilters = {
-    date: '',
+    month: '',
+    year: '',
     equipment: '',
-    status: ''
+    status: '',
+    operator: ''
   };
 
   renderChecklists();
+  document.getElementById('checklistFiltersContainer')?.classList.add('hidden');
 }
 
     // Render checklists based on current filters
@@ -4322,15 +4962,25 @@ function clearChecklistFilters() {
   if (!container || !emptyState) return;
 
   updateChecklistEquipmentFilterOptions();
+  updateChecklistYearFilterOptions();
 
-  const dateFilter = appliedChecklistFilters.date || '';
+  const monthFilter = appliedChecklistFilters.month || '';
+  const yearFilter = appliedChecklistFilters.year || '';
   const equipmentFilter = appliedChecklistFilters.equipment || '';
   const statusFilter = appliedChecklistFilters.status || '';
+  const operatorFilter = appliedChecklistFilters.operator || '';
 
   let filtered = [...allChecklists];
 
-  if (dateFilter) {
-    filtered = filtered.filter(c => c.data === dateFilter || c.date === dateFilter);
+  if (monthFilter || yearFilter) {
+    filtered = filtered.filter(c => {
+      const dateValue = getChecklistHistoryDateValue(c);
+      const checklistYear = String(dateValue).slice(0, 4);
+      const checklistMonth = String(dateValue).slice(5, 7);
+      const matchesMonth = !monthFilter || checklistMonth === monthFilter;
+      const matchesYear = !yearFilter || checklistYear === yearFilter;
+      return matchesMonth && matchesYear;
+    });
   }
 
   if (equipmentFilter) {
@@ -4343,6 +4993,10 @@ function clearChecklistFilters() {
   if (statusFilter) {
     const normalizedFilter = normalizeStatus(statusFilter);
     filtered = filtered.filter(c => normalizeStatus(c.status) === normalizedFilter);
+  }
+
+  if (operatorFilter) {
+    filtered = filtered.filter(c => normalizeString(c.operador || c.operator || '').includes(operatorFilter));
   }
 
   container.innerHTML = '';
@@ -4452,6 +5106,7 @@ async function loadChecklistsFromFirestore() {
     });
 
     updateDashboardEquipmentFilterOptions();
+    updateDashboardYearFilterOptions();
 
     renderChecklists();
     renderHistorico();
@@ -4506,6 +5161,7 @@ function subscribeChecklistsRealtime() {
     });
 
     updateDashboardEquipmentFilterOptions();
+    updateDashboardYearFilterOptions();
 
     renderChecklists();
     renderHistorico();
@@ -4525,6 +5181,8 @@ async function loadDashboardData() {
 
   try {
     const checklists = getDashboardFilteredChecklists();
+    updateDashboardEquipmentFilterOptions();
+    updateDashboardYearFilterOptions();
     renderDashboardSummary(checklists);
 
   } catch (error) {
@@ -4634,6 +5292,40 @@ async function loadDashboardData() {
       ) {
         setNotificationsOpen(false);
       }
+
+      if (
+        dashboardFiltersContainer &&
+        toggleDashboardFiltersBtn &&
+        !dashboardFiltersContainer.classList.contains('hidden') &&
+        !dashboardFiltersContainer.contains(e.target) &&
+        !toggleDashboardFiltersBtn.contains(e.target)
+      ) {
+        dashboardFiltersContainer.classList.add('hidden');
+      }
+
+      const checklistFiltersContainer = document.getElementById('checklistFiltersContainer');
+      const checklistToggleBtn = document.getElementById('toggleFiltersBtn');
+      if (
+        checklistFiltersContainer &&
+        checklistToggleBtn &&
+        !checklistFiltersContainer.classList.contains('hidden') &&
+        !checklistFiltersContainer.contains(e.target) &&
+        !checklistToggleBtn.contains(e.target)
+      ) {
+        checklistFiltersContainer.classList.add('hidden');
+      }
+
+      const historyFiltersContainer = document.getElementById('historyFiltersContainer');
+      const historyToggleBtn = document.getElementById('toggleHistoryFiltersBtn');
+      if (
+        historyFiltersContainer &&
+        historyToggleBtn &&
+        !historyFiltersContainer.classList.contains('hidden') &&
+        !historyFiltersContainer.contains(e.target) &&
+        !historyToggleBtn.contains(e.target)
+      ) {
+        historyFiltersContainer.classList.add('hidden');
+      }
     });
 
     if (settingsForm) {
@@ -4658,10 +5350,7 @@ async function loadDashboardData() {
       const checklistFiltersContainer = document.getElementById('checklistFiltersContainer');
       const applyFiltersBtn = document.getElementById('applyChecklistFiltersBtn');
       const clearFiltersBtn = document.getElementById('clearChecklistFiltersBtn');
-      const dateFilter = document.getElementById('checklistDateFilter');
-      const equipmentFilter = document.getElementById('checklistEquipmentFilter');
-      const statusFilter = document.getElementById('checklistStatusFilter');
-      
+
       if (toggleFiltersBtn && checklistFiltersContainer && !toggleFiltersBtn.dataset.bound) {
         toggleFiltersBtn.addEventListener('click', () => {
           checklistFiltersContainer.classList.toggle('hidden');
@@ -4791,6 +5480,31 @@ function updateHistoricoEquipmentFilterOptions() {
   }
 }
 
+function updateHistoricoYearFilterOptions() {
+  const select = document.getElementById('historyYearFilter');
+
+  if (!select) {
+    return;
+  }
+
+  const currentValue = select.value || '';
+  const years = Array.from(new Set(
+    (allChecklists || [])
+      .map(item => getChecklistHistoryDateValue(item))
+      .filter(Boolean)
+      .map(dateValue => String(dateValue).slice(0, 4))
+      .filter(year => /^\d{4}$/.test(year))
+  )).sort((a, b) => Number(b) - Number(a));
+
+  select.innerHTML = '<option value="">Todos os anos</option>' + years
+    .map(year => `<option value="${escapeHtml(year)}">${escapeHtml(year)}</option>`)
+    .join('');
+
+  if (years.includes(currentValue)) {
+    select.value = currentValue;
+  }
+}
+
 function toggleHistoricoFiltersPanel() {
   const filtersContainer = document.getElementById('historyFiltersContainer');
 
@@ -4804,6 +5518,7 @@ function toggleHistoricoFiltersPanel() {
 function readHistoricoFilterForm() {
   return {
     month: document.getElementById('historyMonthFilter')?.value || '',
+    year: document.getElementById('historyYearFilter')?.value || '',
     operator: normalizeString(document.getElementById('historyOperatorFilter')?.value || ''),
     status: normalizeStatus(document.getElementById('historyStatusFilter')?.value || '')
   };
@@ -4812,24 +5527,29 @@ function readHistoricoFilterForm() {
 function applyHistoricoFilters() {
   appliedHistoryFilters = readHistoricoFilterForm();
   renderHistorico();
+  document.getElementById('historyFiltersContainer')?.classList.add('hidden');
 }
 
 function clearHistoricoFilters() {
   const monthFilter = document.getElementById('historyMonthFilter');
+  const yearFilter = document.getElementById('historyYearFilter');
   const operatorFilter = document.getElementById('historyOperatorFilter');
   const statusFilter = document.getElementById('historyStatusFilter');
 
   if (monthFilter) monthFilter.value = '';
+  if (yearFilter) yearFilter.value = '';
   if (operatorFilter) operatorFilter.value = '';
   if (statusFilter) statusFilter.value = '';
 
   appliedHistoryFilters = {
     month: '',
+    year: '',
     operator: '',
     status: ''
   };
 
   renderHistorico();
+  document.getElementById('historyFiltersContainer')?.classList.add('hidden');
 }
 
 function getChecklistHistoryMonthValue(checklist) {
@@ -4851,35 +5571,28 @@ function getChecklistHistoryMonthValue(checklist) {
   return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function matchesHistoricoMonthFilter(checklist, monthFilter, useDefaultCurrentMonth = false) {
+function matchesHistoricoMonthFilter(checklist, monthFilter, yearFilter = '') {
   const timestamp = getChecklistHistoryTimestamp(checklist);
 
   if (!timestamp) {
     return false;
   }
 
-  const now = new Date();
-  const itemDate = new Date(timestamp);
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const itemMonth = getChecklistHistoryMonthValue(checklist);
+  const itemYear = itemMonth.slice(0, 4);
+  const itemMonthPart = itemMonth.slice(5, 7);
 
-  if (!monthFilter) {
-    return useDefaultCurrentMonth ? itemMonth === currentMonth : true;
-  }
-
-  if (monthFilter === 'all') {
-    return true;
-  }
-
-  return itemMonth.endsWith(`-${monthFilter}`);
+  const matchesMonth = !monthFilter || itemMonthPart === monthFilter;
+  const matchesYear = !yearFilter || itemYear === yearFilter;
+  return matchesMonth && matchesYear;
 }
 
 function getHistoricoFilteredItems() {
   const monthFilter = appliedHistoryFilters.month || '';
+  const yearFilter = appliedHistoryFilters.year || '';
   const operatorFilter = appliedHistoryFilters.operator || '';
   const statusFilter = appliedHistoryFilters.status || '';
   let filteredItems = [...allChecklists];
-  const hasActiveFilters = Boolean(monthFilter || operatorFilter || statusFilter);
 
   if (operatorFilter) {
     filteredItems = filteredItems.filter(item => normalizeString(item.operador || item.operator || '').includes(operatorFilter));
@@ -4889,7 +5602,7 @@ function getHistoricoFilteredItems() {
     filteredItems = filteredItems.filter(item => normalizeStatus(item.status) === statusFilter);
   }
 
-  filteredItems = filteredItems.filter(item => matchesHistoricoMonthFilter(item, monthFilter, !hasActiveFilters));
+  filteredItems = filteredItems.filter(item => matchesHistoricoMonthFilter(item, monthFilter, yearFilter));
 
   return filteredItems.sort((a, b) => getChecklistHistoryTimestamp(b) - getChecklistHistoryTimestamp(a));
 }
@@ -4898,6 +5611,7 @@ function renderHistorico() {
   const tbody = document.getElementById('historyTableBody');
   if (!tbody) return;
 
+  updateHistoricoYearFilterOptions();
   const historyItems = getHistoricoFilteredItems();
 
   if (!historyItems.length) {
@@ -7662,6 +8376,7 @@ initializeCharts();
     navigateToPage(resolveRequestedPage());
     renderNotifications();
     attachDashboardFilters();
+    attachDashboardChartPeriodHandlers();
     attachChecklistFilters();
     attachHistoricoFilters();
 

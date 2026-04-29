@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CheckMaint Pro - Login</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e293b'/%3E%3Cpath d='M18 33l8 8 20-20' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgSqRBPtB2OYDfzcxKm-A4y0m8CDpr89w",
+      authDomain: "checklist-64b92.firebaseapp.com",
+      projectId: "checklist-64b92",
+      storageBucket: "checklist-64b92.firebasestorage.app",
+      messagingSenderId: "264367718946",
+      appId: "1:264367718946:web:28b62d3e5e2548b32f807b"
+    };
+
+    let db = null;
+    let auth = null;
+
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      db = firebase.firestore();
+      auth = firebase.auth();
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+    } catch (error) {
+      console.error('Erro ao inicializar Firebase:', error);
+    }
+
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            'primary-dark': '#4f46e5',
+            'primary-light': '#818cf8',
+            surface: '#f8fafc',
+            'surface-dark': '#f1f5f9',
+            card: '#ffffff',
+            'text-primary': '#1e293b',
+            'text-secondary': '#64748b',
+            border: '#e2e8f0',
+            success: '#10b981',
+            danger: '#ef4444'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    .fade-in { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+ </head>
+ <body class="h-full bg-surface">
+  <div id="authLoadingScreen" class="h-full flex items-center justify-center p-4">
+   <div class="w-full max-w-sm bg-card rounded-2xl border border-border shadow-xl p-8 text-center fade-in">
+    <div class="inline-flex items-center justify-center w-24 h-24 mb-4">
+     <img src="xl_media_image4.png" alt="Grupo J. Demito" class="w-full h-full object-contain scale-110">
+    </div>
+    <h1 class="text-2xl font-bold text-text-primary">CheckMaint Pro</h1>
+    <p class="text-text-secondary mt-2">Verificando sua sessão...</p>
+   </div>
+  </div>
+
+  <div id="loginScreen" class="hidden h-full items-center justify-center p-4">
+   <div class="w-full max-w-md fade-in">
+    <div class="text-center mb-8">
+     <div class="inline-flex items-center justify-center w-32 h-32 mb-4">
+      <img src="xl_media_image4.png" alt="Grupo J. Demito" class="w-full h-full object-contain scale-110">
+     </div>
+     <h1 class="text-2xl font-bold text-text-primary">CheckMaint Pro</h1>
+     <p class="text-text-secondary mt-1">Sistema de Manutenção e Checklists</p>
+    </div>
+
+    <div class="bg-card rounded-2xl shadow-xl p-8 border border-border">
+     <div class="flex items-center justify-between gap-3 mb-6">
+      <div>
+       <h2 id="authCardTitle" class="text-xl font-semibold text-text-primary">Acesso ao Sistema</h2>
+       <p id="authCardSubtitle" class="text-sm text-text-secondary mt-1">Entre com seu CPF e senha para continuar</p>
+      </div>
+      <button id="backToLoginBtn" type="button" class="hidden px-3 py-2 rounded-xl bg-surface hover:bg-surface-dark text-text-primary text-sm font-medium transition-colors">Voltar</button>
+     </div>
+
+     <form id="loginForm" class="space-y-5">
+      <div id="registerFields" class="hidden space-y-5">
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+         <label for="regFirstName" class="block text-sm font-medium text-text-primary mb-2">Nome</label>
+         <input type="text" id="regFirstName" placeholder="Seu nome" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+        </div>
+        <div>
+         <label for="regLastName" class="block text-sm font-medium text-text-primary mb-2">Último nome</label>
+         <input type="text" id="regLastName" placeholder="Seu sobrenome" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+        </div>
+       </div>
+       <div>
+        <label for="regRole" class="block text-sm font-medium text-text-primary mb-2">Função</label>
+        <input type="text" id="regRole" placeholder="Ex: OPERADOR" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+       </div>
+      </div>
+
+      <div>
+       <label for="cpf" class="block text-sm font-medium text-text-primary mb-2">CPF</label>
+       <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+      </div>
+
+      <div>
+       <label for="password" class="block text-sm font-medium text-text-primary mb-2">Senha</label>
+       <div class="relative">
+        <input type="password" id="password" name="password" placeholder="••••••••" class="w-full px-4 py-3 pr-12 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+        <button type="button" id="togglePassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary">Ver</button>
+       </div>
+      </div>
+
+      <div id="confirmPasswordField" class="hidden">
+       <label for="confirmPassword" class="block text-sm font-medium text-text-primary mb-2">Confirmar senha</label>
+       <input type="password" id="confirmPassword" placeholder="Repita a senha" class="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-text-primary placeholder-text-secondary">
+      </div>
+
+      <div id="loginError" class="hidden bg-danger/10 text-danger text-sm p-3 rounded-lg">
+       <span id="loginErrorText">CPF ou senha inválidos</span>
+      </div>
+
+      <button type="submit" id="loginBtn" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25">
+       <span>Entrar</span>
+      </button>
+
+      <button type="button" id="registerBtn" class="w-full mt-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all">
+       Primeiro acesso / Cadastre-se
+      </button>
+     </form>
+    </div>
+
+    <p class="text-center text-text-secondary text-sm mt-6">© 2026 Todos os direitos reservados | Dev. por Juan Carlos</p>
+   </div>
+  </div>
+
+  <script>
+    let authMode = 'login';
+    let authStateInitialized = false;
+    let currentUserData = null;
+
+    const pageFileMap = {
+      dashboard: 'dashboard.html',
+      checklists: 'checklists.html',
+      operadores: 'operadores.html',
+      historico: 'historico.html',
+      manutencao: 'manutencao.html',
+      relatorios: 'relatorios.html',
+      configuracoes: 'configuracoes.html'
+    };
+
+    const authLoadingScreen = document.getElementById('authLoadingScreen');
+    const loginScreen = document.getElementById('loginScreen');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const loginErrorText = document.getElementById('loginErrorText');
+    const authCardTitle = document.getElementById('authCardTitle');
+    const authCardSubtitle = document.getElementById('authCardSubtitle');
+    const cpfInput = document.getElementById('cpf');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const registerFields = document.getElementById('registerFields');
+    const confirmPasswordField = document.getElementById('confirmPasswordField');
+    const registerBtn = document.getElementById('registerBtn');
+    const backToLoginBtn = document.getElementById('backToLoginBtn');
+    const regFirstNameInput = document.getElementById('regFirstName');
+    const regLastNameInput = document.getElementById('regLastName');
+    const regRoleInput = document.getElementById('regRole');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+
+    function onlyNumbers(value = '') {
+      return String(value).replace(/\D/g, '');
+    }
+
+    function formatCpfValue(value = '') {
+      const digits = onlyNumbers(value).slice(0, 11);
+      return digits
+        .replace(/^(\d{3})(\d)/, '$1.$2')
+        .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d)/, '.$1-$2');
+    }
+
+    function hideLoginError() {
+      loginError.classList.add('hidden');
+    }
+
+    function showLoginError(message) {
+      loginErrorText.textContent = message;
+      loginError.classList.remove('hidden');
+    }
+
+    function setAuthMode(mode = 'login') {
+      authMode = mode === 'register' ? 'register' : 'login';
+      const isRegister = authMode === 'register';
+
+      authCardTitle.textContent = isRegister ? 'Primeiro acesso' : 'Acesso ao Sistema';
+      authCardSubtitle.textContent = isRegister
+        ? 'Preencha seus dados para criar a conta de acesso'
+        : 'Entre com seu CPF e senha para continuar';
+
+      registerFields.classList.toggle('hidden', !isRegister);
+      confirmPasswordField.classList.toggle('hidden', !isRegister);
+      registerBtn.classList.toggle('hidden', isRegister);
+      backToLoginBtn.classList.toggle('hidden', !isRegister);
+      hideLoginError();
+    }
+
+    function setLoginLoading(isLoading) {
+      const loginBtn = document.getElementById('loginBtn');
+      const span = loginBtn.querySelector('span');
+      loginBtn.disabled = isLoading;
+      loginBtn.style.opacity = isLoading ? '0.7' : '1';
+      span.textContent = isLoading ? 'Entrando...' : (authMode === 'register' ? 'Criar conta' : 'Entrar');
+    }
+
+    async function findUserByCpf(cpfLimpo) {
+      const snapshot = await db.collection('users').where('cpf', '==', cpfLimpo).limit(1).get();
+      if (snapshot.empty) return null;
+      const doc = snapshot.docs[0];
+      return { id: doc.id, ...doc.data() };
+    }
+
+    async function findUserByUid(uid) {
+      if (!uid || !db) return null;
+      const doc = await db.collection('users').doc(uid).get();
+      if (!doc.exists) return null;
+      return { id: doc.id, ...doc.data() };
+    }
+
+    async function loginWithCpfAndPassword(cpf, password) {
+      const cpfLimpo = onlyNumbers(cpf);
+      if (cpfLimpo.length !== 11) throw new Error('Digite um CPF válido com 11 números.');
+      if (!password || password.length < 4) throw new Error('Digite sua senha.');
+
+      const userData = await findUserByCpf(cpfLimpo);
+      if (!userData) throw new Error('CPF não encontrado.');
+      if (!userData.email) throw new Error('Este usuário não possui e-mail cadastrado no Firebase Auth.');
+
+      const cred = await auth.signInWithEmailAndPassword(userData.email, password);
+      currentUserData = userData;
+      return { cred, userData };
+    }
+
+    function getRequestedNextFile() {
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get('next') || '';
+      const allowedTargets = new Set(Object.values(pageFileMap));
+      return allowedTargets.has(next) ? next : '';
+    }
+
+    function resolveLandingFile(userData = currentUserData) {
+      const requestedNext = getRequestedNextFile();
+      if (requestedNext) {
+        return requestedNext;
+      }
+
+      const preferredPage = userData?.settings?.landingPage;
+      return pageFileMap[preferredPage] || 'dashboard.html';
+    }
+
+    function redirectToApp(userData = currentUserData) {
+      window.location.replace(resolveLandingFile(userData));
+    }
+
+    cpfInput.addEventListener('input', (e) => {
+      e.target.value = formatCpfValue(e.target.value);
+    });
+
+    togglePasswordBtn.addEventListener('click', () => {
+      const nextType = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = nextType;
+      togglePasswordBtn.textContent = nextType === 'password' ? 'Ver' : 'Ocultar';
+    });
+
+    registerBtn.addEventListener('click', () => {
+      loginForm.reset();
+      setAuthMode('register');
+    });
+
+    backToLoginBtn.addEventListener('click', () => {
+      loginForm.reset();
+      setAuthMode('login');
+    });
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideLoginError();
+      setLoginLoading(true);
+
+      try {
+        if (authMode === 'register') {
+          const firstName = (regFirstNameInput.value.trim() || '').toUpperCase();
+          const lastName = (regLastNameInput.value.trim() || '').toUpperCase();
+          const role = (regRoleInput.value.trim() || '').toUpperCase();
+          const cpf = cpfInput.value.trim();
+          const cpfLimpo = onlyNumbers(cpf);
+          const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+
+          if (!firstName || !lastName || !role) throw new Error('Preencha nome, sobrenome e função.');
+          if (cpfLimpo.length !== 11) throw new Error('Digite um CPF válido com 11 números.');
+          if (password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres.');
+          if (password !== confirmPassword) throw new Error('As senhas não coincidem.');
+
+          const existingUser = await findUserByCpf(cpfLimpo);
+          if (existingUser) throw new Error('Já existe uma conta cadastrada para este CPF.');
+
+          const email = `${cpfLimpo}@checkmaint.local`;
+          const cred = await auth.createUserWithEmailAndPassword(email, password);
+          await db.collection('users').doc(cred.user.uid).set({
+            name: `${firstName} ${lastName}`.trim(),
+            firstName,
+            lastName,
+            cpf: cpfLimpo,
+            email,
+            role,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          await auth.signOut();
+          loginForm.reset();
+          setAuthMode('login');
+          loginError.classList.remove('hidden');
+          loginError.classList.remove('bg-danger/10', 'text-danger');
+          loginError.classList.add('bg-success/10', 'text-success');
+          loginErrorText.textContent = 'Conta criada com sucesso. Faça login para continuar.';
+          return;
+        }
+
+        const cpf = cpfInput.value.trim();
+        const password = passwordInput.value;
+        const { userData } = await loginWithCpfAndPassword(cpf, password);
+        redirectToApp(userData);
+      } catch (error) {
+        console.error('Erro no login:', error);
+        loginError.classList.remove('bg-success/10', 'text-success');
+        loginError.classList.add('bg-danger/10', 'text-danger');
+        showLoginError(error.message || 'Não foi possível entrar. Verifique CPF e senha.');
+      } finally {
+        setLoginLoading(false);
+      }
+    });
+
+    if (auth?.onAuthStateChanged) {
+      auth.onAuthStateChanged(async (user) => {
+        try {
+          if (user) {
+            currentUserData = await findUserByUid(user.uid);
+            redirectToApp(currentUserData);
+            return;
+          }
+
+          if (!authStateInitialized) {
+            authLoadingScreen.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            loginScreen.classList.add('flex');
+          }
+        } catch (error) {
+          console.error('Erro ao restaurar sessão autenticada:', error);
+          authLoadingScreen.classList.add('hidden');
+          loginScreen.classList.remove('hidden');
+          loginScreen.classList.add('flex');
+        } finally {
+          authStateInitialized = true;
+        }
+      });
+    } else {
+      authLoadingScreen.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+      loginScreen.classList.add('flex');
+    }
+  </script>
+ </body>
+</html>
