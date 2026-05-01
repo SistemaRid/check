@@ -627,12 +627,34 @@
 
     const equipmentModelCatalog = [
       {
-        model: "EC-380DL",
-        tags: ["EC-402", "EC-418", "EC-403"]
+        model: "ATEGO1420",
+        tags: ["CC-520"]
+      },
+      {
+        model: "AXOR 3131",
+        tags: ["CB-101", "CB-102", "CB-172"]
       },
       {
         model: "EC-320D2L",
         tags: ["EC-432"]
+      },
+      {
+        model: "EC-380DL",
+        tags: ["EC-402", "EC-418", "EC-403"]
+      },
+      {
+        model: "FIAT STRADA",
+        tags: ["RMC-9G11", "SPT-1A97"],
+        checklistKeys: ["veiculos-leves"]
+      },
+      {
+        model: "FMX-500",
+        tags: ["CB-180", "CB-182"]
+      },
+      {
+        model: "L-200",
+        tags: ["RSD-6E59"],
+        checklistKeys: ["veiculos-leves"]
       },
       {
         model: "L-556",
@@ -643,28 +665,24 @@
         tags: ["CA-303"]
       },
       {
-        model: "XAMS-900",
-        tags: ["COM-551"]
+        model: "MARCOPOLO 1050",
+        tags: ["VA-008"]
       },
       {
         model: "PWH-500",
         tags: ["PER-601"]
       },
       {
+        model: "S-450",
+        tags: ["MCA-756"]
+      },
+      {
         model: "STG-190C",
         tags: ["MNT-802"]
       },
       {
-        model: "FMX-500",
-        tags: ["CB-180", "CB-182"]
-      },
-      {
-        model: "AXOR 3131",
-        tags: ["CB-101", "CB-102", "CB-172"]
-      },
-      {
-        model: "ATEGO1420",
-        tags: ["CC-520"]
+        model: "VW-11.180",
+        tags: ["VA-006"]
       },
       {
         model: "VW-23.310",
@@ -675,16 +693,8 @@
         tags: ["CM-901"]
       },
       {
-        model: "VW-11.180",
-        tags: ["VA-006"]
-      },
-      {
-        model: "MARCOPOLO 1050",
-        tags: ["VA-008"]
-      },
-      {
-        model: "S-450",
-        tags: ["MCA-756"]
+        model: "XAMS-900",
+        tags: ["COM-551"]
       }
     ];
 
@@ -1325,7 +1335,13 @@
     }
 
     function getEquipmentModels() {
-      return equipmentModelCatalog;
+      return equipmentModelCatalog.filter((entry) => {
+        if (!Array.isArray(entry.checklistKeys) || !entry.checklistKeys.length) {
+          return true;
+        }
+
+        return entry.checklistKeys.includes(selectedEquipmentType);
+      });
     }
 
     function getSelectedOperatorModelValue() {
