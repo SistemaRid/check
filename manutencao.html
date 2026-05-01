@@ -5848,6 +5848,16 @@ const equipmentModelCatalog = [
   {
     model: "S-450",
     tags: ["MCA-756"]
+  },
+  {
+    model: "L-200",
+    tags: ["RSD-6E59"],
+    checklistKeys: ["veiculos-leves"]
+  },
+  {
+    model: "FIAT STRADA",
+    tags: ["RMC-9G11", "SPT-1A97"],
+    checklistKeys: ["veiculos-leves"]
   }
 ];
 
@@ -5870,7 +5880,13 @@ function closeEquipmentSelectionModal() {
 }
 
 function getEquipmentModels() {
-  return equipmentModelCatalog;
+  return equipmentModelCatalog.filter((entry) => {
+    if (!Array.isArray(entry.checklistKeys) || !entry.checklistKeys.length) {
+      return true;
+    }
+
+    return entry.checklistKeys.includes(selectedEquipmentType);
+  });
 }
 
 function populateModalTagOptions(modelValue = '', selectedTag = '') {
